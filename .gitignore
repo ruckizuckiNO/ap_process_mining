@@ -1,0 +1,9 @@
+__pycache__/
+.DS_Store
+# raw and large intermediate data (rebuilt by 01_prepare.py)
+*.csv.gz
+output/events.pkl
+output/cases.csv
+output/invoices.csv
+# scratch exploration
+explore*.py

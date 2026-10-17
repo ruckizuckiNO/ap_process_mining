@@ -1,0 +1,15 @@
+{
+ "events_raw":890784,
+ "cases_raw":186588,
+ "cases_untyped_dropped":41,
+ "cases":186547,
+ "events":890530,
+ "users":387,
+ "activities":27,
+ "first_event":"2025-07-01 00:06:33",
+ "last_event":"2026-03-03 09:33:35",
+ "bot_event_share":0.9468552435,
+ "incomplete_cases":1779,
+ "invoice_cycles":215128,
+ "cases_multi_cycle":15416
+}
