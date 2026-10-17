@@ -7,3 +7,6 @@ output/cases.csv
 output/invoices.csv
 # scratch exploration
 explore*.py
+# notebook outputs (rebuilt when the notebook runs)
+ap_output/
+.ipynb_checkpoints/

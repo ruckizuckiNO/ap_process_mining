@@ -7,7 +7,8 @@ Process mining of an accounts-payable invoice process (11 SAP PO types) at a con
 - **Step 3** – X̄–S / I-MR control charts on log(x+1) KPIs with Western Electric rules, and process capability (Cpu) against a 10-day soft and 30-day hard SLA
 - **Step 4** – prioritisation and recommendations
 
-The full write-up is in [`output/report.html`](output/report.html).
+The full write-up is in [`output/report.html`](output/report.html). The whole analysis is also collected in one
+notebook, [`ap_process_mining.ipynb`](ap_process_mining.ipynb) (self-contained; writes to `ap_output/`).
 
 ## Run
 
