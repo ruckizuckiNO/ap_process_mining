@@ -34,6 +34,10 @@ A single step can be rerun on its own as long as its inputs in `output/` exist (
 
 ## Domain rules
 
+See `docs/domain.md` for what each PO type and activity means.
+
+- PO types fall into four procurement situations in this log: standard purchasing (ZJD1, ZNB1, ZJD3), third-party/dropshipping (ZNB2/3/4/6, the bulk of the volume), transportation (ZNBF) and returns (NB2, ZRPC, ZRPM). Returns are "reverse POs" that follow an earlier purchase, so don't judge them by purchasing benchmarks.
+
 - Events are ordered by timestamp, then `Event_ID` (`Item_No` is not chronological). Cases without a PO type are dropped.
 - The log ends at posting, not payment. "First posting" (any of `POSTING_ACTIVITIES`) is when the invoice became payable; SLA clocks run from the first event to first posting.
 - A PO_ID can contain several invoice cycles (`SAP_PO_No`, `Item_No` restarts at 1); each gets its own SLA clock.

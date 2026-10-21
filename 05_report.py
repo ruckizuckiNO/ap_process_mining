@@ -130,11 +130,15 @@ usl10 = np.log(11)
 nb2_ev = types.loc["NB2"]
 
 # ---------------------------------------------------------------- step 1
+# Procurement situation per PO type, from the case description (see docs/domain.md)
+SITUATION = {"ZJD1": "Standard purchasing", "ZNB1": "Standard purchasing", "ZJD3": "Standard purchasing",
+             "ZNB2": "Third-party", "ZNB3": "Third-party", "ZNB4": "Third-party", "ZNB6": "Third-party",
+             "ZNBF": "Transportation", "NB2": "Returns", "ZRPC": "Returns", "ZRPM": "Returns"}
 overview_rows = []
 for c in order:
     t = types.loc[c]
     overview_rows.append(
-        f"<td>{code(c)}</td><td>{t['name']}</td><td class='n'>{num(t.cases)}</td><td class='n'>{pct(t.cases / tot)}</td>"
+        f"<td>{code(c)}</td><td>{t['name']}</td><td>{SITUATION[c]}</td><td class='n'>{num(t.cases)}</td><td class='n'>{pct(t.cases / tot)}</td>"
         f"<td class='n'>{num(t.activities)}</td><td class='n'>{num(t.variants)}</td><td class='n'>{pct(t.top1_share, 0)}</td>"
         f"<td class='n'>{num(t.variants_for_80pct)}</td>")
 
@@ -350,12 +354,12 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
   <dt>Trace</dt><dd>The ordered list of activities in one case.</dd>
   <dt>Variant</dt><dd>All cases with exactly the same trace. A process with few variants is standardised. Many variants mean many different paths, which usually means exceptions and rework.</dd>
   <dt>Process map (DFG)</dt><dd>A directly-follows graph. Boxes are activities and arrows show which activity came directly after which, with counts.</dd>
-  <dt>PO type</dt><dd>The SAP purchase-order category (e.g. <code>ZNB2</code> third-party order). Different PO types follow different workflows, so they are analysed separately.</dd>
+  <dt>PO type</dt><dd>The SAP purchase-order category (e.g. <code>ZNB2</code> third-party order). Different PO types follow different workflows, so they are analysed separately. The 11 types in the data cover four procurement situations: <b>standard purchasing</b> of goods for stock (ZJD1 normal, ZNB1 manual, ZJD3 automatic replenishment), <b>third-party orders</b> where the supplier ships directly to the customer (ZNB2/3/4/6, dropshipping), <b>transportation</b> services (ZNBF) and <b>returns</b> of goods already bought (NB2, ZRPC, ZRPM). The service order types ZINS and ZSER from the assignment do not occur in the log.</dd>
   <dt>System user (bot)</dt><dd>A user ID that is a program, not a person. Its events cost no manual effort.</dd>
   <dt>Touchless</dt><dd>A case where only system users did anything: zero manual activities.</dd>
   <dt>Invoice cycle</dt><dd>One invoice document within a case, identified by <code>SAP_PO_No</code>. A purchase order can receive several invoices (e.g. for partial deliveries), so one case can contain several cycles. Each cycle starts again with <i>Data management</i>.</dd>
   <dt>Rework</dt><dd>An activity that happens more than once <b>within the same invoice cycle</b>, e.g. the same invoice is validated twice. Repeats across different invoices of the same PO are not rework.</dd>
-  <dt>GR, MM, WM, FI</dt><dd>SAP terms: goods receipt (proof that the goods arrived), Materials Management, Warehouse Management and Financial Accounting.</dd>
+  <dt>GR, MM, WM, FI</dt><dd>SAP terms: goods receipt (proof that the goods arrived), Materials Management, Warehouse Management and Financial Accounting. Invoices that refer to a purchase order go to <b>MM</b>, where they are matched against the PO and the goods receipt. Invoices without a PO reference go to <b>FI</b> for account coding.</dd>
   <dt>SLA</dt><dd>Service level: here a deadline for finishing an invoice. 10 days to get the 2% cash discount, 30 days for the legal payment deadline.</dd>
   <dt>Control chart</dt><dd>A time chart of a KPI with a centre line and limits at ±3 standard deviations. Points outside the limits, or suspicious patterns, mean something changed in the process.</dd>
   <dt>Cpu</dt><dd>Process capability against an upper limit: how many "3-sigma widths" fit between the average and the deadline. Cpu ≥ 1 is good, below 1 means many cases break the deadline.</dd>
@@ -383,7 +387,7 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
 
 <h2 id="step1"><span class="step">Step 1</span>Understand the workflows</h2>
 <div class="prose"><p>Every case starts with <i>Data management → Initial validation</i>. The happy path then waits for the goods receipt (GR) and posts automatically in MM. Deviations come from three places: <b>GR problems</b> (repeated waiting, retrieving the GR from WM, transferring to MM and restarting), <b>manual posting</b> (after a failed auto-post or directly after validation), and <b>exception handling</b> (approval for price differences, asking for comments, deletion). The PO types mix these in very different proportions.</p></div>
-{table(["Code", "PO type", "Cases", "Share", "Activities", "Variants", "Top variant", "Variants for 80%"], overview_rows)}
+{table(["Code", "PO type", "Situation", "Cases", "Share", "Activities", "Variants", "Top variant", "Variants for 80%"], overview_rows)}
 {fig("figures/activity_presence.png", "Share of cases in each PO type that contain each activity. The third-party types (ZNB2–4) rarely leave the happy path, while ZNB1, ZJD3, ZNB6 and ZNBF show many repeated activities, from real rework or from several invoices per case.", "wide")}
 <div class="example">
   <div class="lbl">Example · reading a process map</div>
@@ -536,7 +540,7 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
 <h3>Recommended scope options</h3>
 <ol class="rec">
   <li><b>Manual and normal orders ({code('ZNB1')} + {code('ZJD1')}), time to posting.</b> This is the strongest case. Together they have {num(cap_inv.loc[['ZNB1', 'ZJD1'], 'cases_breach_soft10'].sum())} invoices that took longer than 10 days, Cpu far below 1 on every measure, and about {mnok(disc_focus)} NOK of discount at risk, because these orders carry the large invoices (average about 1.2M NOK per case). The bottleneck is manual posting: about half of their invoices are posted by hand after a median of {mj['median']:.0f}–{m1['median']:.0f} days. Questions for the project: why don't these invoices post automatically, and where do they wait before a person picks them up?</li>
-  <li><b>Return to vendor ({code('NB2')}), manual activities.</b> It accounts for {pct(pr.loc['NB2', 'manual_share'], 0)} of all manual events while meeting both SLAs reasonably well. It also has the most real rework among the large types ({pct(pr.loc['NB2', 'rework_rate'], 0)} of cases). The causes to explain are the direct "Posted manually" path and the GR loop through WM and "Transfer to MM". Automating these is a cost case, not a deadline case.</li>
+  <li><b>Return to vendor ({code('NB2')}), manual activities.</b> A return is a "reverse PO": it follows goods bought under another PO type that are sent back, for example because they arrived damaged, and the supplier may issue a credit note. It accounts for {pct(pr.loc['NB2', 'manual_share'], 0)} of all manual events while meeting both SLAs reasonably well. It also has the most real rework among the large types ({pct(pr.loc['NB2', 'rework_rate'], 0)} of cases). The causes to explain are the direct "Posted manually" path and the GR loop through WM and "Transfer to MM". Automating these is a cost case, not a deadline case.</li>
   <li><b>Automatic orders ({code('ZJD3')}), the same mechanism on a smaller scale.</b> {pct(cap_inv.loc['ZJD3', 'observed_breach_soft10'], 0)} of its invoices take longer than 10 days (Cpu {cap_inv.loc['ZJD3', 'Cpu_soft10']:.2f}), and half are posted manually although the PO type is meant to be automatic. It could be added to option 1 as a comparison group.</li>
 </ol>
 <p class="prose">ZNB4 was a candidate in an earlier version of this report, but per invoice it meets the 10-day SLA (see <a href="#sla">When does an invoice meet the SLA?</a>). ZNB6, ZNBF and ZRPM have the worst capability, but together they make up less than 0.5% of cases. They are better kept as side notes than chosen as the project scope.</p>
