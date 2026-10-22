@@ -1,8 +1,9 @@
-"""Step 4 input: one table that combines volume, cost (manual work), SLA risk and control status per PO type."""
+"""Step 4 input: one table that combines volume, cost (manual work), SLA risk and control status per PO type,
+plus the routing decision at validation and who posts on the direct manual path."""
 import numpy as np
 import pandas as pd
 
-from common import OUT, PO_TYPES, SLA_SOFT_DAYS, SLA_HARD_DAYS, load_events, load_cases
+from common import OUT, PO_TYPES, BOT_USERS, SLA_SOFT_DAYS, SLA_HARD_DAYS, load_events, load_cases
 
 ev = load_events()
 cases = load_cases().set_index("PO_ID")
@@ -64,9 +65,53 @@ m = cases.groupby([cases.start.dt.to_period("M"), "po_type"]).agg(
     breach10=("breach10", "mean"), manual=("manual_count", "mean")).reset_index()
 m.to_csv(OUT / "monthly_by_type.csv", index=False)
 
+# Routing at validation: SAP_Next_Processing_Type on Initial validation picks the road (WAITGR = goods-receipt
+# check before auto-posting, CTRL1 = manual control queue, ZWMGRW = goods receipt from WM first, DELE = deletion)
+ev["next_activity"] = ev.groupby(["PO_ID", "SAP_PO_No"]).Activity_ID.shift(-1).fillna("(end)")
+iv = ev[ev.Activity_ID == "Initial validation"]
+codes = iv.groupby("SAP_Next_Processing_Type").agg(validations=("PO_ID", "size"))
+codes["share"] = codes.validations / codes.validations.sum()
+nxt = iv.groupby("SAP_Next_Processing_Type").next_activity.value_counts(normalize=True)
+codes["top_next_activity"] = nxt.groupby(level=0).idxmax().str[1]
+codes["top_next_share"] = nxt.groupby(level=0).max()
+codes.index.name = "code"
+codes.sort_values("validations", ascending=False).to_csv(OUT / "routing_codes.csv")
+# Per PO type, counted once per invoice: the first validation of each SAP_PO_No
+first_iv = iv.groupby(["PO_ID", "SAP_PO_No"]).first()
+routing = pd.crosstab(first_iv.SAP_PO_Type_Code, first_iv.SAP_Next_Processing_Type, normalize="index")
+routing["invoices"] = first_iv.groupby("SAP_PO_Type_Code").size()
+routing = routing.reindex(p.index)
+routing.index.name = "po_type"
+routing.to_csv(OUT / "routing.csv")
+
+# Direct path (validation straight to manual posting): who posts, and how long after validation.
+# User280 (nightly batch) does many of these "manual" postings.
+DIRECT = ("Data management", "Initial validation", "Posted manually")
+trace = ev.groupby("PO_ID").Activity_ID.agg(tuple)
+d = ev[ev.PO_ID.isin(trace.index[trace == DIRECT])]
+t = d.pivot(index="PO_ID", columns="Activity_ID", values="ts")
+post = d[d.Activity_ID == "Posted manually"].set_index("PO_ID")
+post["days"] = (t["Posted manually"] - t["Initial validation"]).dt.total_seconds() / 86400
+post["by_bot"] = post.User_ID.isin(BOT_USERS)
+
+
+def direct_stats(x):
+    bot, hum = x[x.by_bot].days, x[~x.by_bot].days
+    return pd.Series({"cases": len(x), "bot_share": x.by_bot.mean(), "median_days_bot": bot.median(),
+                      "median_days_human": hum.median(), "p90_days_human": hum.quantile(0.9)})
+
+
+direct = post.groupby("SAP_PO_Type_Code").apply(direct_stats).reindex(p.index)
+direct.loc["ALL"] = direct_stats(post)
+direct.index.name = "po_type"
+direct.to_csv(OUT / "direct_posting.csv")
+
 pd.set_option("display.width", 250)
 print(p.drop(columns=["name"]).round(3).to_string())
 print("total discount at risk NOK", p.discount_at_risk_nok.sum().round(0), "of invoice value", p.invoice_value_nok.sum().round(0))
 print("overall touchless", cases.touchless.mean(), "manual events", cases.manual_count.sum())
 print(cases.groupby(cases.start.dt.to_period("M")).agg(n=("touchless", "size"), touchless=("touchless", "mean"),
       breach10=("breach10", "mean"), completed=("completed", "mean")).round(3))
+print(codes.round(3).to_string())
+print(routing.round(2).to_string())
+print(direct.round(2).to_string())
