@@ -3,7 +3,8 @@ plus the routing decision at validation and who posts on the direct manual path.
 import numpy as np
 import pandas as pd
 
-from common import OUT, PO_TYPES, BOT_USERS, POSTING_ACTIVITIES, SLA_SOFT_DAYS, SLA_HARD_DAYS, load_events, load_cases
+from common import (OUT, PO_TYPES, BOT_USERS, POSTING_ACTIVITIES, SLA_SOFT_DAYS, SLA_HARD_DAYS, load_events, load_cases,
+                    load_invoices)
 
 ev = load_events()
 cases = load_cases().set_index("PO_ID")
@@ -22,12 +23,20 @@ cases["deleted"] = act.get("Invoice document deleted", 0) > 0
 cases["touchless"] = cases.manual_count == 0
 cases["breach10"] = cases.throughput_days > SLA_SOFT_DAYS
 cases["breach30"] = cases.throughput_days > SLA_HARD_DAYS
-# PO lead time: first event to the last posting, i.e. until every invoice on the PO is posted. A PO posted after
-# more than 10 days misses the 2% cash discount on its whole value. POs never posted (deleted, open) are left out.
+# Missed 2% cash discount, counted per invoice: an invoice (SAP_PO_No) posted more than 10 days after its first
+# event misses 2% of its value. The value is only known per PO (the sum of its invoices), so it is split evenly over
+# the PO's posted invoices. Invoices never posted (deleted, open) are not paid and are left out.
+inv = load_invoices()
+inv = inv[inv.posted].copy()
+inv["value_nok"] = inv.PO_ID.map(cases.invoice_value_nok) / inv.groupby("PO_ID").SAP_PO_No.transform("size")
+inv["late"] = inv.time_to_post_days > SLA_SOFT_DAYS
+inv["missed_discount_nok"] = inv.value_nok * 0.02 * inv.late
+cases["late_invoices"] = inv.groupby("PO_ID").late.sum().reindex(cases.index, fill_value=0)
+cases["missed_discount_nok"] = inv.groupby("PO_ID").missed_discount_nok.sum().reindex(cases.index, fill_value=0)
+# Upper bound for comparison: the whole PO value once the PO's last posting comes after more than 10 days
 last_post = ev[ev.Activity_ID.isin(POSTING_ACTIVITIES)].groupby("PO_ID").ts.max()
-cases["po_lead_days"] = (last_post.reindex(cases.index) - cases.start).dt.total_seconds() / 86400
-cases["po_late"] = cases.po_lead_days > SLA_SOFT_DAYS
-cases["missed_discount_nok"] = cases.invoice_value_nok * 0.02 * cases.po_late
+po_lead_days = (last_post.reindex(cases.index) - cases.start).dt.total_seconds() / 86400
+cases["missed_discount_po_nok"] = cases.invoice_value_nok * 0.02 * (po_lead_days > SLA_SOFT_DAYS)
 
 g = cases.groupby("po_type")
 p = pd.DataFrame({
@@ -48,10 +57,11 @@ p = pd.DataFrame({
     "breach30_rate": g.breach30.mean(),
     "breach10_cases": g.breach10.sum(),
     "breach30_cases": g.breach30.sum(),
-    "median_po_lead_days": g.po_lead_days.median(),
-    "mean_po_lead_days": g.po_lead_days.mean(),
-    "late_pos": g.po_late.sum(),
+    "median_invoice_lead_days": inv.groupby("po_type").time_to_post_days.median(),
+    "mean_invoice_lead_days": inv.groupby("po_type").time_to_post_days.mean(),
+    "late_invoices": g.late_invoices.sum(),
     "missed_discount_nok": g.missed_discount_nok.sum(),
+    "missed_discount_po_nok": g.missed_discount_po_nok.sum(),
     "invoice_value_nok": g.invoice_value_nok.sum(),
 })
 p["case_share"] = p.cases / p.cases.sum()
@@ -114,23 +124,23 @@ direct.loc["ALL"] = direct_stats(post)
 direct.index.name = "po_type"
 direct.to_csv(OUT / "direct_posting.csv")
 
-# ZNB1 PO lead time and missed 2% discount by top-5 case variant
+# ZNB1 invoice lead time and missed 2% discount by top-5 case variant
 LT_TYPE = "ZNB1"
-po = cases[cases.po_type == LT_TYPE].copy()
+li = inv[inv.po_type == LT_TYPE].copy()
 variant = ev[ev.SAP_PO_Type_Code == LT_TYPE].groupby("PO_ID").Activity_ID.agg(" → ".join)
-po["variant_rank"] = variant.map({v: i for i, v in enumerate(variant.value_counts().index, 1)})
-po["variant_rank"] = po.variant_rank.where(po.variant_rank <= 5, 0)  # 0 = all other variants
+rank = variant.map({v: i for i, v in enumerate(variant.value_counts().index, 1)})
+li["variant_rank"] = li.PO_ID.map(rank.where(rank <= 5, 0))  # 0 = all other variants
 
 
 def lead_stats(x):
-    return pd.Series({"cases": len(x), "posted": x.po_lead_days.notna().sum(),
-                      "invoices": x.invoice_cycles.sum(),
-                      "median_days": x.po_lead_days.median(), "mean_days": x.po_lead_days.mean(),
-                      "late_pos": x.po_late.sum(), "missed_discount_nok": x.missed_discount_nok.sum()})
+    return pd.Series({"cases": x.PO_ID.nunique(), "invoices": len(x),
+                      "median_days": x.time_to_post_days.median(), "mean_days": x.time_to_post_days.mean(),
+                      "late_invoices": x.late.sum(), "missed_discount_nok": x.missed_discount_nok.sum(),
+                      "missed_discount_po_nok": cases.loc[x.PO_ID.unique(), "missed_discount_po_nok"].sum()})
 
 
-lt = po.groupby("variant_rank").apply(lead_stats)
-lt.loc["ALL"] = lead_stats(po)
+lt = li.groupby("variant_rank").apply(lead_stats)
+lt.loc["ALL"] = lead_stats(li)
 lt.index.name = "variant_rank"
 lt.to_csv(OUT / "lead_time_variants.csv")
 
