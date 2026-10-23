@@ -155,12 +155,16 @@ def human_share(c):
 SITUATION = {"ZJD1": "Standard purchasing", "ZNB1": "Standard purchasing", "ZJD3": "Standard purchasing",
              "ZNB2": "Third-party", "ZNB3": "Third-party", "ZNB4": "Third-party", "ZNB6": "Third-party",
              "ZNBF": "Transportation", "NB2": "Returns", "ZRPC": "Returns", "ZRPM": "Returns"}
+# Suppliers: distinct per PO type, and in total (a supplier can deliver under several PO types)
+SUP = pd.read_csv(OUT / "cases.csv", usecols=["po_type", "supplier"])
+sup_total = SUP.supplier.nunique()
+sup_multi = int((SUP.groupby("supplier").po_type.nunique() > 1).sum())
 overview_rows = []
 for c in order:
     t = types.loc[c]
     overview_rows.append(
         f"<td>{code(c)}</td><td>{t['name']}</td><td>{SITUATION[c]}</td><td class='n'>{num(t.cases)}</td><td class='n'>{pct(t.cases / tot)}</td>"
-        f"<td class='n'>{num(t.activities)}</td><td class='n'>{num(t.variants)}</td><td class='n'>{pct(t.top1_share, 0)}</td>"
+        f"<td class='n'>{num(pr.loc[c, 'suppliers'])}</td><td class='n'>{num(t.activities)}</td><td class='n'>{num(t.variants)}</td><td class='n'>{pct(t.top1_share, 0)}</td>"
         f"<td class='n'>{num(t.variants_for_80pct)}</td>")
 
 type_notes = {
@@ -400,6 +404,7 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
     <span><b>{num(S['events'])}</b> events</span>
     <span><b>{S['activities']}</b> activities</span>
     <span><b>{S['users']}</b> users</span>
+    <span><b>{num(sup_total)}</b> suppliers</span>
     <span>cases started <b>Jul–Nov 2025</b>, events until <b>3 Mar 2026</b></span>
   </div>
 </header>
@@ -463,7 +468,8 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
 
 <h2 id="step1"><span class="step">Step 1</span>Understand the workflows</h2>
 <div class="prose"><p>Every case starts with <i>Data management → Initial validation</i>. The happy path then waits for the goods receipt (GR) and posts automatically in MM. Deviations come from three places: <b>GR problems</b> (repeated waiting, retrieving the GR from WM, transferring to MM and restarting), <b>manual posting</b> (after a failed auto-post or directly after validation), and <b>exception handling</b> (approval for price differences, asking for comments, deletion). The PO types mix these in very different proportions.</p></div>
-{table(["Code", "PO type", "Situation", "Cases", "Share", "Activities", "Variants", "Top variant", "Variants for 80%"], overview_rows)}
+{table(["Code", "PO type", "Situation", "Cases", "Share", "Suppliers", "Activities", "Variants", "Top variant", "Variants for 80%"], overview_rows)}
+<p class="prose">The log has {num(sup_total)} suppliers in total. {num(sup_multi)} of them deliver under more than one PO type, so the supplier column adds up to more than the total. The third-party types run their volume through few suppliers ({code('ZNB2')}: {num(pr.loc['ZNB2', 'cases'])} cases from {num(pr.loc['ZNB2', 'suppliers'])} suppliers), while the large standard-purchasing and return types (ZNB1, ZJD1, ZJD3, NB2) spread over {num(pr.loc[['ZNB1', 'ZJD1', 'ZJD3', 'NB2'], 'suppliers'].min())}–{num(pr.loc[['ZNB1', 'ZJD1', 'ZJD3', 'NB2'], 'suppliers'].max())} suppliers each.</p>
 {fig("figures/activity_presence.png", "Share of cases in each PO type that contain each activity. The third-party types (ZNB2–4) rarely leave the happy path, while ZNB1, ZJD3, ZNB6 and ZNBF show many repeated activities, from real rework or from several invoices per case.", "wide")}
 <div class="example">
   <div class="lbl">Example · reading a process map</div>

@@ -63,6 +63,7 @@ p = pd.DataFrame({
     "missed_discount_nok": g.missed_discount_nok.sum(),
     "missed_discount_po_nok": g.missed_discount_po_nok.sum(),
     "invoice_value_nok": g.invoice_value_nok.sum(),
+    "suppliers": g.supplier.nunique(),
 })
 p["case_share"] = p.cases / p.cases.sum()
 p["manual_share"] = p.total_manual / p.total_manual.sum()
