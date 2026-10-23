@@ -122,8 +122,10 @@ xh, xr = CASES.loc[EX_HAPPY], CASES.loc[EX_REWORK]
 
 # ---------------------------------------------------------------- numbers used in the text
 tot = pr.cases.sum()
-disc_total = pr.discount_at_risk_nok.sum()
-disc_focus = pr.loc[["ZJD1", "ZNB1"], "discount_at_risk_nok"].sum()
+disc_total = pr.missed_discount_nok.sum()
+disc_focus = pr.loc[["ZJD1", "ZNB1"], "missed_discount_nok"].sum()
+# PO lead time of the worked example: first event to last posting
+xr_lead = (EV[(EV.PO_ID == EX_REWORK) & EV.Activity_ID.isin(POSTING_ACTIVITIES)].ts.max() - xr.start).total_seconds() / 86400
 manual_total = pr.total_manual.sum()
 b1, b2 = bots.loc["User1587"], bots.loc["User280"]
 # Typical busy human (median over human users with >= 500 events) for the comparison table
@@ -197,6 +199,25 @@ def rc(c):
     return pct(rcodes.loc[c, "share"], 0)
 
 
+# ZNB1: PO lead time and the discount missed on POs posted after 10 days, by top-5 variant
+lt = pd.read_csv(OUT / "lead_time_variants.csv", index_col="variant_rank")
+LT_TYPE = "ZNB1"
+lt_var = variants[variants.po_type == LT_TYPE].set_index("rank").variant
+lt_rows = []
+for k, label in [*((str(i), None) for i in range(1, 6)), ("0", "Other variants"), ("ALL", f"All {LT_TYPE}")]:
+    r = lt.loc[k]
+    first = (f"<td class='n'>{k}</td><td>{variant_html(lt_var[int(k)])}</td>" if label is None
+             else f"<td></td><td><b>{label}</b></td>")
+    lt_rows.append(f"{first}<td class='n'>{num(r.cases)}</td><td class='n'>{num(r.invoices)}</td>"
+                   f"<td class='n'>{num(r.median_days, 1)}</td><td class='n'>{num(r.mean_days, 1)}</td>"
+                   f"<td class='n'>{num(r.late_pos)}</td><td class='n'>{num(r.missed_discount_nok)}</td>")
+lt_all, lt_other = lt.loc["ALL"], lt.loc["0"]
+lead_time_html = f"""
+    <h4>Lead time and missed discount by variant</h4>
+    <p>Lead time runs per PO, from its first event until its last posting, when every invoice on the PO is posted. A PO posted after more than 10 days misses the 2% cash discount on its whole value. {num(lt_all.cases - lt_all.posted)} POs that were never posted are left out.</p>
+    {table(["#", "Variant", "POs", "Invoices", "Median days", "Mean days", "POs > 10 d", "Missed 2% discount (NOK)"], lt_rows, "variants")}
+    <p>{pct(lt_other.missed_discount_nok / lt_all.missed_discount_nok, 0)} of the {mnok(lt_all.missed_discount_nok)} NOK sits outside the top five, in POs with {lt_other.invoices / lt_other.cases:.1f} invoices on average and a median lead time of {lt_other.median_days:.0f} days. The top five miss {mnok(lt_all.missed_discount_nok - lt_other.missed_discount_nok)} NOK, mostly in variants 3 and 4: most of their invoices are posted within days, but the second invoice arrives weeks after the first, so the PO as a whole is posted late.</p>"""
+
 per_type = []
 for c in order:
     t = types.loc[c]
@@ -213,7 +234,7 @@ for c in order:
     {fig(f"figures/process_maps/dfg_freq_{c}.png", f"{c}: frequency process map (filter: {t.map_filter}). Numbers are event and transition counts.", "wide")}
     {fig(f"figures/process_maps/dfg_perf_{c}.png", f"{c}: performance map, median time per transition.", "wide")}
     <h4>Top 5 variants</h4>
-    {table(["#", "Variant", "Cases", "Share", "Median days", "Manual acts"], vrows, "variants")}
+    {table(["#", "Variant", "Cases", "Share", "Median days", "Manual acts"], vrows, "variants")}{lead_time_html if c == LT_TYPE else ""}
   </div>
 </details>""")
 
@@ -266,8 +287,8 @@ for c in order:
     r = pr.loc[c]
     prio_rows.append(
         f"<td>{code(c)}</td><td class='n'>{pct(r.case_share)}</td><td class='n'>{pct(r.manual_share)}</td>"
-        f"<td class='n'>{num(cap_inv.loc[c, 'cases_breach_soft10'])}</td><td class='n'>{pct(cap_inv.loc[c, 'cases_breach_soft10'] / cap_inv.cases_breach_soft10.sum())}</td>"
-        f"<td class='n'>{mnok(r.discount_at_risk_nok)}</td>{cpu_cell(cap_inv.loc[c, 'Cpu_soft10'])}"
+        f"<td class='n'>{num(cap_inv.loc[c, 'cases_breach_soft10'])}</td><td class='n'>{num(r.late_pos)}</td>"
+        f"<td class='n'>{mnok(r.missed_discount_nok)}</td>{cpu_cell(cap_inv.loc[c, 'Cpu_soft10'])}"
         f"<td class='n'>{int(r.xbar_in_control_kpis)}/3</td>")
 
 # ---------------------------------------------------------------- page
@@ -419,8 +440,8 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
 <h2 id="findings">Key findings</h2>
 <div class="findings">
   <div class="finding"><div class="k">87%</div><p>of invoices are processed fully touchless. Two system users ({BOT_USERS[0]}, {BOT_USERS[1]}) perform {pct(S['bot_event_share'], 1)} of all events.</p></div>
-  <div class="finding"><div class="k">{code('ZNB1')} {code('ZJD1')}</div><p>Manual and normal orders are only 5.5% of the cases but carry the highest-value invoices. Invoice by invoice, {pct(cap_inv.loc['ZNB1', 'observed_breach_soft10'], 0)} and {pct(cap_inv.loc['ZJD1', 'observed_breach_soft10'], 0)} take longer than 10 days, mostly those waiting for manual posting. They account for {pct(disc_focus / disc_total, 0)} of the cash discount at risk.</p></div>
-  <div class="finding"><div class="k">{mnok(disc_total)} NOK</div><p>of 2% cash discount is at risk on invoices that took more than 10 days. This is an upper bound that assumes all invoices had 2%/10-day terms.</p></div>
+  <div class="finding"><div class="k">{code('ZNB1')} {code('ZJD1')}</div><p>Manual and normal orders are only 5.5% of the cases but carry the highest-value invoices. Invoice by invoice, {pct(cap_inv.loc['ZNB1', 'observed_breach_soft10'], 0)} and {pct(cap_inv.loc['ZJD1', 'observed_breach_soft10'], 0)} take longer than 10 days, mostly those waiting for manual posting. They account for {pct(disc_focus / disc_total, 0)} of the missed cash discount.</p></div>
+  <div class="finding"><div class="k">{mnok(disc_total)} NOK</div><p>of 2% cash discount is missed on {num(pr.late_pos.sum())} POs that were posted after more than 10 days.</p></div>
   <div class="finding"><div class="k">{code('NB2')} {pct(pr.loc['NB2', 'manual_share'], 0)}</div><p>of all manual work comes from returns to vendor. They meet the SLAs well, so this is a cost problem, not a deadline problem.</p></div>
   <div class="finding"><div class="k">10 of 11</div><p>processes are out of control on the weekly X̄–S charts. The exception, ZRPM, has only 5 cases. A large part of the signal is a drift in the case population from October onward, so read these verdicts together with the data caveats.</p></div>
   <div class="finding new"><div class="k">At validation</div><p>the road is already chosen. {rc('CTRL1')} of validations send the invoice straight to the manual control queue (<code>CTRL1</code>) and skip the goods-receipt check. That is {ctrl1('ZNB1')} of ZNB1 invoices and {ctrl1('ZJD1')} of ZJD1 invoices, so their manual posting is decided up front, not after a failed auto-post. <a href="#routing">Details</a></p></div>
@@ -601,13 +622,13 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
 </div>
 
 <h2 id="step4"><span class="step">Step 4</span>Where to focus</h2>
-<div class="prose"><p>Need for improvement depends on how bad a process is (control, Cpu) and how much it matters (volume, manual effort, money). The discount column estimates the 2% discount lost on invoices that took more than 10 days.</p>
-<p>For example, invoice {EX_REWORK} from Step 2 was worth {num(xr.invoice_value_nok)} NOK and took {num(xr.throughput_days, 1)} days, so it counts {num(xr.invoice_value_nok * 0.02)} NOK towards ZNB1's total. Treat this column as an upper bound, because not every supplier offers a discount. It is calculated per case, because the data only gives one invoice value per case, not one per invoice. The ranking between PO types is what matters, not the exact amount.</p>
-<p>How to read the columns: <b>share of manual work</b> shows where accountants spend their time (cost). <b>Cases &gt; 10 d</b> and <b>discount at risk</b> show where deadlines are missed (money). <b>Cpu</b> and <b>KPIs in control</b> show how reliable the process is.</p></div>
-{table(["Code", "Share of cases", "Share of manual work", "Invoices > 10 d", "Share of all late invoices", "Discount at risk (NOK)", "Cpu 10 d (per invoice)", "KPIs in control"], prio_rows)}
+<div class="prose"><p>Need for improvement depends on how bad a process is (control, Cpu) and how much it matters (volume, manual effort, money). The discount column is the 2% cash discount missed on POs that were posted after more than 10 days.</p>
+<p>The discount is counted per PO, because the data gives one value per PO, not one per invoice. The PO's lead time runs from its first event until its last posting, when every invoice on it is posted. If that takes more than 10 days, the discount is missed on the whole PO value. For example, {EX_REWORK} from Step 2 was worth {num(xr.invoice_value_nok)} NOK and its last invoice was posted after {num(xr_lead, 1)} days, so it misses {num(xr.invoice_value_nok * 0.02)} NOK. POs that were never posted are left out.</p>
+<p>How to read the columns: <b>share of manual work</b> shows where accountants spend their time (cost). <b>Invoices &gt; 10 d</b> is the SLA breach count from Step 3. <b>POs &gt; 10 d</b> and <b>missed discount</b> show the money lost. <b>Cpu</b> and <b>KPIs in control</b> show how reliable the process is.</p></div>
+{table(["Code", "Share of cases", "Share of manual work", "Invoices > 10 d", "POs > 10 d", "Missed 2% discount (NOK)", "Cpu 10 d (per invoice)", "KPIs in control"], prio_rows)}
 <h3>Recommended scope options</h3>
 <ol class="rec">
-  <li><b>Manual and normal orders ({code('ZNB1')} + {code('ZJD1')}), time to posting.</b> This is the strongest case. Together they have {num(cap_inv.loc[['ZNB1', 'ZJD1'], 'cases_breach_soft10'].sum())} invoices that took longer than 10 days, Cpu far below 1 on every measure, and about {mnok(disc_focus)} NOK of discount at risk, because these orders carry the large invoices (average about 1.2M NOK per case). The bottleneck is manual posting: about half of their invoices are posted by hand after a median of {mj['median']:.0f}–{m1['median']:.0f} days. Questions for the project: why don't these invoices post automatically, and where do they wait before a person picks them up?
+  <li><b>Manual and normal orders ({code('ZNB1')} + {code('ZJD1')}), time to posting.</b> This is the strongest case. Together they have {num(cap_inv.loc[['ZNB1', 'ZJD1'], 'cases_breach_soft10'].sum())} invoices that took longer than 10 days, Cpu far below 1 on every measure, and about {mnok(disc_focus)} NOK of missed discount, because these orders carry the large invoices (average about 1.2M NOK per case). The bottleneck is manual posting: about half of their invoices are posted by hand after a median of {mj['median']:.0f}–{m1['median']:.0f} days. Questions for the project: why don't these invoices post automatically, and where do they wait before a person picks them up?
     {note(f"<p>For many of them, the decision is made at validation: {ctrl1('ZNB1')} of ZNB1 and {ctrl1('ZJD1')} of ZJD1 invoices are routed straight to the manual queue (<code>CTRL1</code>). The sharper project question is <b>which validation rule triggers <code>CTRL1</code></b> for these PO types. Answering it needs the SAP validation configuration or messages, which aren't in the event log.</p>", "Annotation · partly answered")}</li>
   <li><b>Return to vendor ({code('NB2')}), manual activities.</b> A return is a "reverse PO": it follows goods bought under another PO type that are sent back, for example because they arrived damaged, and the supplier may issue a credit note. It accounts for {pct(pr.loc['NB2', 'manual_share'], 0)} of all manual events while meeting both SLAs reasonably well. It also has the most real rework among the large types ({pct(pr.loc['NB2', 'rework_rate'], 0)} of cases). The causes to explain are the direct "Posted manually" path and the GR loop through WM and "Transfer to MM". Automating these is a cost case, not a deadline case.
     {note(f"<p>The direct \"Posted manually\" path is already {pct(dn.bot_share, 0)} automated by the nightly batch job {BOT_USERS[1]}. The remaining manual cost sits in the {pct(1 - dn.bot_share, 0)} posted by people and in the WM loop ({pct(routing.loc['NB2', 'ZWMGRW'], 0)} of NB2 invoices start via <code>ZWMGRW</code>). Moving more of the direct path into the batch run would cut manual work without new tooling.</p>")}</li>

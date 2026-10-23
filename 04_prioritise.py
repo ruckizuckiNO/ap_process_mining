@@ -3,7 +3,7 @@ plus the routing decision at validation and who posts on the direct manual path.
 import numpy as np
 import pandas as pd
 
-from common import OUT, PO_TYPES, BOT_USERS, SLA_SOFT_DAYS, SLA_HARD_DAYS, load_events, load_cases
+from common import OUT, PO_TYPES, BOT_USERS, POSTING_ACTIVITIES, SLA_SOFT_DAYS, SLA_HARD_DAYS, load_events, load_cases
 
 ev = load_events()
 cases = load_cases().set_index("PO_ID")
@@ -22,6 +22,12 @@ cases["deleted"] = act.get("Invoice document deleted", 0) > 0
 cases["touchless"] = cases.manual_count == 0
 cases["breach10"] = cases.throughput_days > SLA_SOFT_DAYS
 cases["breach30"] = cases.throughput_days > SLA_HARD_DAYS
+# PO lead time: first event to the last posting, i.e. until every invoice on the PO is posted. A PO posted after
+# more than 10 days misses the 2% cash discount on its whole value. POs never posted (deleted, open) are left out.
+last_post = ev[ev.Activity_ID.isin(POSTING_ACTIVITIES)].groupby("PO_ID").ts.max()
+cases["po_lead_days"] = (last_post.reindex(cases.index) - cases.start).dt.total_seconds() / 86400
+cases["po_late"] = cases.po_lead_days > SLA_SOFT_DAYS
+cases["missed_discount_nok"] = cases.invoice_value_nok * 0.02 * cases.po_late
 
 g = cases.groupby("po_type")
 p = pd.DataFrame({
@@ -42,8 +48,10 @@ p = pd.DataFrame({
     "breach30_rate": g.breach30.mean(),
     "breach10_cases": g.breach10.sum(),
     "breach30_cases": g.breach30.sum(),
-    # Upper bound: assumes every invoice had 2%/10-day terms
-    "discount_at_risk_nok": cases[cases.breach10].groupby("po_type").invoice_value_nok.sum() * 0.02,
+    "median_po_lead_days": g.po_lead_days.median(),
+    "mean_po_lead_days": g.po_lead_days.mean(),
+    "late_pos": g.po_late.sum(),
+    "missed_discount_nok": g.missed_discount_nok.sum(),
     "invoice_value_nok": g.invoice_value_nok.sum(),
 })
 p["case_share"] = p.cases / p.cases.sum()
@@ -106,12 +114,33 @@ direct.loc["ALL"] = direct_stats(post)
 direct.index.name = "po_type"
 direct.to_csv(OUT / "direct_posting.csv")
 
+# ZNB1 PO lead time and missed 2% discount by top-5 case variant
+LT_TYPE = "ZNB1"
+po = cases[cases.po_type == LT_TYPE].copy()
+variant = ev[ev.SAP_PO_Type_Code == LT_TYPE].groupby("PO_ID").Activity_ID.agg(" → ".join)
+po["variant_rank"] = variant.map({v: i for i, v in enumerate(variant.value_counts().index, 1)})
+po["variant_rank"] = po.variant_rank.where(po.variant_rank <= 5, 0)  # 0 = all other variants
+
+
+def lead_stats(x):
+    return pd.Series({"cases": len(x), "posted": x.po_lead_days.notna().sum(),
+                      "invoices": x.invoice_cycles.sum(),
+                      "median_days": x.po_lead_days.median(), "mean_days": x.po_lead_days.mean(),
+                      "late_pos": x.po_late.sum(), "missed_discount_nok": x.missed_discount_nok.sum()})
+
+
+lt = po.groupby("variant_rank").apply(lead_stats)
+lt.loc["ALL"] = lead_stats(po)
+lt.index.name = "variant_rank"
+lt.to_csv(OUT / "lead_time_variants.csv")
+
 pd.set_option("display.width", 250)
 print(p.drop(columns=["name"]).round(3).to_string())
-print("total discount at risk NOK", p.discount_at_risk_nok.sum().round(0), "of invoice value", p.invoice_value_nok.sum().round(0))
+print("total missed discount NOK", p.missed_discount_nok.sum().round(0), "of invoice value", p.invoice_value_nok.sum().round(0))
 print("overall touchless", cases.touchless.mean(), "manual events", cases.manual_count.sum())
 print(cases.groupby(cases.start.dt.to_period("M")).agg(n=("touchless", "size"), touchless=("touchless", "mean"),
       breach10=("breach10", "mean"), completed=("completed", "mean")).round(3))
 print(codes.round(3).to_string())
 print(routing.round(2).to_string())
 print(direct.round(2).to_string())
+print(lt.round(2).to_string())
