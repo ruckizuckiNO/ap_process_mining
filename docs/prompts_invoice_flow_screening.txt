@@ -1,0 +1,127 @@
+Prompts for the artifact 'Invoice Flow Screening' (AP process mining)
+Artifact: https://claude.ai/artifact/3dq8sRATvEHtXxL25GhdrJ
+Repo: https://github.com/ruckizuckiNO/ap_process_mining
+
+All prompts written in the Claude Code sessions that built and changed the analysis, the report and the notebook,
+in chronological order and verbatim (typos kept). Unrelated prompts in the same sessions (installing apps, grammar, etc.) are left out.
+[Image #n] = a screenshot that was attached to the prompt; images are not included in this file.
+
+====================================================================================================
+Session 1 – 17 Oct 2026: analysis, report (artifact) and notebook
+====================================================================================================
+
+[1] 2026-10-17 07:43 UTC
+[Image #1] [Image #2] [Image #3] [Image #4]
+
+[2] 2026-10-17 07:44 UTC
+I will upload the the csv as well shortly
+
+[3] 2026-10-17 07:45 UTC
+You just do your magic! Give me a report in addition to all the coding you do. and use the conda env test if you install new packages
+
+[4] 2026-10-17 09:18 UTC
+i want a light theme in the report and also more explanations and examples for the reader
+
+[5] 2026-10-17 09:23 UTC
+good! how did you distinguish between bos(system) and human ?
+
+[6] 2026-10-17 09:25 UTC
+include this in the report somehow
+
+[7] 2026-10-17 09:29 UTC
+how do how that the SLA was met or not. Like as a general question?
+
+[8] 2026-10-17 09:31 UTC
+yeah, but when is purchase ID acutally posted for payment? This I was not able to see from the .csv?
+
+[9] 2026-10-17 09:35 UTC
+yes
+
+[10] 2026-10-17 09:44 UTC
+So a PO_ID might have several different SAP_PO_No?
+
+[11] 2026-10-17 10:52 UTC
+when i look at the csv in pandans I find 1 in 171163 instances. Why is your number lower
+
+[12] 2026-10-17 11:19 UTC
+can we move this to github some how?
+
+[13] 2026-10-17 11:23 UTC
+I want to change the conda env name from test to datasci
+
+[14] 2026-10-17 11:38 UTC
+Can you also cllect tall the analysis in an .ipynb notebook for me? You can save it under /Desktop/python
+
+[15] 2026-10-17 11:43 UTC
+yes install juptyerlab also
+
+====================================================================================================
+Session 2 – 18 and 21 Oct 2026: log transform, domain information, report update
+====================================================================================================
+
+[16] 2026-10-18 20:56 UTC
+general question
+
+[17] 2026-10-18 20:56 UTC
+when should i use log1p instead of log
+
+[18] 2026-10-18 20:59 UTC
+but why to use it in process mining?
+
+[19] 2026-10-18 21:00 UTC
+yes
+
+[20] 2026-10-18 21:02 UTC
+shouldn't you use seconds instead of hours?
+
+[21] 2026-10-18 21:04 UTC
+no, it's fine. but what is a log
+
+[22] 2026-10-21 21:54 UTC
+some add. info about the data mining project.. coming soon
+
+[23] 2026-10-21 21:56 UTC
+[Image #4] [Image #5] [Image #6] [Image #7] [Image #8] [Image #9] [Image #10]
+
+[24] 2026-10-21 21:58 UTC
+did you also change something in the report? Maybe you should
+
+[25] 2026-10-21 22:02 UTC
+yes commit and push and also include the .ipynb
+
+[26] 2026-10-21 22:02 UTC
+yes, please
+
+[27] 2026-10-21 22:05 UTC
+do you knwo which company the log is from?
+
+[28] 2026-10-21 22:07 UTC
+what is dropshipping
+
+====================================================================================================
+Session 3 – 22 Oct 2026: process-flow one-pager
+====================================================================================================
+
+[29] 2026-10-22 16:06 UTC
+Can you run me through some examples of this different possible porcess flows, maybe a short one-pager pdf with some illustrations.
+
+[30] 2026-10-22 16:10 UTC
+Why has case B no need to wait for the goods received?
+
+[31] 2026-10-22 16:15 UTC
+the raw log is here: /Downloads/EN event log.csv
+
+[32] 2026-10-22 16:20 UTC
+yes, annotate everything which is important
+
+[33] 2026-10-22 16:24 UTC
+commit and push
+
+[34] 2026-10-22 16:39 UTC
+Is the pdf also on git?
+
+[35] 2026-10-22 16:39 UTC
+no, it's fine
+
+[36] 2026-10-22 17:12 UTC
+what kind of pipeline are you talking about?
