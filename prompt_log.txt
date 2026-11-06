@@ -26,8 +26,38 @@ and sort it by amount of POs in descending order
 [2026-11-06] 8
 same list with the highest average PO value?
 
-[2026-11-06] 9
-from now on you can start logging my promts again
-
 [2026-11-06] 10
 can you also push and commit
+
+[2026-11-06] 12
+just focus on znb1: Can you give me the the suppliers by total PO-amount? an overview
+
+[2026-11-06] 13
+and for the same i want the last step (most frequent: modus) before it went to ctrl1
+
+[2026-11-06] 14
+how many stop up which are set up for goods receipt?
+
+[2026-11-06] 15
+which one of znb1 (suppliers) have large po-values and are fast?
+
+[2026-11-06] 16
+in znb1 can we see something about mismatches in PO-values. I mean invoice amounts against PO-value?
+
+[2026-11-06] 17
+but my suspicson is that the difference between cleared and invoice value is due to the cash discount if we pay within 10 days. can you check this?
+
+[2026-11-06] 18
+okay, then i want and overwie of the differences in percent. a histogram or a density plot including sigma and mean
+
+[2026-11-06] 19
+and a box plot
+
+[2026-11-06] 20
+no, a box plot with the differences between cleared amounts and PO-amounts
+
+[2026-11-06] 21
+Can i get a list with a separate column for the amount difference for all znb1. .csv is fine
+
+[2026-11-06] 22
+push and commit
