@@ -2,15 +2,6 @@ Prompt log – INN354 accounts-payable process mining
 Record of prompts given to Claude Code (verbatim), newest at the bottom.
 ====================================================================
 
-[2026-11-06] 1
-How can we access the work you've done with process ingineering?
-
-[2026-11-06] 2
-or connect to a git repo?
-
-[2026-11-06] 3
-nice! yes. thats the folder we should work in!
-
 [2026-11-06] 4
 What i need are the top ten suppliers with the highest median po values and there respective throughput times
 
@@ -61,3 +52,9 @@ Can i get a list with a separate column for the amount difference for all znb1. 
 
 [2026-11-06] 22
 push and commit
+
+[2026-11-06] 23
+into main?
+
+[2026-11-06] 24
+everything should be in main
