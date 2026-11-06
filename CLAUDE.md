@@ -26,7 +26,7 @@ A single step can be rerun on its own as long as its inputs in `output/` exist (
   - `01_prepare.py`: raw CSV → `events.pkl`, `cases.csv` (one row per PO_ID), `invoices.csv` (one row per PO_ID × SAP_PO_No invoice cycle), `bot_profile.csv`, `summary.json`.
   - `02_process_maps.py`: DFGs/variants per PO type (pm4py + graphviz).
   - `03_control_capability.py`: X̄–S / I-MR control charts with Western Electric rules and Cpu/Ppu capability → `control_chart_results.csv`, `capability*.csv`.
-  - `04_prioritise.py`: combines the above → `priority.csv`.
+  - `04_prioritise.py`: combines the above → `priority.csv`; also the routing decision at *Initial validation* (`SAP_Next_Processing_Type`: `WAITGR`, `CTRL1`, `ZWMGRW`, `DELE`) → `routing.csv`, `routing_codes.csv`, and who posts on the direct validation → *Posted manually* path → `direct_posting.csv`.
   - `05_report.py`: builds `output/report.html` from the CSVs and figures; numbers in the report text come from those files via f-strings.
 - `ap_process_mining.ipynb` is a self-contained copy of the whole analysis that writes to `ap_output/`. Logic changes in the scripts must be mirrored there by hand.
 - `explore*.py` are untracked scratch files; don't build on them.

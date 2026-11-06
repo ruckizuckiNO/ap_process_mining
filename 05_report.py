@@ -16,6 +16,9 @@ cap = pd.read_csv(OUT / "capability.csv", index_col="po_type")
 cap_post = pd.read_csv(OUT / "capability_first_post.csv", index_col="po_type")
 cap_inv = pd.read_csv(OUT / "capability_invoice.csv", index_col="po_type")
 pr = pd.read_csv(OUT / "priority.csv", index_col="po_type")
+routing = pd.read_csv(OUT / "routing.csv", index_col="po_type")
+rcodes = pd.read_csv(OUT / "routing_codes.csv", index_col="code")
+direct = pd.read_csv(OUT / "direct_posting.csv", index_col="po_type")
 order = list(pr.index)  # by volume
 
 
@@ -38,6 +41,15 @@ def cpu_cell(v):
 
 def code(c):
     return f'<span class="code">{c}</span>'
+
+
+def note(body, label="Annotation"):
+    return f'<div class="note"><div class="lbl">{label}</div>{body}</div>'
+
+
+def ctrl1(c):
+    """Share of a PO type's invoices sent to the manual control queue at validation."""
+    return pct(routing.loc[c, "CTRL1"], 0)
 
 
 def table(head, rows, cls=""):
@@ -90,6 +102,7 @@ NB2_DM_EVENTS = int((_nb2.Activity_ID == "Data management").sum())
 NB2_CASES = _nb2.PO_ID.nunique()
 NB2_GR_SELF = int(((_nb2.Activity_ID == "Wait for goods receipt") & (_nxt == "Wait for goods receipt")).sum())
 NB2_IV_PM = int(((_nb2.Activity_ID == "Initial validation") & (_nxt == "Posted manually")).sum())
+NEG_VALUES = int((EV.Case_Invoice_Value_NOK < 0).sum())
 # Sensitivity of the bot classification: events of the two judgment-call users per PO type
 U280_BY_TYPE = EV[EV.User_ID == "User280"].groupby("SAP_PO_Type_Code").size()
 U1550_EVENTS = int((EV.User_ID == "User1550").sum())
@@ -109,8 +122,10 @@ xh, xr = CASES.loc[EX_HAPPY], CASES.loc[EX_REWORK]
 
 # ---------------------------------------------------------------- numbers used in the text
 tot = pr.cases.sum()
-disc_total = pr.discount_at_risk_nok.sum()
-disc_focus = pr.loc[["ZJD1", "ZNB1"], "discount_at_risk_nok"].sum()
+disc_total = pr.missed_discount_nok.sum()
+disc_focus = pr.loc[["ZJD1", "ZNB1"], "missed_discount_nok"].sum()
+disc_po_total = pr.missed_discount_po_nok.sum()
+ex_late = int((EX_INV > 10).sum())
 manual_total = pr.total_manual.sum()
 b1, b2 = bots.loc["User1587"], bots.loc["User280"]
 # Typical busy human (median over human users with >= 500 events) for the comparison table
@@ -128,18 +143,28 @@ m1, mj = route("ZNB1"), route("ZJD1")
 c1, c2 = cap.loc["ZNB1"], cap.loc["ZNB2"]
 usl10 = np.log(11)
 nb2_ev = types.loc["NB2"]
+dn, da = direct.loc["NB2"], direct.loc["ALL"]
+
+
+def human_share(c):
+    b = direct.loc[c, "bot_share"]
+    return "All" if b == 0 else "Almost all" if b < 0.005 else pct(1 - b, 0)
 
 # ---------------------------------------------------------------- step 1
 # Procurement situation per PO type, from the case description (see docs/domain.md)
 SITUATION = {"ZJD1": "Standard purchasing", "ZNB1": "Standard purchasing", "ZJD3": "Standard purchasing",
              "ZNB2": "Third-party", "ZNB3": "Third-party", "ZNB4": "Third-party", "ZNB6": "Third-party",
              "ZNBF": "Transportation", "NB2": "Returns", "ZRPC": "Returns", "ZRPM": "Returns"}
+# Suppliers: distinct per PO type, and in total (a supplier can deliver under several PO types)
+SUP = pd.read_csv(OUT / "cases.csv", usecols=["po_type", "supplier"])
+sup_total = SUP.supplier.nunique()
+sup_multi = int((SUP.groupby("supplier").po_type.nunique() > 1).sum())
 overview_rows = []
 for c in order:
     t = types.loc[c]
     overview_rows.append(
         f"<td>{code(c)}</td><td>{t['name']}</td><td>{SITUATION[c]}</td><td class='n'>{num(t.cases)}</td><td class='n'>{pct(t.cases / tot)}</td>"
-        f"<td class='n'>{num(t.activities)}</td><td class='n'>{num(t.variants)}</td><td class='n'>{pct(t.top1_share, 0)}</td>"
+        f"<td class='n'>{num(pr.loc[c, 'suppliers'])}</td><td class='n'>{num(t.activities)}</td><td class='n'>{num(t.variants)}</td><td class='n'>{pct(t.top1_share, 0)}</td>"
         f"<td class='n'>{num(t.variants_for_80pct)}</td>")
 
 type_notes = {
@@ -156,6 +181,47 @@ type_notes = {
     "ZRPM": "Only 5 cases, too few to characterise a process.",
 }
 
+# Routing findings per type (see "Routing at validation" in Step 1)
+type_annot = {
+    "NB2": f"Variant 1 (direct manual posting) is mostly automated after all: {pct(dn.bot_share, 0)} of its {num(dn.cases)} postings come from the nightly batch {BOT_USERS[1]} (median {dn.median_days_bot:.1f} days after validation), {pct(1 - dn.bot_share, 0)} from people (median {dn.median_days_human:.1f} days). {ctrl1('NB2')} of NB2 invoices are routed to the manual queue <code>CTRL1</code> at validation, and {pct(routing.loc['NB2', 'ZWMGRW'], 0)} to a goods receipt from WM (<code>ZWMGRW</code>), the start of the WM loop in variant 3.",
+    "ZJD1": f"{ctrl1('ZJD1')} of ZJD1 invoices are sent to the manual queue (<code>CTRL1</code>) during validation, before any goods-receipt check. {human_share('ZJD1')} of the direct manual postings are made by people, not by the batch job.",
+    "ZNB1": f"{ctrl1('ZNB1')} of ZNB1 invoices are sent to the manual queue (<code>CTRL1</code>) during validation. Most of the manual posting is decided there, not after a failed auto-post. {human_share('ZNB1')} of the direct manual postings are made by people (median {direct.loc['ZNB1', 'median_days_human']:.1f} days).",
+    "ZJD3": f"{ctrl1('ZJD3')} of ZJD3 invoices are routed to the manual queue (<code>CTRL1</code>) at validation, even though the PO type is meant to be automatic.",
+    "ZNB6": f"{ctrl1('ZNB6')} of ZNB6 invoices go to the manual queue (<code>CTRL1</code>) at validation. Variant 2 (direct manual posting) then waits a median of {direct.loc['ZNB6', 'median_days_human']:.0f} days for a person, the longest human queue in the data. Whether the clerks are holding invoices until the goods arrive can't be checked, because the log has no goods-receipt date.",
+    "ZRPC": f"{ctrl1('ZRPC')} of ZRPC invoices are routed to the manual queue (<code>CTRL1</code>) at validation, and {human_share('ZRPC')} of the direct manual postings are made by people. Unlike NB2, the other return type, ZRPC returns aren't handled by the nightly batch.",
+}
+
+routing_rows = []
+for c in order:
+    r = routing.loc[c]
+    cls = "bad" if r.CTRL1 >= 0.5 else "warn" if r.CTRL1 >= 0.25 else ""
+    routing_rows.append(f"<td>{code(c)}</td><td class='n {cls}'>{pct(r.CTRL1, 0)}</td><td class='n'>{pct(r.WAITGR, 0)}</td>"
+                        f"<td class='n'>{pct(r.ZWMGRW, 0)}</td><td class='n'>{pct(r.DELE, 0)}</td>")
+
+
+def rc(c):
+    return pct(rcodes.loc[c, "share"], 0)
+
+
+# ZNB1: invoice lead time and the discount missed on invoices posted after 10 days, by top-5 variant
+lt = pd.read_csv(OUT / "lead_time_variants.csv", index_col="variant_rank")
+LT_TYPE = "ZNB1"
+lt_var = variants[variants.po_type == LT_TYPE].set_index("rank").variant
+lt_rows = []
+for k, label in [*((str(i), None) for i in range(1, 6)), ("0", "Other variants"), ("ALL", f"All {LT_TYPE}")]:
+    r = lt.loc[k]
+    first = (f"<td class='n'>{k}</td><td>{variant_html(lt_var[int(k)])}</td>" if label is None
+             else f"<td></td><td><b>{label}</b></td>")
+    lt_rows.append(f"{first}<td class='n'>{num(r.cases)}</td><td class='n'>{num(r.invoices)}</td>"
+                   f"<td class='n'>{num(r.median_days, 1)}</td><td class='n'>{num(r.mean_days, 1)}</td>"
+                   f"<td class='n'>{num(r.late_invoices)}</td><td class='n'>{num(r.missed_discount_nok)}</td>")
+lt_all, lt_other = lt.loc["ALL"], lt.loc["0"]
+lead_time_html = f"""
+    <h4>Lead time and missed discount by variant</h4>
+    <p>Lead time runs per invoice, from its first event to its posting. An invoice posted after more than 10 days misses 2% of its value. The value is only known per PO, so it is split evenly over the PO's posted invoices (see Step 4). Invoices that were never posted are left out.</p>
+    {table(["#", "Variant", "POs", "Invoices", "Median days", "Mean days", "Invoices > 10 d", "Missed 2% discount (NOK)"], lt_rows, "variants")}
+    <p>{pct(lt_other.missed_discount_nok / lt_all.missed_discount_nok, 0)} of the {mnok(lt_all.missed_discount_nok)} NOK sits outside the top five, in POs with {lt_other.invoices / lt_other.cases:.1f} invoices on average. The top five miss only {mnok(lt_all.missed_discount_nok - lt_other.missed_discount_nok)} NOK. Variants 3 and 4 show why the count runs per invoice: their cases take 20–25 days because a second invoice arrives weeks after the first, but each invoice is mostly posted within days. Counted per PO they would miss {mnok(lt.loc[['3', '4'], 'missed_discount_po_nok'].sum())} NOK, per invoice {mnok(lt.loc[['3', '4'], 'missed_discount_nok'].sum())} NOK.</p>"""
+
 per_type = []
 for c in order:
     t = types.loc[c]
@@ -168,10 +234,11 @@ for c in order:
   <summary>{code(c)} <b>{t['name']}</b><span class="meta">{num(t.cases)} cases · {num(t.variants)} variants</span></summary>
   <div class="type-body">
     <p>{type_notes.get(c, '')}</p>
+    {note(f"<p>{type_annot[c]}</p>") if c in type_annot else ""}
     {fig(f"figures/process_maps/dfg_freq_{c}.png", f"{c}: frequency process map (filter: {t.map_filter}). Numbers are event and transition counts.", "wide")}
     {fig(f"figures/process_maps/dfg_perf_{c}.png", f"{c}: performance map, median time per transition.", "wide")}
     <h4>Top 5 variants</h4>
-    {table(["#", "Variant", "Cases", "Share", "Median days", "Manual acts"], vrows, "variants")}
+    {table(["#", "Variant", "Cases", "Share", "Median days", "Manual acts"], vrows, "variants")}{lead_time_html if c == LT_TYPE else ""}
   </div>
 </details>""")
 
@@ -225,7 +292,7 @@ for c in order:
     prio_rows.append(
         f"<td>{code(c)}</td><td class='n'>{pct(r.case_share)}</td><td class='n'>{pct(r.manual_share)}</td>"
         f"<td class='n'>{num(cap_inv.loc[c, 'cases_breach_soft10'])}</td><td class='n'>{pct(cap_inv.loc[c, 'cases_breach_soft10'] / cap_inv.cases_breach_soft10.sum())}</td>"
-        f"<td class='n'>{mnok(r.discount_at_risk_nok)}</td>{cpu_cell(cap_inv.loc[c, 'Cpu_soft10'])}"
+        f"<td class='n'>{mnok(r.missed_discount_nok)}</td>{cpu_cell(cap_inv.loc[c, 'Cpu_soft10'])}"
         f"<td class='n'>{int(r.xbar_in_control_kpis)}/3</td>")
 
 # ---------------------------------------------------------------- page
@@ -317,6 +384,13 @@ tr.sys td {{ color: var(--muted); }}
 .toc a:hover, .toc a:focus-visible {{ border-bottom-color: var(--accent); }}
 code {{ font: 12.5px var(--f-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }}
 footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px; font-size: 13px; color: var(--muted); }}
+/* Annotations from the routing analysis: amber rule so they read as later notes */
+.note {{ border-left: 3px solid var(--warn); background: var(--warn-bg); border-radius: 0 8px 8px 0; padding: 10px 16px; margin: 14px 0; max-width: 90ch; }}
+.note > .lbl {{ font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warn); }}
+.note p {{ margin: 6px 0; }}
+.note .tbl {{ margin: 10px 0; }}
+.finding.new {{ border-color: var(--warn); }}
+.finding.new .k {{ color: var(--warn); }}
 @media (prefers-reduced-motion: reduce) {{ * {{ transition: none !important; }} }}
 </style>
 
@@ -330,6 +404,7 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
     <span><b>{num(S['events'])}</b> events</span>
     <span><b>{S['activities']}</b> activities</span>
     <span><b>{S['users']}</b> users</span>
+    <span><b>{num(sup_total)}</b> suppliers</span>
     <span>cases started <b>Jul–Nov 2025</b>, events until <b>3 Mar 2026</b></span>
   </div>
 </header>
@@ -339,6 +414,7 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
   <li><a href="#findings">Key findings</a></li>
   <li><a href="#data">Data</a></li>
   <li><a href="#step1">1 · Workflows</a></li>
+  <li><a href="#routing">Routing at validation</a></li>
   <li><a href="#step2">2 · KPIs</a></li>
   <li><a href="#step3">3 · Control &amp; capability</a></li>
   <li><a href="#step4">4 · Focus</a></li>
@@ -360,6 +436,7 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
   <dt>Invoice cycle</dt><dd>One invoice document within a case, identified by <code>SAP_PO_No</code>. A purchase order can receive several invoices (e.g. for partial deliveries), so one case can contain several cycles. Each cycle starts again with <i>Data management</i>.</dd>
   <dt>Rework</dt><dd>An activity that happens more than once <b>within the same invoice cycle</b>, e.g. the same invoice is validated twice. Repeats across different invoices of the same PO are not rework.</dd>
   <dt>GR, MM, WM, FI</dt><dd>SAP terms: goods receipt (proof that the goods arrived), Materials Management, Warehouse Management and Financial Accounting. Invoices that refer to a purchase order go to <b>MM</b>, where they are matched against the PO and the goods receipt. Invoices without a PO reference go to <b>FI</b> for account coding.</dd>
+  <dt>Routing code</dt><dd>The value of <code>SAP_Next_Processing_Type</code> on an event: the queue SAP sends the invoice to next. On <i>Initial validation</i> it decides the road: <code>WAITGR</code> (goods-receipt check, then automatic posting), <code>ZWMGRW</code> (goods receipt from WM first), <code>CTRL1</code> (manual control queue) or <code>DELE</code> (deletion). See <a href="#routing">Routing at validation</a>.</dd>
   <dt>SLA</dt><dd>Service level: here a deadline for finishing an invoice. 10 days to get the 2% cash discount, 30 days for the legal payment deadline.</dd>
   <dt>Control chart</dt><dd>A time chart of a KPI with a centre line and limits at ±3 standard deviations. Points outside the limits, or suspicious patterns, mean something changed in the process.</dd>
   <dt>Cpu</dt><dd>Process capability against an upper limit: how many "3-sigma widths" fit between the average and the deadline. Cpu ≥ 1 is good, below 1 means many cases break the deadline.</dd>
@@ -368,10 +445,11 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
 <h2 id="findings">Key findings</h2>
 <div class="findings">
   <div class="finding"><div class="k">87%</div><p>of invoices are processed fully touchless. Two system users ({BOT_USERS[0]}, {BOT_USERS[1]}) perform {pct(S['bot_event_share'], 1)} of all events.</p></div>
-  <div class="finding"><div class="k">{code('ZNB1')} {code('ZJD1')}</div><p>Manual and normal orders are only 5.5% of the cases but carry the highest-value invoices. Invoice by invoice, {pct(cap_inv.loc['ZNB1', 'observed_breach_soft10'], 0)} and {pct(cap_inv.loc['ZJD1', 'observed_breach_soft10'], 0)} take longer than 10 days, mostly those waiting for manual posting. They account for {pct(disc_focus / disc_total, 0)} of the cash discount at risk.</p></div>
-  <div class="finding"><div class="k">{mnok(disc_total)} NOK</div><p>of 2% cash discount is at risk on invoices that took more than 10 days. This is an upper bound that assumes all invoices had 2%/10-day terms.</p></div>
+  <div class="finding"><div class="k">{code('ZNB1')} {code('ZJD1')}</div><p>Manual and normal orders are only 5.5% of the cases but carry the highest-value invoices. Invoice by invoice, {pct(cap_inv.loc['ZNB1', 'observed_breach_soft10'], 0)} and {pct(cap_inv.loc['ZJD1', 'observed_breach_soft10'], 0)} take longer than 10 days, mostly those waiting for manual posting. They account for {pct(disc_focus / disc_total, 0)} of the missed cash discount.</p></div>
+  <div class="finding"><div class="k">{mnok(disc_total)} NOK</div><p>of 2% cash discount is missed on {num(pr.late_invoices.sum())} invoices that were posted after more than 10 days.</p></div>
   <div class="finding"><div class="k">{code('NB2')} {pct(pr.loc['NB2', 'manual_share'], 0)}</div><p>of all manual work comes from returns to vendor. They meet the SLAs well, so this is a cost problem, not a deadline problem.</p></div>
   <div class="finding"><div class="k">10 of 11</div><p>processes are out of control on the weekly X̄–S charts. The exception, ZRPM, has only 5 cases. A large part of the signal is a drift in the case population from October onward, so read these verdicts together with the data caveats.</p></div>
+  <div class="finding new"><div class="k">At validation</div><p>the road is already chosen. {rc('CTRL1')} of validations send the invoice straight to the manual control queue (<code>CTRL1</code>) and skip the goods-receipt check. That is {ctrl1('ZNB1')} of ZNB1 invoices and {ctrl1('ZJD1')} of ZJD1 invoices, so their manual posting is decided up front, not after a failed auto-post. <a href="#routing">Details</a></p></div>
 </div>
 
 <h2 id="data"><span class="step">Data preparation</span>What the event log contains</h2>
@@ -383,22 +461,39 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
   <li>Case volume falls sharply in October and November 2025 (14k and 3.5k cases, against about 60k in September), and those later cases are slower and more manual. This looks like an extraction effect: probably only cases that reached a certain state were included. It causes a lot of the late-period signals in the control charts.</li>
   <li>{num(S['incomplete_cases'])} cases (1%) do not end in a posting or deletion, so they may be unfinished. They are kept, because removing them would hide slow cases.</li>
 </ul>
+{note(f'''<p><b>No goods-receipt date.</b> The log records when SAP <i>checks</i> for the goods receipt, not when the goods arrived. Waiting for goods outside the automatic path (e.g. a clerk holding an invoice) can't be measured; it shows up only as a long gap before <i>Posted manually</i>.</p>
+<p><b>{"No credit notes by sign." if NEG_VALUES == 0 else "Few negative values."}</b> {"No invoice value is negative, including all return types (NB2, ZRPC, ZRPM). Credit notes can't be told apart from invoices in this data." if NEG_VALUES == 0 else f"Only {num(NEG_VALUES)} events carry a negative invoice value, so credit notes can't be reliably told apart from invoices."}</p>
+<p><b>Routing field:</b> <code>SAP_Next_Processing_Type</code> shows where SAP routes the invoice after each step. It explains why some invoices never wait for the goods receipt (see <a href="#routing">Routing at validation</a>).</p>''', "Annotation · data limits")}
 </div>
 
 <h2 id="step1"><span class="step">Step 1</span>Understand the workflows</h2>
 <div class="prose"><p>Every case starts with <i>Data management → Initial validation</i>. The happy path then waits for the goods receipt (GR) and posts automatically in MM. Deviations come from three places: <b>GR problems</b> (repeated waiting, retrieving the GR from WM, transferring to MM and restarting), <b>manual posting</b> (after a failed auto-post or directly after validation), and <b>exception handling</b> (approval for price differences, asking for comments, deletion). The PO types mix these in very different proportions.</p></div>
-{table(["Code", "PO type", "Situation", "Cases", "Share", "Activities", "Variants", "Top variant", "Variants for 80%"], overview_rows)}
+{table(["Code", "PO type", "Situation", "Cases", "Share", "Suppliers", "Activities", "Variants", "Top variant", "Variants for 80%"], overview_rows)}
+<p class="prose">The log has {num(sup_total)} suppliers in total. {num(sup_multi)} of them deliver under more than one PO type, so the supplier column adds up to more than the total. The third-party types run their volume through few suppliers ({code('ZNB2')}: {num(pr.loc['ZNB2', 'cases'])} cases from {num(pr.loc['ZNB2', 'suppliers'])} suppliers), while the large standard-purchasing and return types (ZNB1, ZJD1, ZJD3, NB2) spread over {num(pr.loc[['ZNB1', 'ZJD1', 'ZJD3', 'NB2'], 'suppliers'].min())}–{num(pr.loc[['ZNB1', 'ZJD1', 'ZJD3', 'NB2'], 'suppliers'].max())} suppliers each.</p>
 {fig("figures/activity_presence.png", "Share of cases in each PO type that contain each activity. The third-party types (ZNB2–4) rarely leave the happy path, while ZNB1, ZJD3, ZNB6 and ZNBF show many repeated activities, from real rework or from several invoices per case.", "wide")}
 <div class="example">
   <div class="lbl">Example · reading a process map</div>
   <p>Take the <code>NB2</code> (Return to vendor) frequency map below. Each <b>box</b> shows an activity and how often it occurred. <i>Data management</i> occurs {num(NB2_DM_EVENTS)} times in {num(NB2_CASES)} cases, so some cases go through it more than once. In NB2 that is almost always rework (the invoice is restarted), because only {pct(pr.loc["NB2", "multi_cycle_rate"], 1)} of NB2 cases hold a second invoice.</p>
-  <p>Each <b>arrow</b> counts how often one activity was directly followed by another. The arrow from <i>Initial validation</i> to <i>Posted manually</i> ({num(NB2_IV_PM)}) is the road that skips the automatic posting entirely. The loop arrow on <i>Wait for goods receipt</i> ({num(NB2_GR_SELF)}) means the system checked for the goods receipt again because it still hadn't arrived.</p>
+  <p>Each <b>arrow</b> counts how often one activity was directly followed by another. The arrow from <i>Initial validation</i> to <i>Posted manually</i> ({num(NB2_IV_PM)}) is the road that skips the automatic posting entirely. <i>(Annotation: SAP picks this road during validation, using routing code <code>CTRL1</code>. In NB2, {pct(dn.bot_share, 0)} of these direct postings are made by the nightly batch job {BOT_USERS[1]}, not by a person. See <a href="#routing">Routing at validation</a>.)</i> The loop arrow on <i>Wait for goods receipt</i> ({num(NB2_GR_SELF)}) means the system checked for the goods receipt again because it still hadn't arrived.</p>
   <p>Darker boxes and thicker arrows mean more traffic. The <b>performance map</b> uses the same layout but labels the arrows with the median time between the two steps. That shows where invoices wait, not just where they go.</p>
 </div>
 <div class="example">
   <div class="lbl">Example · reading a variant</div>
   <p>A variant is shown as a chain of steps, e.g. <span class="code">Data management</span> → <span class="code">Initial validation</span> → <span class="code">Wait for goods receipt</span> → <span class="code">MM Posted Automatically</span>. That is the happy path: {pct(types.loc['ZNB2', 'top1_share'], 0)} of all ZNB2 cases follow exactly this sequence. In ZNB1 the most common variant covers only {pct(types.loc['ZNB1', 'top1_share'], 0)}, and you need {num(types.loc['ZNB1', 'variants_for_80pct'])} variants to cover 80% of the cases. The "Variants for 80%" column in the table above is a quick measure of how standardised each process is.</p>
 </div>
+<h3 id="routing">Where the road is chosen: routing at validation</h3>
+{note(f'''<p>Why do some invoices never wait for the goods receipt? <i>Initial validation</i> records a routing code (<code>SAP_Next_Processing_Type</code>) that fixes the next queue. Across all {num(rcodes.validations.sum())} validations:</p>
+<ul class="tight">
+  <li><code>WAITGR</code>, {rc('WAITGR')}: goods-receipt check. {pct(rcodes.loc['WAITGR', 'top_next_share'], 1)} are followed by <i>{rcodes.loc['WAITGR', 'top_next_activity']}</i>, the road to automatic posting.</li>
+  <li><code>CTRL1</code>, {rc('CTRL1')}: manual control queue. No goods-receipt check. {pct(rcodes.loc['CTRL1', 'top_next_share'], 0)} are followed directly by <i>{rcodes.loc['CTRL1', 'top_next_activity']}</i>, the rest by <i>Transfer to MM</i>, deletion, re-sequencing or approval.</li>
+  <li><code>ZWMGRW</code>, {rc('ZWMGRW')}: goods receipt from Warehouse Management first, then the normal wait.</li>
+  <li><code>DELE</code>, {rc('DELE')}: deletion.</li>
+</ul>
+<p>The share sent to the manual queue depends heavily on the PO type. Counted per invoice (first validation of each <code>SAP_PO_No</code>):</p>
+{table(["Code", "CTRL1 manual queue", "WAITGR goods-receipt check", "ZWMGRW via WM", "DELE"], routing_rows)}
+<p><b>"Posted manually" isn't always manual.</b> On the direct path (<i>Data management → Initial validation → Posted manually</i>, {num(da.cases)} cases), the nightly batch job {BOT_USERS[1]} makes {pct(da.bot_share, 0)} of the postings: {pct(dn.bot_share, 0)} in NB2 and almost none in other types. Bot postings take a median of {da.median_days_bot:.1f} days from validation (they wait for the next night's run). Human postings take {da.median_days_human:.1f} days, with a 90th percentile of {da.p90_days_human:.0f} days. In ZNB6 the human queue takes a median of {direct.loc['ZNB6', 'median_days_human']:.0f} days. This is consistent with the Step 2 classification of {BOT_USERS[1]} as a system user, so the manual-work figures elsewhere in the report already exclude these postings.</p>
+<p><b>What the data can't say:</b> which validation rule sends an invoice to <code>CTRL1</code>. That needs the SAP configuration or the validation messages, which aren't in the log.</p>''')}
+
 <h3>Process maps and variants per PO type</h3>
 <p class="prose">Open a PO type to see its frequency map, its performance map and its five most common variants. The maps for large types hide activities and transitions that occur in fewer than 0.5% of cases (2% for types with 300–5,000 cases), so that they stay readable.</p>
 {''.join(per_type)}
@@ -533,20 +628,24 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
 </div>
 
 <h2 id="step4"><span class="step">Step 4</span>Where to focus</h2>
-<div class="prose"><p>Need for improvement depends on how bad a process is (control, Cpu) and how much it matters (volume, manual effort, money). The discount column estimates the 2% discount lost on invoices that took more than 10 days.</p>
-<p>For example, invoice {EX_REWORK} from Step 2 was worth {num(xr.invoice_value_nok)} NOK and took {num(xr.throughput_days, 1)} days, so it counts {num(xr.invoice_value_nok * 0.02)} NOK towards ZNB1's total. Treat this column as an upper bound, because not every supplier offers a discount. It is calculated per case, because the data only gives one invoice value per case, not one per invoice. The ranking between PO types is what matters, not the exact amount.</p>
-<p>How to read the columns: <b>share of manual work</b> shows where accountants spend their time (cost). <b>Cases &gt; 10 d</b> and <b>discount at risk</b> show where deadlines are missed (money). <b>Cpu</b> and <b>KPIs in control</b> show how reliable the process is.</p></div>
-{table(["Code", "Share of cases", "Share of manual work", "Invoices > 10 d", "Share of all late invoices", "Discount at risk (NOK)", "Cpu 10 d (per invoice)", "KPIs in control"], prio_rows)}
+<div class="prose"><p>Need for improvement depends on how bad a process is (control, Cpu) and how much it matters (volume, manual effort, money). The discount column is the 2% cash discount missed on invoices that were posted after more than 10 days.</p>
+<p>Each invoice (<code>SAP_PO_No</code>) can be followed from its first event to its posting, so lateness is counted per invoice. Its value is not in the data: <code>Case_Invoice_Value_NOK</code> is the same on every row of a PO and grows with the number of invoices, so it is the total for the PO. The value is therefore split evenly over the PO's posted invoices. For example, {EX_REWORK} from Step 2 was worth {num(xr.invoice_value_nok)} NOK; {ex_late} of its {len(EX_INV)} invoices were posted after more than 10 days, so it misses {num(xr.invoice_value_nok * 0.02 * ex_late / len(EX_INV))} NOK. Invoices that were never posted are left out.</p>
+<p>Counting per PO instead, with the whole PO value lost once its last invoice is posted after 10 days, would give {mnok(disc_po_total)} NOK. That overstates the loss, because one late invoice, or invoices that simply arrive weeks apart, would put the whole PO value at loss. The exact amounts need the invoice value per document from SAP.</p>
+<p>How to read the columns: <b>share of manual work</b> shows where accountants spend their time (cost). <b>Invoices &gt; 10 d</b> and <b>missed discount</b> show where deadlines are missed (money). <b>Cpu</b> and <b>KPIs in control</b> show how reliable the process is.</p></div>
+{table(["Code", "Share of cases", "Share of manual work", "Invoices > 10 d", "Share of all late invoices", "Missed 2% discount (NOK)", "Cpu 10 d (per invoice)", "KPIs in control"], prio_rows)}
 <h3>Recommended scope options</h3>
 <ol class="rec">
-  <li><b>Manual and normal orders ({code('ZNB1')} + {code('ZJD1')}), time to posting.</b> This is the strongest case. Together they have {num(cap_inv.loc[['ZNB1', 'ZJD1'], 'cases_breach_soft10'].sum())} invoices that took longer than 10 days, Cpu far below 1 on every measure, and about {mnok(disc_focus)} NOK of discount at risk, because these orders carry the large invoices (average about 1.2M NOK per case). The bottleneck is manual posting: about half of their invoices are posted by hand after a median of {mj['median']:.0f}–{m1['median']:.0f} days. Questions for the project: why don't these invoices post automatically, and where do they wait before a person picks them up?</li>
-  <li><b>Return to vendor ({code('NB2')}), manual activities.</b> A return is a "reverse PO": it follows goods bought under another PO type that are sent back, for example because they arrived damaged, and the supplier may issue a credit note. It accounts for {pct(pr.loc['NB2', 'manual_share'], 0)} of all manual events while meeting both SLAs reasonably well. It also has the most real rework among the large types ({pct(pr.loc['NB2', 'rework_rate'], 0)} of cases). The causes to explain are the direct "Posted manually" path and the GR loop through WM and "Transfer to MM". Automating these is a cost case, not a deadline case.</li>
+  <li><b>Manual and normal orders ({code('ZNB1')} + {code('ZJD1')}), time to posting.</b> This is the strongest case. Together they have {num(cap_inv.loc[['ZNB1', 'ZJD1'], 'cases_breach_soft10'].sum())} invoices that took longer than 10 days, Cpu far below 1 on every measure, and about {mnok(disc_focus)} NOK of missed discount, because these orders carry the large invoices (average about 1.2M NOK per case). The bottleneck is manual posting: about half of their invoices are posted by hand after a median of {mj['median']:.0f}–{m1['median']:.0f} days. Questions for the project: why don't these invoices post automatically, and where do they wait before a person picks them up?
+    {note(f"<p>For many of them, the decision is made at validation: {ctrl1('ZNB1')} of ZNB1 and {ctrl1('ZJD1')} of ZJD1 invoices are routed straight to the manual queue (<code>CTRL1</code>). The sharper project question is <b>which validation rule triggers <code>CTRL1</code></b> for these PO types. Answering it needs the SAP validation configuration or messages, which aren't in the event log.</p>", "Annotation · partly answered")}</li>
+  <li><b>Return to vendor ({code('NB2')}), manual activities.</b> A return is a "reverse PO": it follows goods bought under another PO type that are sent back, for example because they arrived damaged, and the supplier may issue a credit note. It accounts for {pct(pr.loc['NB2', 'manual_share'], 0)} of all manual events while meeting both SLAs reasonably well. It also has the most real rework among the large types ({pct(pr.loc['NB2', 'rework_rate'], 0)} of cases). The causes to explain are the direct "Posted manually" path and the GR loop through WM and "Transfer to MM". Automating these is a cost case, not a deadline case.
+    {note(f"<p>The direct \"Posted manually\" path is already {pct(dn.bot_share, 0)} automated by the nightly batch job {BOT_USERS[1]}. The remaining manual cost sits in the {pct(1 - dn.bot_share, 0)} posted by people and in the WM loop ({pct(routing.loc['NB2', 'ZWMGRW'], 0)} of NB2 invoices start via <code>ZWMGRW</code>). Moving more of the direct path into the batch run would cut manual work without new tooling.</p>")}</li>
   <li><b>Automatic orders ({code('ZJD3')}), the same mechanism on a smaller scale.</b> {pct(cap_inv.loc['ZJD3', 'observed_breach_soft10'], 0)} of its invoices take longer than 10 days (Cpu {cap_inv.loc['ZJD3', 'Cpu_soft10']:.2f}), and half are posted manually although the PO type is meant to be automatic. It could be added to option 1 as a comparison group.</li>
 </ol>
 <p class="prose">ZNB4 was a candidate in an earlier version of this report, but per invoice it meets the 10-day SLA (see <a href="#sla">When does an invoice meet the SLA?</a>). ZNB6, ZNBF and ZRPM have the worst capability, but together they make up less than 0.5% of cases. They are better kept as side notes than chosen as the project scope.</p>
 
 <footer>
 <p>Built with Python {'(conda env <code>datasci</code>)'}: pandas, pm4py, matplotlib and scipy. The scripts run in order: <code>01_prepare.py</code> → <code>02_process_maps.py</code> → <code>03_control_capability.py</code> → <code>04_prioritise.py</code> → <code>05_report.py</code>. All tables come from the CSV files in <code>output/</code>.</p>
+<p>Amber annotations come from a follow-up analysis of <code>SAP_Next_Processing_Type</code> and posting users (<code>routing.csv</code>, <code>routing_codes.csv</code>, <code>direct_posting.csv</code>).</p>
 </footer>
 </div>
 """
