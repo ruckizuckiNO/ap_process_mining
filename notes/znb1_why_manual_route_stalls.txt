@@ -1,0 +1,120 @@
+WHY THE MANUAL ROUTE FOR ZNB1 STALLS
+INN354 - Accounts-payable process mining
+Data: cases started 1 July - 30 November 2025 (log runs to 3 March 2026)
+Scope: ZNB1 (manual order) invoices routed to the manual control queue CTRL1
+=============================================================================
+
+SUMMARY
+-------
+The manual route stalls because invoices sit and wait rather than being
+worked on. Handling one takes minutes, but it waits days in the CTRL1 queue
+first. The ZNB1 data shows six reasons for the waiting.
+
+
+1. ONE PERSON HANDLES MOST OF THE QUEUE, AND THE LARGEST INVOICES GO TO THEM
+-----------------------------------------------------------------------------
+- User1341 handles 31% of ZNB1's CTRL1 work and specialises almost entirely
+  in ZNB1 (2,640 of roughly 3,100 items).
+- Invoices waiting for User1341 sit about 8 days, whatever their value.
+  Invoices handled by colleagues wait 1-2 days.
+- 54% of the most valuable invoices (top quarter by value) go to User1341,
+  against about 20% of the rest.
+- As a result, the most valuable invoices wait longest: a median of 7.1 days
+  in the top quarter vs. about 3 days in the other three quarters. That is
+  the opposite of what the 2% discount calls for.
+- A likely reason is posting authority: perhaps only User1341, or a few
+  people, may post large amounts. Needs checking with the business.
+
+  Invoice value    Share handled   Median wait,         Median wait,
+  (quarter)        by User1341     User1341 (days)      others (days)
+  ------------     -------------   ------------------   -------------
+  Q1 (lowest)      23%             8.3                  1.9
+  Q2               17%             8.3                  1.8
+  Q3               25%             8.2                  1.1
+  Q4 (highest)     54%             7.5                  1.2
+
+
+2. THE QUEUE IS WORKED IN BATCHES, ON WEEKDAYS ONLY
+---------------------------------------------------
+- User1341 posts 28 ZNB1 invoices on an average active day, but up to 90 in
+  a single day. Invoices pile up and are cleared in bulk.
+- Manual postings peak on Monday (1,910), drop towards Friday (1,022), and
+  almost stop at weekends (181).
+- The 10-day limit counts calendar days, so a weekend uses up 2 of the 10
+  days with no progress.
+
+
+3. THE CLERK OFTEN CAN'T RESOLVE THE CASE ALONE AND HAS TO WAIT FOR OTHERS
+--------------------------------------------------------------------------
+  What happens after the queue                        Mean wait (days)
+  -------------------------------------------------   ----------------
+  Transfer to MM (purchasing must correct the PO)      9.5
+  Sent for approval                                    7.9
+  Sent back to data management                         6.9
+  Posted manually                                      5.7
+
+- In ZNB1 the "others" are often a single purchaser who placed a one-off
+  order. That person has no deadline of their own for answering accounts
+  payable, and may be busy, travelling or on holiday.
+
+
+4. CAPACITY CHANGES OVER TIME
+-----------------------------
+- In July-September, ZNB1 invoices waited 7-13 days each week. From October
+  the wait fell to 2-4 days, even though arrivals rose, from 80-300 to
+  450-580 invoices a week.
+- Backlog size and wait are not correlated for ZNB1 (correlation -0.12).
+  So the stalls aren't mainly caused by too many invoices; they're caused by
+  who is available and when.
+- The summer peak fits the Norwegian summer holiday period. The improvement
+  in the autumn suggests more people or new priorities.
+
+
+5. THERE'S NO PRIORITISATION BY DEADLINE OR VALUE
+-------------------------------------------------
+- Nothing in the data suggests the queue is sorted by discount due date or
+  amount. If it were, the most valuable invoices wouldn't wait the longest
+  (point 1).
+- The 10-day clock is probably not visible to whoever works the queue.
+
+
+6. THE QUEUE IS SHARED WITH OTHER WORK
+--------------------------------------
+- The same people also handle ZJD1, ZJD3 and returns. For example, User1482
+  handles 1,401 ZJD1 items vs. 959 ZNB1 items.
+- When another type has a busy period, ZNB1 waits.
+
+
+UNDERLYING CAUSE
+----------------
+ZNB1 invoices fail automatic matching more often, because they are one-off
+orders with prices and quantities a purchaser entered by hand. Every failure
+becomes a task in a queue that depends on a few people, works in batches,
+and doesn't see deadlines.
+
+
+HOW TO UNBLOCK IT
+-----------------
+  Cause          Measure
+  ------------   ------------------------------------------------------------
+  1              Spread posting authority, so high-value invoices don't
+                 depend on User1341
+  2              Clear the queue daily rather than in batches, and keep
+                 cover on Fridays
+  3              Set a response deadline for purchasers and approvers, with
+                 automatic escalation
+  4              Plan holiday cover for July and August
+  5              Sort the queue by discount due date and value
+  (root cause)   Send fewer invoices to the queue: tighter purchase orders
+                 and correct PO references
+
+
+CAVEAT
+------
+The patterns are from the data, but the reasons behind them (authority
+limits, holidays, batch working) are interpretations that should be
+confirmed with the AP team.
+
+Definitions: "wait" = time from an invoice entering CTRL1 to the next event
+on that invoice. Value quarters are based on Case_Invoice_Value_NOK (one
+value per PO).
