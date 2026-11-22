@@ -1,0 +1,4 @@
+variant,label,all_invoices_in_variant,invoices ≤10 days,invoices 10–30 days,invoices >30 days,invoice_value_nok ≤10 days,invoice_value_nok 10–30 days,invoice_value_nok >30 days,missed_discount_nok
+Data management > Initial validation > Posted manually,Data mgmt > Validation > Manual post,5232.0,3670,1045,15,2019093489.2310333,523301981.2605175,4894956.00297619,10563938.745269874
+Data management > Initial validation > Wait for goods receipt > MM Posted Automatically,Data mgmt > Validation > Wait GR > Auto post,4630.0,4110,0,0,1267671545.1774564,0.0,0.0,0.0
+Data management > Initial validation > Wait for goods receipt > Posted manually,Data mgmt > Validation > Wait GR > Manual post,2071.0,1430,86,111,580801250.5639355,44882293.486107275,41093908.3074308,1719524.0358707614

@@ -1,0 +1,11 @@
+,manual_postings,suppliers,dedicated_suppliers,postings_at_own_dedicated_pct,median_queue_age_days,late_pct,direct_to_queue_pct,median_po_value_nok,dedicated_list
+User1341,2638,17,11.0,95.1,8.2,29.6,99.1,355602.7,"Supplier361(1055), Supplier381(400), Supplier378(345), Supplier362(265), Supplier380(233), Supplier377(135), Supplier328(120), Supplier348(53), Supplier282(50), Supplier7(44), Supplier379(23)"
+User1482,826,39,8.0,52.2,3.7,20.3,63.4,818745.8,"Supplier59(150), Supplier77(143), Supplier296(31), Supplier60(31), Supplier51(29), Supplier512(29), Supplier302(21), Supplier289(20)"
+User400,805,82,5.0,30.9,0.9,11.2,60.4,669389.8,"Supplier92(90), Supplier115(86), Supplier318(39), Supplier10(29), Supplier460(28)"
+User1177,725,33,5.0,54.2,0.2,30.5,40.6,863762.9,"Supplier281(215), Supplier374(99), Supplier395(48), Supplier390(44), Supplier357(28)"
+User712,682,40,5.0,27.4,4.0,20.2,58.4,527344.2,"Supplier275(81), Supplier33(44), Supplier246(31), Supplier31(29), Supplier188(24)"
+User1564,575,43,10.0,74.6,1.1,9.9,82.8,385474.1,"Supplier262(89), Supplier66(74), Supplier45(53), Supplier120(48), Supplier23(42), Supplier104(36), Supplier32(29), Supplier35(26), Supplier397(23), Supplier264(22)"
+User394,533,19,4.0,78.4,1.0,5.6,28.9,378026.2,"Supplier235(311), Supplier295(103), Supplier218(54), Supplier324(21)"
+User489,443,45,2.0,45.6,1.1,9.5,69.3,610957.1,"Supplier356(139), Supplier276(90)"
+User1331,212,50,,,1.8,3.3,50.5,971325.4,
+User1082,133,9,2.0,66.9,6.0,32.3,78.2,1494454.1,"Supplier284(46), Supplier383(43)"

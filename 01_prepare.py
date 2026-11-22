@@ -6,7 +6,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from common import RAW_CSV, OUT, FIG, EVENTS_PKL, CASES_CSV, INVOICES_CSV, BOT_USERS, POSTING_ACTIVITIES
+from common import (RAW_CSV, OUT, FIG, EVENTS_PKL, CASES_CSV, INVOICES_CSV, BOT_USERS, POSTING_ACTIVITIES,
+                    GR_ACTIVITY, GR_OBJECT_CODE, GR_CLOCK_PO_TYPES)
 
 df = pd.read_csv(RAW_CSV, low_memory=False)
 df["ts"] = pd.to_datetime(df.Timestamp_DDMMYYYY, format="%d/%m/%Y %H:%M:%S")
@@ -65,6 +66,18 @@ plt.close(fig)
 
 # --- Case-level KPIs -------------------------------------------------------
 df["is_bot"] = df.User_ID.isin(BOT_USERS)
+
+# SLA clock start per invoice cycle: first event, or for GR_CLOCK_PO_TYPES the goods receipt (see common.py)
+cyc = df.groupby(["PO_ID", "SAP_PO_No"])
+clock = pd.DataFrame({
+    "po_type": cyc.SAP_PO_Type_Code.first(),
+    "start": cyc.ts.min(),
+    "goods_receipt": df[(df.Activity_ID == GR_ACTIVITY) & (df.SAP_Object_Code == GR_OBJECT_CODE)]
+    .groupby(["PO_ID", "SAP_PO_No"]).ts.min(),
+})
+use_gr = clock.po_type.isin(GR_CLOCK_PO_TYPES) & clock.goods_receipt.notna()
+clock["clock_start"] = clock.goods_receipt.where(use_gr, clock.start)
+
 g = df.groupby("PO_ID")
 cases = pd.DataFrame({
     "po_type": g.SAP_PO_Type_Code.first(),
@@ -83,7 +96,9 @@ first_post = df[df.Activity_ID.isin(POSTING_ACTIVITIES)].groupby("PO_ID").ts.min
 cases["first_post"] = first_post
 cases["posted"] = cases.first_post.notna()
 cases["n_postings"] = df[df.Activity_ID.isin(POSTING_ACTIVITIES)].groupby("PO_ID").size().reindex(cases.index, fill_value=0)
-cases["time_to_post_days"] = (cases.first_post - cases.start).dt.total_seconds() / 86400
+# Case clock starts at the earliest clock start of its invoice cycles (= first event unless a GR clock applies)
+cases["clock_start"] = clock.groupby(level="PO_ID").clock_start.min()
+cases["time_to_post_days"] = (cases.first_post - cases.clock_start).dt.total_seconds() / 86400
 cases["manual_count"] = cases.trace_length - cases.bot_events
 cases["automation_rate"] = cases.bot_events / cases.trace_length
 cases["completed"] = cases.last_activity.isin(
@@ -95,17 +110,20 @@ cases.index.name = "PO_ID"
 cases.to_csv(CASES_CSV)
 
 # Invoice cycles: a PO_ID can hold several SAP_PO_No cycles (Item_No restarts at 1 for each), most
-# likely separate invoices against the same PO. Each cycle gets its own SLA clock: first event -> first posting.
+# likely separate invoices against the same PO. Each cycle gets its own SLA clock: clock start -> first posting,
+# where the clock starts at the first event, or at goods receipt for GR_CLOCK_PO_TYPES (see common.py).
 df["is_post"] = df.Activity_ID.isin(POSTING_ACTIVITIES)
 gi = df.groupby(["PO_ID", "SAP_PO_No"])
 inv = pd.DataFrame({
     "po_type": gi.SAP_PO_Type_Code.first(),
     "start": gi.ts.min(),
+    "goods_receipt": clock.goods_receipt,
+    "clock_start": clock.clock_start,
     "first_post": df[df.is_post].groupby(["PO_ID", "SAP_PO_No"]).ts.min(),
     "events": gi.size(),
 })
 inv["posted"] = inv.first_post.notna()
-inv["time_to_post_days"] = (inv.first_post - inv.start).dt.total_seconds() / 86400
+inv["time_to_post_days"] = (inv.first_post - inv.clock_start).dt.total_seconds() / 86400
 inv["log_time_to_post_days"] = np.log(inv.time_to_post_days + 1)
 inv["start_week"] = inv.start.dt.to_period("W-SUN").dt.start_time
 inv.to_csv(INVOICES_CSV)

@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoice Assumptions</title>
+<style>
+  :root {
+    --bg: #f7f6f2; --card: #ffffff; --ink: #14213d; --body: #3d4656; --muted: #5f6672;
+    --line: #dcd8ce; --accent: #b4501a; --accent-bg: #f6dccb; --flow: #1f5fad; --flow-bg: #d6e4f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141820; --card: #1d2230; --ink: #eef0f4; --body: #c9cfdb; --muted: #9aa3b2;
+      --line: #333a4a; --accent: #f0a877; --accent-bg: #3a2618; --flow: #8cb8f0; --flow-bg: #1c2b42;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141820; --card: #1d2230; --ink: #eef0f4; --body: #c9cfdb; --muted: #9aa3b2;
+    --line: #333a4a; --accent: #f0a877; --accent-bg: #3a2618; --flow: #8cb8f0; --flow-bg: #1c2b42;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--body);
+         font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif; }
+  main { max-width: 920px; margin: 0 auto; padding: 48px 16px 64px; }
+  header p.eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .12em; color: var(--accent); margin: 0 0 8px; }
+  h1 { color: var(--ink); font-size: 34px; line-height: 1.15; margin: 0 0 12px; }
+  header p.lead { font-size: 18px; margin: 0 0 8px; }
+  header p.meta { font-size: 14px; color: var(--muted); margin: 0; }
+  nav { margin: 28px 0 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+  nav a { font-size: 14px; color: var(--ink); text-decoration: none; border: 1px solid var(--line);
+          border-radius: 999px; padding: 4px 12px; background: var(--card); }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px 28px; margin-top: 20px; }
+  h2 { color: var(--ink); font-size: 21px; margin: 0 0 12px; display: flex; gap: 12px; align-items: baseline; }
+  h2 .n { font-size: 14px; color: var(--accent); font-weight: 700; min-width: 20px; }
+  ul { margin: 0; padding-left: 20px; }
+  li { margin: 6px 0; }
+  b { color: var(--ink); }
+  code { font: 14px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--flow-bg); color: var(--ink);
+         padding: 1px 6px; border-radius: 5px; }
+  .why { margin-top: 12px; font-size: 14px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 12px; }
+  .flag { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--accent);
+          background: var(--accent-bg); border-radius: 999px; padding: 1px 10px; margin-left: auto; white-space: nowrap; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 4px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--ink); font-weight: 600; }
+  td.num, th.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  tr.head td { font-weight: 600; color: var(--ink); background: var(--flow-bg); }
+  footer { margin-top: 28px; font-size: 13px; color: var(--muted); }
+  @media (max-width: 560px) { section { padding: 18px 16px; } h1 { font-size: 27px; } h2 { flex-wrap: wrap; } .flag { margin-left: 0; } }
+</style>
+</head>
+<body>
+<main>
+<header>
+  <p class="eyebrow">INN354 · AP PROCESS MINING</p>
+  <h1>Invoice assumptions</h1>
+  <p class="lead">The assumptions behind every invoice figure in the analysis: lead times, on-time shares, missed discount and exposure.</p>
+  <p class="meta">Event log: POs started 1 July – 30 November 2025, followed until 3 March 2026 · Updated 20 November 2026 with the course’s data description</p>
+</header>
+
+<nav>
+  <a href="#unit">1 · Invoice</a><a href="#value">2 · Value</a><a href="#start">3 · Clock start</a>
+  <a href="#stop">4 · Clock stop</a><a href="#late">5 · On time</a><a href="#discount">6 · Discount</a>
+  <a href="#excluded">7 · Left out</a><a href="#effect">Effect</a><a href="#open">Open questions</a>
+</nav>
+
+<section id="unit">
+  <h2><span class="n">1</span>What an invoice is <span class="flag">Definition</span></h2>
+  <ul>
+    <li>An invoice is one <code>SAP_PO_No</code> within a purchase order (<code>PO_ID</code>).</li>
+    <li>A PO can hold several invoices (ZNB1: 2.9 on average, 53% of POs have more than one). Each runs through the process on its own and gets its own clock.</li>
+  </ul>
+  <p class="why">The log has no explicit invoice ID. The course’s data description calls <code>SAP_PO_No</code> a case-level “purchase order identifier”, but in the log it varies within a PO (215,191 values for 186,588 POs; 15,425 POs have more than one), and <code>Item_No</code> restarts at 1 for each value. Every <code>SAP_PO_No</code> starts with its own capture (<i>Data management</i>), runs its own validation and is posted at most once; 93% of ZNB1 POs with several of them have at least two separate postings. About 6% of follow-up documents are resubmissions after a rejection or renumbering; the rejected versions are never posted, so each payable invoice counts once. Fits bulk orders delivered and invoiced in parts. The course staff confirmed (20 Nov 2026) that this reading holds and that we may define it this way.</p>
+</section>
+
+<section id="value">
+  <h2><span class="n">2</span>Invoice value <span class="flag">Estimate</span></h2>
+  <ul>
+    <li><code>Case_Invoice_Value_NOK</code> is, per the data description, the <b>amount on the invoice</b> in NOK at the exchange rate when it was received. It is one value per PO, identical on every row and every <code>SAP_PO_No</code> of the PO, so there is <b>no amount per invoice document</b>. It grows with the number of invoices (ZNB1: 1.6 invoices per PO in the lowest value quarter, 5.4 in the highest), so it is read as the <b>total of the PO’s invoices</b>.</li>
+    <li><b>The PO value is split evenly over the PO’s posted invoices.</b> The value of a single invoice, and the discount per invoice, are therefore estimates. Totals per PO and per supplier are reliable.</li>
+    <li><code>Case_Clearing_value_NOK</code> is the <b>amount paid to the supplier</b> in NOK at the exchange rate when the invoice was cleared, also one value per PO. The two differ mainly by <b>exchange-rate movement</b> between receipt and clearing (only 24% of POs match exactly, probably the NOK invoices); in total by 0.1–0.3%, so the choice between them barely matters.</li>
+    <li>A filter such as “clearing within ±0.5% of the invoice value” therefore keeps mostly NOK invoices and stable exchange rates. It is not a data-quality filter and should be described that way if used.</li>
+  </ul>
+</section>
+
+<section id="start">
+  <h2><span class="n">3</span>When the clock starts <span class="flag">Proxy</span></h2>
+  <ul>
+    <li><b>ZNB1:</b> at goods receipt, meaning the first <i>Wait for goods receipt</i> step with status <code>WAIT_GR</code>.</li>
+    <li><b>ZNB1 invoices without such a step</b> (the manual-queue route, or a wait that ended with <code>END_WAIT_GR</code>): from the invoice’s first event, its arrival in AP.</li>
+    <li><b>All other PO types:</b> from the invoice’s first event.</li>
+  </ul>
+  <p class="why">The log has no goods-receipt date and no invoice date. The end of the bot’s wait step is read as the moment the goods receipt was booked (after long waits it fires on weekdays, mostly 08:00–12:00). It shows when the receipt was booked, not when goods physically arrived. <code>END_WAIT_GR</code> looks like a wait released without a receipt, so it does not start the clock. Arrival in AP stands in for the invoice date; invoices are usually dated a few days earlier.</p>
+</section>
+
+<section id="stop">
+  <h2><span class="n">4</span>When the clock stops <span class="flag">Proxy</span></h2>
+  <ul>
+    <li><b>At the first posting</b>: <i>MM Posted Automatically</i>, <i>Posted manually</i> or <i>MM Autopost after manual process</i>. This is when the invoice became payable.</li>
+  </ul>
+  <p class="why">The log ends at posting and has no payment dates, so posting stands in for “could have been paid”. “Cleared” exists in the log only as an amount (<code>Case_Clearing_value_NOK</code>), never as a date.</p>
+  <ul>
+    <li><b>Timestamps mark completions.</b> Each event has one timestamp; the data description defines <code>SAP_Processing_Type</code> as the stage “just completed” and <code>SAP_Object_Code</code> as the “resulting status”. There are no start times, so the time between two events combines waiting and working time. Bot steps follow within seconds and manual postings about a minute apart, so gaps of days are read as waiting.</li>
+    <li>Each invoice document has its own clock: its own start (goods receipt or arrival) and its own first posting.</li>
+  </ul>
+</section>
+
+<section id="late">
+  <h2><span class="n">5</span>On time and late</h2>
+  <ul>
+    <li><b>10 days</b> is the soft limit and the discount window, <b>30 days</b> the hard limit. Both count calendar days, so weekends count.</li>
+    <li>An invoice is <b>late</b> when it is posted more than 10 days after its clock start.</li>
+  </ul>
+</section>
+
+<section id="discount">
+  <h2><span class="n">6</span>The 2% discount and exposure <span class="flag">Assumption</span></h2>
+  <ul>
+    <li><b>2/10 terms are assumed for every invoice</b>: 2% off when paid within 10 days.</li>
+    <li><b>Exposure</b> is the value of late invoices. <b>Discount at stake</b> is 2% of that.</li>
+    <li>Both are the most that faster posting could earn, not money the data shows as lost.</li>
+  </ul>
+  <p class="why">The log has no payment terms, so it is unknown which suppliers offer 2/10. There is no sign in the data that discounts were taken: the amount paid (<code>Case_Clearing_value_NOK</code>) does not cluster 2% below the invoice amount. Exchange-rate noise and SAP booking the discount on a separate line mean this is not proof either way.</p>
+</section>
+
+<section id="excluded">
+  <h2><span class="n">7</span>What is left out</h2>
+  <ul>
+    <li>Invoices <b>never posted</b> carry no value and no discount, as they were not paid. ZNB1: 902 of 13,776 (6.5%): 457 deleted, 376 sent to deletion at validation, 15 moved to a new number, 54 still open on 3 March 2026.</li>
+    <li>Robustness check: leaving out the 483 ZNB1 POs that contain such an invoice altogether keeps the on-time share at 86.9% and lowers the missed discount from 15.9M to 13.8M NOK (fewer POs, not more lateness). The supplier workbook <code>notes/znb1_always_manual_suppliers.xlsx</code> uses this stricter rule.</li>
+    <li>Cases without a PO type are dropped.</li>
+    <li><b>Observation window:</b> only POs started 1 July – 30 November 2025 are in the log. From December on it only holds later invoices on older POs, so those months are thinner and not typical.</li>
+  </ul>
+</section>
+
+<section id="effect">
+  <h2>Effect on the headline (ZNB1)</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Clock and value rule</th><th class="num">Within 10 days</th><th class="num">Late invoices</th><th class="num">Missed discount</th><th>Role</th></tr>
+    <tr class="head"><td>From goods receipt (<code>WAIT_GR</code>), per invoice</td><td class="num">86.9%</td><td class="num">1,687</td><td class="num">15.9M NOK</td><td>Headline</td></tr>
+    <tr><td>From arrival in AP, per invoice</td><td class="num">76.1%</td><td class="num">3,071</td><td class="num">27.3M NOK</td><td>Upper bound</td></tr>
+    <tr><td>Whole PO value once the PO’s last posting is late</td><td class="num">–</td><td class="num">–</td><td class="num">79.1M NOK</td><td>Extreme upper bound</td></tr>
+  </table>
+  </div>
+  <p class="why">Shares are of posted ZNB1 invoices. Suggested wording for the report: “Invoice values are not in the log; each PO’s value is split evenly over its posted invoices. For ZNB1 the payment term is assumed to start at goods receipt, read from the system’s wait-for-goods-receipt step. Discount figures assume 2/10 terms and show the potential, not a proven loss.”</p>
+</section>
+
+<section id="open">
+  <h2>Open questions for the course staff</h2>
+  <ul>
+    <li><s>What does <code>SAP_PO_No</code> stand for?</s> Answered 20 Nov 2026: reading each <code>SAP_PO_No</code> as an invoice document holds; we define it so.</li>
+    <li>Does <code>Case_Invoice_Value_NOK</code> cover all invoice documents of a PO (their sum)? It is identical on every <code>SAP_PO_No</code> of a PO and grows with the number of invoices, so we read it as the PO total.</li>
+    <li>Are payment terms (e.g. 2/10) and goods-receipt or payment dates available?</li>
+  </ul>
+</section>
+
+<footer>Field descriptions and checks: <code>docs/domain.md</code> (section “Variables”). Implemented in <code>common.py</code> (<code>GR_CLOCK_PO_TYPES</code>, <code>GR_OBJECT_CODE</code>, SLA limits) and <code>01_prepare.py</code> / <code>04_prioritise.py</code>; mirrored in the notebook.</footer>
+</main>
+</body>
+</html>

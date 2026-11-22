@@ -35,7 +35,7 @@ cases["late_invoices"] = inv.groupby("PO_ID").late.sum().reindex(cases.index, fi
 cases["missed_discount_nok"] = inv.groupby("PO_ID").missed_discount_nok.sum().reindex(cases.index, fill_value=0)
 # Upper bound for comparison: the whole PO value once the PO's last posting comes after more than 10 days
 last_post = ev[ev.Activity_ID.isin(POSTING_ACTIVITIES)].groupby("PO_ID").ts.max()
-po_lead_days = (last_post.reindex(cases.index) - cases.start).dt.total_seconds() / 86400
+po_lead_days = (last_post.reindex(cases.index) - cases.clock_start).dt.total_seconds() / 86400
 cases["missed_discount_po_nok"] = cases.invoice_value_nok * 0.02 * (po_lead_days > SLA_SOFT_DAYS)
 
 g = cases.groupby("po_type")

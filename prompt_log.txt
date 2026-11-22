@@ -58,3 +58,182 @@ into main?
 
 [2026-11-06] 24
 everything should be in main
+
+[2026-11-19] 25
+Hey! back at the process mining!
+
+[2026-11-19] 26
+deep dive into znb1. we thought of some possible improvements and therefore I need to know which suppliers do not reach the 10 and 30 days.
+
+We want to proioritize the ones with high amount POs, but manual approvals and not achieved 10 / 30 dyas
+
+[2026-11-19] 27
+okay. let's look at the first one first. I think an overview of of the top five suppliers where the target of 10 days is not met and which users are handeling them
+
+[2026-11-19] 28
+can we add how many invoices theses useres take care of on a daily basis. plain average
+
+[2026-11-19] 29
+Basisc question: We assume that a PO has one invoice connected to it, but looking at the the dataset it seems that a PO can consist of more than just one invoice?!
+
+[2026-11-19] 30
+So we never know the real invoice value since SAP just has the po-value and not the invoice amount?
+
+[2026-11-19] 31
+Ok. That's somehow problematic. what is the difference in invoice value and clearing value? in percent and why are there differences in reality?
+
+[2026-11-19] 32
+are there signs of cash discount taken?
+
+[2026-11-19] 33
+how many different users handle the znb1 POs?
+
+[2026-11-19] 35
+we want to look at the znb1 which are handled unamiously manually.
+
+[2026-11-19] 36
+Okay, maybe we also should look at the PO-values! median po-value of theese 37 suppliers
+
+[2026-11-19] 37
+can you generate an overview?
+
+[2026-11-19] 38
+let's look more closely to user 1341. Which suppliers he has, what are the median po-values he handles and etc pp
+
+[2026-11-19] 39
+no activity after jan 12? but the dataset's obvservation window is not much longer
+
+[2026-11-19] 40
+Who took over for user1341? Or did it just start piling up?
+
+[2026-11-19] 41
+which suppliers are assigned to which users. are there any patterns?
+
+[2026-11-19] 42
+can i get a suitable output for this?
+
+[2026-11-19] 43
+okay. let's look specifically at user 1341 until january 12. 
+Pattern, median po. share below 10 days, share between 10 and 30 days and share above e30 days
+
+[2026-11-19] 44
+yes
+
+[2026-11-19] 45
+what suppliers are missing the 10 days and what is the total exposure?
+
+[2026-11-19] 46
+state the invoice assumptions again?
+
+[2026-11-19] 47
+in a sepearte .html assumption file
+
+[2026-11-19] 48
+can we also have a closer look at user1177 for znb1 like you did for 1341
+
+[2026-11-19] 49
+For user1341 i need an add. graph which shows the potential savings for the invoices missed over 10 days
+
+[2026-11-19] 50
+whats the working pattern of user1341
+
+[2026-11-19] 51
+for znb1 i need to have it confirmed that the manual qeue is handeld by when cases appear and not by po-value or ohter stuff. My assumtpion is first in first out
+
+[2026-11-19] 52
+for znb1 are there suppliers which always end up in the manual queue regardless of the po-amount?
+
+[2026-11-19] 54
+save the list in an excel file
+
+[2026-11-19] 55
+For the 100% manual znb1 suppliers i also want an overview of all the quantiles in 0.1 steps add it to the excel
+
+[2026-11-19] 56
+per supplier in 0.25 steps
+
+[2026-11-19] 57
+what would be an appropriate target value to triage between autmatic and manual handling based on po-value?
+
+[2026-11-19] 58
+for the 100 % manual ones, can i get a chart per week and month for the average throughput time on invoices with an underlying po-value abvoe 1.5 mnok
+
+[2026-11-19] 59
+Ranking of the users which handle the pos with the highest PO-values combined (touched by on user only)
+
+[2026-11-19] 60
+this is only znb1?
+
+[2026-11-19] 61
+no, i only need znb1. how many po's in absolute terms are touch by one user only and what is the cumulative po-/invoice-value
+
+[2026-11-19] 62
+table please
+
+[2026-11-19] 63
+For the one user only. what is the share of the po-value which is cleared <= 10 days, between 10 and <= 30 days and above 30 days?
+
+[2026-11-19] 64
+and the same analysis for the entire znb1 - doesn't matter how many users touched it. And only take into acount a difference between po-value and cleard amount which is withing 0.5% difference
+
+[2026-11-19] 67
+each invoice has its own end, mening it's each percentwise invoice amount as well, right? since there is only a po-amount but no invoice amount
+
+[2026-11-19] 68
+for znb1 how many invoices are never posted?
+
+[2026-11-19] 69
+what does this mean for our analysis. I mean we should exclude pos in znb1 where we have invoices which are never posted (i.e. 902)!
+
+[2026-11-19] 70
+can you adjust the the excel based on this new assumption
+znb1_always_manual_suppliers.xlsx
+
+[2026-11-20] 71
+can you draw the four most frequent process steps for znb1 in a .pptx format?
+
+
+[2026-11-22] if we look at znb1 only. what are quick wins and what could be more expensive changes we could make?
+
+[2026-11-22] okay! What is pareto chart?
+
+[2026-11-22] Create a nice pareto chart for znb1 and only the suppliers which are 100 % manual
+
+[2026-11-22] give me only the around 80%, so for the four bigest.
+
+[2026-11-22] Can you also create a histogram for each of these three suppliers? bins based on PO-value! (screenshot: Supplier378, Supplier361, Supplier381)
+
+[2026-11-22] can you remove the triage line for the moment
+
+[2026-11-22] run: notes/znb1_supplier_po_value_histograms.py
+
+[2026-11-22] Show me the potential if all the suppliers which are handled 100 % manually are treated automatically if the po amount is equal or below mnok 1.5. What are the potential savings looked at the 10 days deadline. Like take the ones which miss the deadline now and assume they will be handled within the deadline so the discount of 2% for these can be claimed!
+
+[2026-11-22] what is the remaining potential for the remaining manual ones if they also would have been posted within 10 days?
+
+[2026-11-22] So the remaining potential is 9.8 minus 1.07?
+
+[2026-11-22] how much in invoice value lie above 30 days?
+
+[2026-11-22] let's analyze user1341. there something stopped up at some point. He/she vanished and there was a build up right?
+
+[2026-11-22] let's look more at user 1341 until 12 jan.
+I need daily numbers. We only have end-numbers and we don't know how much time it takes to post invoices. but this can be estimated it we look at the time from on posting to the next an so on
+
+[2026-11-22] can we also get a chart which proves/disproves if it takes longer if the invoice amounts are high?
+
+[2026-11-22] write also an explanation of how to interpret the chart. directly in the chart below the graphs
+
+[2026-11-22] I want only the left chart and the explanation can sit on the right
+
+[2026-11-22] What would a variant analysis for znb1 be like?
+
+[2026-11-22] Yes!
+
+[2026-11-22] Can I get a .png with the variants which only include manual post
+
+[2026-11-22] Read znb1_variants_pareto.png - for this i want an overview for the first three which show amount of invoices per category and amount below 10 days between 10 and 30 days and these over 30
+
+[2026-11-22] What is the total PO-value for all znb1 (PO-level not invoice level)
+
+[2026-11-22] push and commit everything

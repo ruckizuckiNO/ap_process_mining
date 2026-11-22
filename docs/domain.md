@@ -64,3 +64,27 @@ Invoices are processed in Invoice Cockpit. MM = SAP Materials Management (PO-rel
 - *Restarted process*: workflow restarted after a correction, technical issue or rejection.
 - *Transfered to new Sequence number*: new workflow or sequence reference, typically during reprocessing or restructuring.
 - *Invoice document deleted*: removed from the workflow (entered wrongly, duplicate, cancelled or replaced).
+
+## Variables (data description from the course, received 2026-11-20)
+
+| Variable | Description (course) | Level | Checked against the log |
+|---|---|---|---|
+| `PO_ID` | Purchase order identifier (= case ID) | Case | 186,588 distinct, as described |
+| `PO_Type`, `SAP_PO_Type_Code` | PO type, name and SAP code | Case | 12 values incl. empty (41 untyped cases, dropped) |
+| `SAP_PO_No` | "Internal SAP purchase order identifier" | Case | **Not case level:** 215,191 distinct; 15,425 POs have more than one. Each value runs its own capture → validation → posting, so we treat it as one invoice document (see `docs/assumptions.html`) |
+| `Supplier_ID` | Supplier who submitted the invoice | Case | 476 distinct (description: 477) |
+| `Item_No` | "Sequential number of event in case" | Event | **Restarts at 1 for every `SAP_PO_No`**; its maximum equals the events of that `SAP_PO_No`, not of the case. Not chronological (order by timestamp, then `Event_ID`) |
+| `Activity_ID` | Activity / invoice status in the SAP add-on Invoice Cockpit | Event | 27 values |
+| `Timestamp_DDMMYYYY`, `Timestamp_MMDDYYYY` | Timestamp, two formats | Event | **One timestamp per event, marking the completion of a stage** (see `SAP_Processing_Type`); no start times |
+| `Event_ID` | Event identifier | Event | Used as tie-breaker after the timestamp |
+| `User_ID` | User who carried out the activity (human or system) | Event | 389; system users found by profiling: `BOT_USERS` |
+| `SAP_Processing_Type` | SAP code for the stage of processing **just completed** | Event | Confirms timestamps = completion |
+| `SAP_Object_Code` | SAP code for the **resulting status** of the invoice | Event | e.g. `WAIT_GR` / `END_WAIT_GR` after the goods-receipt wait |
+| `SAP_Next_Processing_Type` | SAP code for the next stage | Event | Routing at validation: `WAITGR`, `CTRL1`, `DELE`, … |
+| `Case_Start_Date`, `Case_End_Date` | First / last timestamp of the case | Case | |
+| `Case_Trace_Length` | Number of events in the case | Case | Equals all events of the `PO_ID` (all `SAP_PO_No` together) |
+| `Case_Throughput_Time_Days/Hours` | Throughput time of the case | Case | First to last event of the whole PO |
+| `Case_Invoice_Value_NOK` | **Amount on the invoice**, in NOK at the exchange rate when the invoice was received | Case | One value per PO, although a PO can hold several `SAP_PO_No`; split evenly over posted invoices |
+| `Case_Clearing_value_NOK` | **Amount paid to the supplier**, in NOK at the exchange rate when the invoice was cleared | Case | One value per PO; differs from the invoice value mainly by exchange-rate movement (only 24% of POs exactly equal). No clearing/payment **date** in the log |
+
+Course staff (20 Nov 2026): reading each `SAP_PO_No` as a separate invoice document holds, and we may define it so. `Case_Invoice_Value_NOK` and `Case_Clearing_value_NOK` are identical on every `SAP_PO_No` of a PO; we read them as the PO total and split the value evenly over its posted invoices.

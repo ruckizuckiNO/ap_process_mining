@@ -1,0 +1,16 @@
+,value
+first_active_day,2025-07-14
+last_active_day,2026-01-12
+active_days,96
+postings,3088
+postings_per_active_day_mean,32.166666666666664
+postings_per_active_day_max,112
+median_minutes_between_postings,1.1166666666666667
+share_posted_13_to_19h_pct,74.51424870466322
+queue_age_median_days,8.193194444444444
+queue_age_under_5d_pct,5.990932642487047
+others_queue_age_median_days,1.8809837962962963
+others_queue_age_under_5d_pct,79.70092185208463
+znb1_manual_postings_share_pct,34.583114840062926
+znb1_late_share_pct,46.23592175459395
+znb1_missed_discount_share_pct,54.93298380421313
