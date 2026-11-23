@@ -1,239 +1,467 @@
-Prompt log – INN354 accounts-payable process mining
-Record of prompts given to Claude Code (verbatim), newest at the bottom.
-====================================================================
+Prompt log – INN354 accounts-payable process mining (verbatim, newest at the bottom)
+Report artifact 'Invoice Flow Screening': https://claude.ai/artifact/3dq8sRATvEHtXxL25GhdrJ
+Repo: https://github.com/ruckizuckiNO/ap_process_mining
 
-[2026-11-06] 4
-What i need are the top ten suppliers with the highest median po values and there respective throughput times
+All prompts written in the Claude Code sessions that built and changed the analysis, the report and the notebook,
+in chronological order and verbatim (typos kept). Unrelated prompts in the same sessions (installing apps, grammar, etc.) are left out.
+Sessions 1–4 carry UTC times from the Claude Code transcripts; sessions 5–7 were run on another laptop and were logged with dates only.
+[Image #n] = a screenshot that was attached to the prompt; images are not included in this file.
 
-[2026-11-06] 5
-I need you also to keep a record (ideally in a .txt-file) of my prompts to you
+====================================================================================================
+Session 1 – 17 Oct 2026: analysis, report (artifact) and notebook
+====================================================================================================
 
-[2026-11-06] 6
-look only at ZNB1 and ZJD1
+[1] 2026-10-17 07:43 UTC
+[Image #1] [Image #2] [Image #3] [Image #4]
 
-[2026-11-06] 7
-and sort it by amount of POs in descending order
+[2] 2026-10-17 07:44 UTC
+I will upload the the csv as well shortly
 
-[2026-11-06] 8
-same list with the highest average PO value?
+[3] 2026-10-17 07:45 UTC
+You just do your magic! Give me a report in addtion to all the coding you do. and use the conda env test if you install new packages
 
-[2026-11-06] 10
-can you also push and commit
+[4] 2026-10-17 09:18 UTC
+i want a light theme in the report and also more explanations and examples for the reader
 
-[2026-11-06] 12
-just focus on znb1: Can you give me the the suppliers by total PO-amount? an overview
+[5] 2026-10-17 09:23 UTC
+good! how did you distinguish between bos(system) and human ?
 
-[2026-11-06] 13
-and for the same i want the last step (most frequent: modus) before it went to ctrl1
+[6] 2026-10-17 09:25 UTC
+include this in the report somehow
 
-[2026-11-06] 14
-how many stop up which are set up for goods receipt?
+[7] 2026-10-17 09:29 UTC
+how do how that the SLA was met or not. Like as a general question?
 
-[2026-11-06] 15
-which one of znb1 (suppliers) have large po-values and are fast?
+[8] 2026-10-17 09:31 UTC
+yeah, but when is purchase ID acutally posted for payment? This I was not able to see from the .csv?
 
-[2026-11-06] 16
-in znb1 can we see something about mismatches in PO-values. I mean invoice amounts against PO-value?
+[9] 2026-10-17 09:35 UTC
+yes
 
-[2026-11-06] 17
-but my suspicson is that the difference between cleared and invoice value is due to the cash discount if we pay within 10 days. can you check this?
+[10] 2026-10-17 09:44 UTC
+So a PO_ID might have several different SAP_PO_No?
 
-[2026-11-06] 18
-okay, then i want and overwie of the differences in percent. a histogram or a density plot including sigma and mean
+[11] 2026-10-17 10:52 UTC
+when i look at the csv in pandans I find 1 in 171163 instances. Why is your number lower
 
-[2026-11-06] 19
-and a box plot
+[12] 2026-10-17 11:19 UTC
+can we move this to github some how?
 
-[2026-11-06] 20
-no, a box plot with the differences between cleared amounts and PO-amounts
+[13] 2026-10-17 11:23 UTC
+I want to change the conda env name from test to datasci
 
-[2026-11-06] 21
-Can i get a list with a separate column for the amount difference for all znb1. .csv is fine
+[14] 2026-10-17 11:38 UTC
+Can you also cllect tall the analysis in an .ipynb notebook for me? You can save it under /Desktop/python
 
-[2026-11-06] 22
+[15] 2026-10-17 11:43 UTC
+yes install juptyerlab also
+
+====================================================================================================
+Session 2 – 18 and 21 Oct 2026: log transform, domain information, report update
+====================================================================================================
+
+[16] 2026-10-18 20:56 UTC
+general question
+
+[17] 2026-10-18 20:56 UTC
+when should i use log1p instead of log
+
+[18] 2026-10-18 20:59 UTC
+but why to use it in process mining?
+
+[19] 2026-10-18 21:00 UTC
+yes
+
+[20] 2026-10-18 21:02 UTC
+shouldn't you use seconds instead of hours?
+
+[21] 2026-10-18 21:04 UTC
+no, it's fine. but what is a log
+
+[22] 2026-10-21 15:57 UTC
+what else can I include in the CLAUDE.md?
+
+[23] 2026-10-21 19:32 UTC
+commit and push
+
+[24] 2026-10-21 19:34 UTC
+yes just write a .gitignore and add .Rhistory
+
+[25] 2026-10-21 19:35 UTC
+commit and push
+
+[26] 2026-10-21 21:54 UTC
+some add. info about the data mining project.. coming soon
+
+[27] 2026-10-21 21:56 UTC
+[Image #4] [Image #5] [Image #6] [Image #7] [Image #8] [Image #9] [Image #10]
+
+[28] 2026-10-21 21:58 UTC
+did you also change something in the report? Maybe you should
+
+[29] 2026-10-21 22:02 UTC
+yes commit and push and also include the .ipynb
+
+[30] 2026-10-21 22:02 UTC
+yes, please
+
+[31] 2026-10-21 22:05 UTC
+do you knwo which company the log is from?
+
+[32] 2026-10-21 22:07 UTC
+what is dropshipping
+
+====================================================================================================
+Session 3 – 22 Oct 2026: process-flow one-pager
+====================================================================================================
+
+[33] 2026-10-22 16:06 UTC
+Can you run me through some examples of this different possible porcess flows, maybe a short one-pager pdf with some illustrations.
+
+[34] 2026-10-22 16:10 UTC
+Why has case B no need to wait for the goods received?
+
+[35] 2026-10-22 16:15 UTC
+the raw log is here: /Downloads/EN event log.csv
+
+[36] 2026-10-22 16:20 UTC
+yes, annotate everything which is important
+
+[37] 2026-10-22 16:24 UTC
+commit and push
+
+[38] 2026-10-22 16:39 UTC
+Is the pdf also on git?
+
+[39] 2026-10-22 16:39 UTC
+no, it's fine
+
+[40] 2026-10-22 17:12 UTC
+what kind of pipeline are you talking about?
+
+====================================================================================================
+Session 4 – 23 Oct 2026: ZNB1 missed cash discount, invoice level, suppliers, Task 2 redesign heuristics
+====================================================================================================
+
+[41] 2026-10-23 09:29 UTC
+For ZNB1, can you create an overview of median and average lead time plus the total missed discount of 2 % for the invoices which were posted after 10 days?[Image #1]
+
+[42] 2026-10-23 09:32 UTC
+do it
+
+[43] 2026-10-23 09:38 UTC
+I am not sure if we are on the same page, but the amount lost is due to postings >10 days, meaning we miss our 2%
+
+[44] 2026-10-23 09:39 UTC
+ja, mi må tenke PO og ikke faktura.
+
+[45] 2026-10-23 09:40 UTC
+B
+
+[46] 2026-10-23 09:55 UTC
 push and commit
 
-[2026-11-06] 23
+[47] 2026-10-23 10:21 UTC
+what does make more sense? Are the separate invoices really tracable?
+
+[48] 2026-10-23 10:24 UTC
+ja, vet ikke. det var sikkert deg.... men du kan tilpasse alt til fakturanivå
+
+[49] 2026-10-23 10:29 UTC
+push and commit
+
+[50] 2026-10-23 10:34 UTC
+I need also the amount of supplier per code category. include it in the dashboard
+
+[51] 2026-10-23 11:41 UTC
+does this make sense?[Image #2]
+
+[52] 2026-10-23 11:46 UTC
+men hvor mange fakturaer var over 10 respektive 30 dager?
+
+[53] 2026-10-23 12:23 UTC
+[Image #3] [Image #4] [Image #5] [Image #6] image 6 is our problem we like to takle. What heuristics and why should we use them. Give me detailed explanation. excel would be best
+
+[54] 2026-10-23 12:28 UTC
+[Image #7] dette skal vi gjøre. Dette er det vi identiserte [Image #8]
+
+[55] 2026-10-23 12:32 UTC
+Can i have this as an excel instead of copy/paste
+
+[56] 2026-10-23 12:42 UTC
+what is GR?
+
+[57] 2026-10-23 13:37 UTC
+can you give me a text file with the complete prompts for this artifact
+
+[58] 2026-10-23 17:46 UTC
+push and commit
+
+====================================================================================================
+Session 5 – 6 Nov 2026: top suppliers by PO value, amount differences (cleared vs PO value)
+====================================================================================================
+
+[59] 2026-11-06
+What i need are the top ten suppliers with the highest median po values and there respective throughput times
+
+[60] 2026-11-06
+I need you also to keep a record (ideally in a .txt-file) of my prompts to you
+
+[61] 2026-11-06
+look only at ZNB1 and ZJD1
+
+[62] 2026-11-06
+and sort it by amount of POs in descending order
+
+[63] 2026-11-06
+same list with the highest average PO value?
+
+[64] 2026-11-06
+can you also push and commit
+
+[65] 2026-11-06
+just focus on znb1: Can you give me the the suppliers by total PO-amount? an overview
+
+[66] 2026-11-06
+and for the same i want the last step (most frequent: modus) before it went to ctrl1
+
+[67] 2026-11-06
+how many stop up which are set up for goods receipt?
+
+[68] 2026-11-06
+which one of znb1 (suppliers) have large po-values and are fast?
+
+[69] 2026-11-06
+in znb1 can we see something about mismatches in PO-values. I mean invoice amounts against PO-value?
+
+[70] 2026-11-06
+but my suspicson is that the difference between cleared and invoice value is due to the cash discount if we pay within 10 days. can you check this?
+
+[71] 2026-11-06
+okay, then i want and overwie of the differences in percent. a histogram or a density plot including sigma and mean
+
+[72] 2026-11-06
+and a box plot
+
+[73] 2026-11-06
+no, a box plot with the differences between cleared amounts and PO-amounts
+
+[74] 2026-11-06
+Can i get a list with a separate column for the amount difference for all znb1. .csv is fine
+
+[75] 2026-11-06
+push and commit
+
+[76] 2026-11-06
 into main?
 
-[2026-11-06] 24
+[77] 2026-11-06
 everything should be in main
 
-[2026-11-19] 25
+====================================================================================================
+Session 6 – 19 and 20 Nov 2026: ZNB1 deep dive – suppliers missing 10/30 days, clerks (user1341, user1177), manual queue, assumptions, process-path .pptx
+====================================================================================================
+
+[78] 2026-11-19
 Hey! back at the process mining!
 
-[2026-11-19] 26
+[79] 2026-11-19
 deep dive into znb1. we thought of some possible improvements and therefore I need to know which suppliers do not reach the 10 and 30 days.
 
 We want to proioritize the ones with high amount POs, but manual approvals and not achieved 10 / 30 dyas
 
-[2026-11-19] 27
+[80] 2026-11-19
 okay. let's look at the first one first. I think an overview of of the top five suppliers where the target of 10 days is not met and which users are handeling them
 
-[2026-11-19] 28
+[81] 2026-11-19
 can we add how many invoices theses useres take care of on a daily basis. plain average
 
-[2026-11-19] 29
+[82] 2026-11-19
 Basisc question: We assume that a PO has one invoice connected to it, but looking at the the dataset it seems that a PO can consist of more than just one invoice?!
 
-[2026-11-19] 30
+[83] 2026-11-19
 So we never know the real invoice value since SAP just has the po-value and not the invoice amount?
 
-[2026-11-19] 31
+[84] 2026-11-19
 Ok. That's somehow problematic. what is the difference in invoice value and clearing value? in percent and why are there differences in reality?
 
-[2026-11-19] 32
+[85] 2026-11-19
 are there signs of cash discount taken?
 
-[2026-11-19] 33
+[86] 2026-11-19
 how many different users handle the znb1 POs?
 
-[2026-11-19] 35
+[87] 2026-11-19
 we want to look at the znb1 which are handled unamiously manually.
 
-[2026-11-19] 36
+[88] 2026-11-19
 Okay, maybe we also should look at the PO-values! median po-value of theese 37 suppliers
 
-[2026-11-19] 37
+[89] 2026-11-19
 can you generate an overview?
 
-[2026-11-19] 38
+[90] 2026-11-19
 let's look more closely to user 1341. Which suppliers he has, what are the median po-values he handles and etc pp
 
-[2026-11-19] 39
+[91] 2026-11-19
 no activity after jan 12? but the dataset's obvservation window is not much longer
 
-[2026-11-19] 40
+[92] 2026-11-19
 Who took over for user1341? Or did it just start piling up?
 
-[2026-11-19] 41
+[93] 2026-11-19
 which suppliers are assigned to which users. are there any patterns?
 
-[2026-11-19] 42
+[94] 2026-11-19
 can i get a suitable output for this?
 
-[2026-11-19] 43
+[95] 2026-11-19
 okay. let's look specifically at user 1341 until january 12. 
 Pattern, median po. share below 10 days, share between 10 and 30 days and share above e30 days
 
-[2026-11-19] 44
+[96] 2026-11-19
 yes
 
-[2026-11-19] 45
+[97] 2026-11-19
 what suppliers are missing the 10 days and what is the total exposure?
 
-[2026-11-19] 46
+[98] 2026-11-19
 state the invoice assumptions again?
 
-[2026-11-19] 47
+[99] 2026-11-19
 in a sepearte .html assumption file
 
-[2026-11-19] 48
+[100] 2026-11-19
 can we also have a closer look at user1177 for znb1 like you did for 1341
 
-[2026-11-19] 49
+[101] 2026-11-19
 For user1341 i need an add. graph which shows the potential savings for the invoices missed over 10 days
 
-[2026-11-19] 50
+[102] 2026-11-19
 whats the working pattern of user1341
 
-[2026-11-19] 51
+[103] 2026-11-19
 for znb1 i need to have it confirmed that the manual qeue is handeld by when cases appear and not by po-value or ohter stuff. My assumtpion is first in first out
 
-[2026-11-19] 52
+[104] 2026-11-19
 for znb1 are there suppliers which always end up in the manual queue regardless of the po-amount?
 
-[2026-11-19] 54
+[105] 2026-11-19
 save the list in an excel file
 
-[2026-11-19] 55
+[106] 2026-11-19
 For the 100% manual znb1 suppliers i also want an overview of all the quantiles in 0.1 steps add it to the excel
 
-[2026-11-19] 56
+[107] 2026-11-19
 per supplier in 0.25 steps
 
-[2026-11-19] 57
+[108] 2026-11-19
 what would be an appropriate target value to triage between autmatic and manual handling based on po-value?
 
-[2026-11-19] 58
+[109] 2026-11-19
 for the 100 % manual ones, can i get a chart per week and month for the average throughput time on invoices with an underlying po-value abvoe 1.5 mnok
 
-[2026-11-19] 59
+[110] 2026-11-19
 Ranking of the users which handle the pos with the highest PO-values combined (touched by on user only)
 
-[2026-11-19] 60
+[111] 2026-11-19
 this is only znb1?
 
-[2026-11-19] 61
+[112] 2026-11-19
 no, i only need znb1. how many po's in absolute terms are touch by one user only and what is the cumulative po-/invoice-value
 
-[2026-11-19] 62
+[113] 2026-11-19
 table please
 
-[2026-11-19] 63
+[114] 2026-11-19
 For the one user only. what is the share of the po-value which is cleared <= 10 days, between 10 and <= 30 days and above 30 days?
 
-[2026-11-19] 64
+[115] 2026-11-19
 and the same analysis for the entire znb1 - doesn't matter how many users touched it. And only take into acount a difference between po-value and cleard amount which is withing 0.5% difference
 
-[2026-11-19] 67
+[116] 2026-11-19
 each invoice has its own end, mening it's each percentwise invoice amount as well, right? since there is only a po-amount but no invoice amount
 
-[2026-11-19] 68
+[117] 2026-11-19
 for znb1 how many invoices are never posted?
 
-[2026-11-19] 69
+[118] 2026-11-19
 what does this mean for our analysis. I mean we should exclude pos in znb1 where we have invoices which are never posted (i.e. 902)!
 
-[2026-11-19] 70
+[119] 2026-11-19
 can you adjust the the excel based on this new assumption
 znb1_always_manual_suppliers.xlsx
 
-[2026-11-20] 71
+[120] 2026-11-20
 can you draw the four most frequent process steps for znb1 in a .pptx format?
 
+====================================================================================================
+Session 7 – 22 Nov 2026: ZNB1 quick wins, Pareto charts, auto-triage potential, user1341 daily load, variant analysis
+====================================================================================================
 
-[2026-11-22] if we look at znb1 only. what are quick wins and what could be more expensive changes we could make?
+[121] 2026-11-22
+if we look at znb1 only. what are quick wins and what could be more expensive changes we could make?
 
-[2026-11-22] okay! What is pareto chart?
+[122] 2026-11-22
+okay! What is pareto chart?
 
-[2026-11-22] Create a nice pareto chart for znb1 and only the suppliers which are 100 % manual
+[123] 2026-11-22
+Create a nice pareto chart for znb1 and only the suppliers which are 100 % manual
 
-[2026-11-22] give me only the around 80%, so for the four bigest.
+[124] 2026-11-22
+give me only the around 80%, so for the four bigest.
 
-[2026-11-22] Can you also create a histogram for each of these three suppliers? bins based on PO-value! (screenshot: Supplier378, Supplier361, Supplier381)
+[125] 2026-11-22
+Can you also create a histogram for each of these three suppliers? bins based on PO-value! (screenshot: Supplier378, Supplier361, Supplier381)
 
-[2026-11-22] can you remove the triage line for the moment
+[126] 2026-11-22
+can you remove the triage line for the moment
 
-[2026-11-22] run: notes/znb1_supplier_po_value_histograms.py
+[127] 2026-11-22
+run: notes/znb1_supplier_po_value_histograms.py
 
-[2026-11-22] Show me the potential if all the suppliers which are handled 100 % manually are treated automatically if the po amount is equal or below mnok 1.5. What are the potential savings looked at the 10 days deadline. Like take the ones which miss the deadline now and assume they will be handled within the deadline so the discount of 2% for these can be claimed!
+[128] 2026-11-22
+Show me the potential if all the suppliers which are handled 100 % manually are treated automatically if the po amount is equal or below mnok 1.5. What are the potential savings looked at the 10 days deadline. Like take the ones which miss the deadline now and assume they will be handled within the deadline so the discount of 2% for these can be claimed!
 
-[2026-11-22] what is the remaining potential for the remaining manual ones if they also would have been posted within 10 days?
+[129] 2026-11-22
+what is the remaining potential for the remaining manual ones if they also would have been posted within 10 days?
 
-[2026-11-22] So the remaining potential is 9.8 minus 1.07?
+[130] 2026-11-22
+So the remaining potential is 9.8 minus 1.07?
 
-[2026-11-22] how much in invoice value lie above 30 days?
+[131] 2026-11-22
+how much in invoice value lie above 30 days?
 
-[2026-11-22] let's analyze user1341. there something stopped up at some point. He/she vanished and there was a build up right?
+[132] 2026-11-22
+let's analyze user1341. there something stopped up at some point. He/she vanished and there was a build up right?
 
-[2026-11-22] let's look more at user 1341 until 12 jan.
+[133] 2026-11-22
+let's look more at user 1341 until 12 jan.
 I need daily numbers. We only have end-numbers and we don't know how much time it takes to post invoices. but this can be estimated it we look at the time from on posting to the next an so on
 
-[2026-11-22] can we also get a chart which proves/disproves if it takes longer if the invoice amounts are high?
+[134] 2026-11-22
+can we also get a chart which proves/disproves if it takes longer if the invoice amounts are high?
 
-[2026-11-22] write also an explanation of how to interpret the chart. directly in the chart below the graphs
+[135] 2026-11-22
+write also an explanation of how to interpret the chart. directly in the chart below the graphs
 
-[2026-11-22] I want only the left chart and the explanation can sit on the right
+[136] 2026-11-22
+I want only the left chart and the explanation can sit on the right
 
-[2026-11-22] What would a variant analysis for znb1 be like?
+[137] 2026-11-22
+What would a variant analysis for znb1 be like?
 
-[2026-11-22] Yes!
+[138] 2026-11-22
+Yes!
 
-[2026-11-22] Can I get a .png with the variants which only include manual post
+[139] 2026-11-22
+Can I get a .png with the variants which only include manual post
 
-[2026-11-22] Read znb1_variants_pareto.png - for this i want an overview for the first three which show amount of invoices per category and amount below 10 days between 10 and 30 days and these over 30
+[140] 2026-11-22
+Read znb1_variants_pareto.png - for this i want an overview for the first three which show amount of invoices per category and amount below 10 days between 10 and 30 days and these over 30
 
-[2026-11-22] What is the total PO-value for all znb1 (PO-level not invoice level)
+[141] 2026-11-22
+What is the total PO-value for all znb1 (PO-level not invoice level)
 
-[2026-11-22] push and commit everything
+[142] 2026-11-22
+push and commit everything
