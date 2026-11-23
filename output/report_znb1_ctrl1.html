@@ -1,0 +1,194 @@
+<meta charset="utf-8">
+<title>ZNB1 Manual Queue Drivers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (~72ch) with wide figure/table breakouts; steps follow the assignment order */
+:root {
+  --bg: #f6f8f7; --surface: #ffffff; --ink: #16201c; --muted: #5a6a63; --line: #d9e1dd;
+  --accent: #1f6f5c; --accent-soft: #e3efea; --ok: #2c7a4b; --warn: #a8670f; --bad: #b0333f;
+  --ok-bg: #e5f2ea; --warn-bg: #fbf0dc; --bad-bg: #f8e4e6; --plate: #ffffff;
+  --f-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+/* Light theme only, regardless of the viewer's system setting */
+:root, :root[data-theme="dark"] { color-scheme: light; }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.6 var(--f-body); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.prose { max-width: 72ch; }
+header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 8px; }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 600 clamp(32px, 5vw, 46px)/1.1 var(--f-display); margin: 12px 0 10px; text-wrap: balance; }
+h2 { font: 600 28px/1.2 var(--f-display); margin: 56px 0 6px; text-wrap: balance; }
+h2 .step { font: 500 13px/1 var(--f-mono); color: var(--accent); display: block; margin-bottom: 8px; letter-spacing: .06em; text-transform: uppercase; }
+h3 { font: 600 18px/1.3 var(--f-body); margin: 32px 0 6px; }
+h4 { font: 600 14px/1.3 var(--f-body); margin: 20px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+p, li { color: var(--ink); }
+.lede { font-size: 17px; color: var(--muted); max-width: 70ch; margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 18px; font: 13px/1.4 var(--f-mono); color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; }
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 18px; }
+.finding { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; min-width: 0; }
+.finding .k { font: 600 26px/1.1 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+.finding p { margin: 6px 0 0; font-size: 14.5px; }
+.callout { background: var(--accent-soft); border-radius: 8px; padding: 14px 18px; margin: 18px 0; max-width: 80ch; }
+.callout p { margin: 4px 0; }
+.code { font: 500 12.5px/1 var(--f-mono); background: var(--accent-soft); color: var(--accent); padding: 3px 6px; border-radius: 4px; white-space: nowrap; }
+.tbl { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th { text-align: left; font: 600 11.5px/1.3 var(--f-body); text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.n { text-align: right; font-family: var(--f-mono); font-size: 12.5px; white-space: nowrap; }
+td.ok { background: var(--ok-bg); } td.warn { background: var(--warn-bg); } td.bad { background: var(--bad-bg); }
+td.n.ok { color: var(--ok); } td.n.warn { color: var(--warn); } td.n.bad { color: var(--bad); }
+td small { color: var(--muted); font-family: var(--f-mono); font-size: 11px; }
+.pill { display: inline-block; font: 500 10.5px/1 var(--f-mono); padding: 3px 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); vertical-align: 1px; }
+.pill.sys { border-color: var(--accent); color: var(--accent); }
+.pill.ok { border-color: var(--ok); color: var(--ok); margin-top: 4px; }
+figure { margin: 18px 0; }
+.plate { background: var(--plate); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; }
+.plate img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+.two > * { min-width: 0; }
+details.type { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 8px 0; }
+details.type > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; list-style: none; }
+details.type > summary::-webkit-details-marker { display: none; }
+details.type > summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+details.type[open] > summary::before { transform: rotate(90deg); }
+details.type > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+details.type .meta { margin-left: auto; font: 12px var(--f-mono); color: var(--muted); }
+.type-body { padding: 0 16px 16px; border-top: 1px solid var(--line); }
+ol.trace { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+ol.trace li { font-size: 12px; background: var(--accent-soft); border-radius: 4px; padding: 2px 6px; }
+ol.trace li + li::before { content: "→ "; color: var(--muted); }
+.variants td:nth-child(2) { min-width: 280px; }
+ul.tight li { margin: 4px 0; }
+.rec { counter-reset: rec; list-style: none; padding: 0; display: grid; gap: 12px; max-width: 80ch; }
+.rec li { counter-increment: rec; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px 14px 56px; position: relative; }
+.rec li::before { content: counter(rec); position: absolute; left: 18px; top: 12px; font: 600 24px/1 var(--f-display); color: var(--accent); }
+dl.gloss { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 8px 20px; margin: 14px 0; max-width: 90ch; }
+dl.gloss dt { font-weight: 600; }
+dl.gloss dd { margin: 0; color: var(--ink); }
+@media (max-width: 560px) { dl.gloss { grid-template-columns: 1fr; gap: 2px; } dl.gloss dd { margin-bottom: 10px; } }
+.example { border: 1px dashed var(--accent); border-radius: 8px; padding: 14px 18px; margin: 18px 0; background: var(--surface); max-width: 90ch; }
+.example > .lbl { font: 500 11.5px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.example p { margin: 8px 0; }
+.example .tbl { margin: 10px 0; }
+.math { font: 13px/1.7 var(--f-mono); background: var(--accent-soft); border-radius: 6px; padding: 10px 14px; overflow-x: auto; white-space: pre; }
+tr.sys td { color: var(--muted); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; margin: 14px 0 0; padding: 0; list-style: none; }
+.toc a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--line); }
+.toc a:hover, .toc a:focus-visible { border-bottom-color: var(--accent); }
+code { font: 12.5px var(--f-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }
+footer { margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px; font-size: 13px; color: var(--muted); }
+/* Annotations from the routing analysis: amber rule so they read as later notes */
+.note { border-left: 3px solid var(--warn); background: var(--warn-bg); border-radius: 0 8px 8px 0; padding: 10px 16px; margin: 14px 0; max-width: 90ch; }
+.note > .lbl { font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warn); }
+.note p { margin: 6px 0; }
+.note .tbl { margin: 10px 0; }
+.finding.new { border-color: var(--warn); }
+.finding.new .k { color: var(--warn); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.bar { background: var(--accent-soft); border-radius: 3px; height: 10px; min-width: 100px; }
+.bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 0 20px; }
+.grid2 > * { min-width: 0; }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Accounts payable · Process mining case · ZNB1 routing</div>
+  <h1>Why do ZNB1 invoices go to the manual queue?</h1>
+  <p class="lede">At <i>Initial validation</i>, SAP sends each invoice either to the goods-receipt check (<code>WAITGR</code>, the road to automatic posting) or to the manual control queue (<code>CTRL1</code>). This report checks what the event log can tell us about that decision for manual orders (<span class="code">ZNB1</span>).</p>
+  <div class="facts">
+    <span><b>13,289</b> ZNB1 invoices</span>
+    <span><b>45%</b> to CTRL1</span>
+    <span><b>216</b> suppliers</span>
+    <span><b>4,720</b> POs</span>
+  </div>
+</header>
+
+<h2 id="answer">Short answer</h2>
+<div class="findings">
+  <div class="finding"><div class="k">No reason code</div><p>The log doesn't record why an invoice goes to <code>CTRL1</code>. The SAP fields at validation are identical for both roads, so the rule itself can't be read from the data.</p></div>
+  <div class="finding"><div class="k">59%</div><p>of <code>CTRL1</code> invoices come from 39 suppliers whose invoices almost always go there. The supplier is the strongest pattern by far.</p></div>
+  <div class="finding"><div class="k">87%</div><p>of later invoices on a PO take the same road as the PO's first invoice. The decision sticks to the PO.</p></div>
+  <div class="finding"><div class="k">AUC 0.95</div><p>A model using only fields from the log predicts the road correctly for 89% of invoices. The decision is systematic, not random, and points to a supplier or PO setting.</p></div>
+</div>
+
+<h2 id="scope"><span class="step">Scope</span>What was analysed</h2>
+<div class="prose">
+<p>One row per ZNB1 invoice (<code>PO_ID</code> × <code>SAP_PO_No</code>), with the routing code (<code>SAP_Next_Processing_Type</code>) of its first <i>Initial validation</i>. Only invoices sent to <code>CTRL1</code> or <code>WAITGR</code> are compared. The few routed via Warehouse Management (<code>ZWMGRW</code>, 110) or to deletion (<code>DELE</code>, 377) are left out.</p>
+<p>The value is <code>Case_Invoice_Value_NOK</code>, which is the PO total, not the value of the single invoice. Shares below are the share of invoices sent to <code>CTRL1</code>; the overall average is 45%.</p>
+</div>
+
+<h2 id="missing"><span class="step">1</span>What the log doesn't contain</h2>
+<div class="tbl "><table><thead><tr><th>Event</th><th>Field</th><th>Values on ZNB1 invoices</th></tr></thead><tbody><tr><td>Initial validation</td><td><code>SAP_Processing_Type</code></td><td><code>INVVER</code></td></tr><tr><td>Initial validation</td><td><code>User_ID</code></td><td><code>User1587</code></td></tr><tr><td>Initial validation</td><td><code>SAP_Object_Code</code></td><td>empty on every event</td></tr><tr><td>Data management</td><td><code>SAP_Processing_Type</code></td><td><code>DATMAN</code></td></tr></tbody></table></div>
+<div class="prose"><p>Validation is always done by the same system user with the same processing type, and the object code is empty. There's no validation message, block reason, tolerance or variance code. Those are the fields that would say why an invoice was stopped, and they live in SAP (e.g. the invoice's blocking reasons and messages), not in this extract.</p></div>
+
+<h2 id="supplier"><span class="step">2</span>The supplier decides most of it</h2>
+<div class="prose"><p>Suppliers fall into three groups: those whose invoices almost always go to <code>CTRL1</code>, those that almost never do, and a mixed group.</p></div>
+<div class="tbl "><table><thead><tr><th>Supplier group</th><th>Suppliers</th><th>Invoices</th><th>Share of invoices</th><th>Of which to CTRL1</th><th>Share of all CTRL1</th></tr></thead><tbody><tr><td>Almost never CTRL1 (≤ 5%)</td><td class='n'>58</td><td class='n'>3,021</td><td class='n'>23%</td><td class='n'>73</td><td class='n'>1%</td></tr><tr><td>Mixed</td><td class='n'>119</td><td class='n'>6,737</td><td class='n'>51%</td><td class='n'>2,398</td><td class='n'>40%</td></tr><tr><td>Almost always CTRL1 (> 95%)</td><td class='n'>39</td><td class='n'>3,531</td><td class='n'>27%</td><td class='n'>3,522</td><td class='n'>59%</td></tr></tbody></table></div>
+<h4>Suppliers with at least 200 invoices</h4>
+<div class="tbl "><table><thead><tr><th>Supplier</th><th>Invoices</th><th>To CTRL1</th><th></th><th>Group</th></tr></thead><tbody><tr><td>Supplier361</td><td class='n'>1,060</td><td class='n'>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td><td>Almost always CTRL1 (> 95%)</td></tr><tr><td>Supplier115</td><td class='n'>958</td><td class='n'>4%</td><td><div class="bar"><span style="width:4.5%"></span></div></td><td>Almost never CTRL1 (≤ 5%)</td></tr><tr><td>Supplier44</td><td class='n'>639</td><td class='n'>1%</td><td><div class="bar"><span style="width:1.3%"></span></div></td><td>Almost never CTRL1 (≤ 5%)</td></tr><tr><td>Supplier381</td><td class='n'>400</td><td class='n'>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td><td>Almost always CTRL1 (> 95%)</td></tr><tr><td>Supplier235</td><td class='n'>393</td><td class='n'>17%</td><td><div class="bar"><span style="width:17.0%"></span></div></td><td>Mixed</td></tr><tr><td>Supplier378</td><td class='n'>345</td><td class='n'>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td><td>Almost always CTRL1 (> 95%)</td></tr><tr><td>Supplier59</td><td class='n'>331</td><td class='n'>15%</td><td><div class="bar"><span style="width:15.1%"></span></div></td><td>Mixed</td></tr><tr><td>Supplier356</td><td class='n'>318</td><td class='n'>24%</td><td><div class="bar"><span style="width:23.6%"></span></div></td><td>Mixed</td></tr><tr><td>Supplier362</td><td class='n'>265</td><td class='n'>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td><td>Almost always CTRL1 (> 95%)</td></tr><tr><td>Supplier66</td><td class='n'>260</td><td class='n'>34%</td><td><div class="bar"><span style="width:33.8%"></span></div></td><td>Mixed</td></tr><tr><td>Supplier243</td><td class='n'>241</td><td class='n'>89%</td><td><div class="bar"><span style="width:89.2%"></span></div></td><td>Mixed</td></tr><tr><td>Supplier380</td><td class='n'>233</td><td class='n'>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td><td>Almost always CTRL1 (> 95%)</td></tr><tr><td>Supplier374</td><td class='n'>229</td><td class='n'>46%</td><td><div class="bar"><span style="width:46.3%"></span></div></td><td>Mixed</td></tr><tr><td>Supplier28</td><td class='n'>220</td><td class='n'>33%</td><td><div class="bar"><span style="width:33.2%"></span></div></td><td>Mixed</td></tr><tr><td>Supplier281</td><td class='n'>217</td><td class='n'>100%</td><td><div class="bar"><span style="width:100.0%"></span></div></td><td>Almost always CTRL1 (> 95%)</td></tr></tbody></table></div>
+<div class="callout"><p><b>Same PO type, same process, opposite roads.</b> Supplier361 sends 100% of its invoices to the manual queue, while Supplier115 and Supplier44, also large ZNB1 suppliers, almost never do. Something about the supplier, or the way its POs are set up, makes the difference.</p></div>
+
+<h2 id="po"><span class="step">3</span>The decision sticks to the PO</h2>
+<div class="prose">
+<p>Of the 2,413 POs with more than one invoice, 77% send all their invoices down the same road. Looking at each later invoice against the PO's first one:</p>
+<ul class="tight">
+  <li>First invoice went to <code>CTRL1</code>: 92% of the later invoices go there too.</li>
+  <li>First invoice went to <code>WAITGR</code>: only 17% of the later invoices go to <code>CTRL1</code>.</li>
+</ul>
+<p>So the trigger is something fixed on the PO or the supplier, not something that varies from invoice to invoice.</p>
+</div>
+
+<h2 id="value"><span class="step">4</span>PO value: a gradual slope, no threshold</h2>
+<div class="grid2">
+<div><h4>All invoices, by PO value (NOK)</h4><div class="tbl "><table><thead><tr><th></th><th>Invoices</th><th>To CTRL1</th><th></th></tr></thead><tbody><tr><td>< 100k</td><td class='n'>2,011</td><td class='n'>31%</td><td><div class="bar"><span style="width:30.7%"></span></div></td></tr><tr><td>100k–500k</td><td class='n'>3,177</td><td class='n'>36%</td><td><div class="bar"><span style="width:35.9%"></span></div></td></tr><tr><td>500k–1M</td><td class='n'>2,079</td><td class='n'>38%</td><td><div class="bar"><span style="width:38.2%"></span></div></td></tr><tr><td>1M–2M</td><td class='n'>2,093</td><td class='n'>45%</td><td><div class="bar"><span style="width:44.9%"></span></div></td></tr><tr><td>2M–5M</td><td class='n'>2,092</td><td class='n'>54%</td><td><div class="bar"><span style="width:54.2%"></span></div></td></tr><tr><td>5M–10M</td><td class='n'>567</td><td class='n'>55%</td><td><div class="bar"><span style="width:54.9%"></span></div></td></tr><tr><td>> 10M</td><td class='n'>1,261</td><td class='n'>84%</td><td><div class="bar"><span style="width:83.8%"></span></div></td></tr></tbody></table></div></div>
+<div><h4>Within the same supplier (mixed group), by value quarter</h4><div class="tbl "><table><thead><tr><th></th><th>Invoices</th><th>To CTRL1</th><th></th></tr></thead><tbody><tr><td>Lowest quarter</td><td class='n'>1,711</td><td class='n'>31%</td><td><div class="bar"><span style="width:30.7%"></span></div></td></tr><tr><td>2nd quarter</td><td class='n'>1,655</td><td class='n'>35%</td><td><div class="bar"><span style="width:34.9%"></span></div></td></tr><tr><td>3rd quarter</td><td class='n'>1,629</td><td class='n'>37%</td><td><div class="bar"><span style="width:37.4%"></span></div></td></tr><tr><td>Highest quarter</td><td class='n'>1,676</td><td class='n'>39%</td><td><div class="bar"><span style="width:39.2%"></span></div></td></tr></tbody></table></div></div>
+</div>
+<div class="prose"><p>Large POs go to <code>CTRL1</code> more often, from 31% below 100k NOK to 84% above 10M. But the share rises step by step, with no cut-off that would point to a fixed amount limit. Within the same supplier the effect is small (31% → 39%), so most of the value pattern comes from which suppliers have the large POs. A value limit could still exist, but this log can't isolate it, because the value is only known per PO.</p></div>
+
+<h2 id="other"><span class="step">5</span>Other candidates</h2>
+<div class="grid2">
+<div><h4>Order of the invoice on its PO</h4><div class="tbl "><table><thead><tr><th></th><th>Invoices</th><th>To CTRL1</th><th></th></tr></thead><tbody><tr><td>1st invoice</td><td class='n'>4,720</td><td class='n'>32%</td><td><div class="bar"><span style="width:32.2%"></span></div></td></tr><tr><td>2nd</td><td class='n'>2,413</td><td class='n'>42%</td><td><div class="bar"><span style="width:42.1%"></span></div></td></tr><tr><td>3rd</td><td class='n'>1,487</td><td class='n'>43%</td><td><div class="bar"><span style="width:43.3%"></span></div></td></tr><tr><td>4th</td><td class='n'>1,031</td><td class='n'>46%</td><td><div class="bar"><span style="width:45.7%"></span></div></td></tr><tr><td>5th or later</td><td class='n'>3,638</td><td class='n'>64%</td><td><div class="bar"><span style="width:64.3%"></span></div></td></tr></tbody></table></div></div>
+<div><h4>Clearing amount vs invoice amount</h4><div class="tbl "><table><thead><tr><th></th><th>Invoices</th><th>To CTRL1</th><th></th></tr></thead><tbody><tr><td>Equal</td><td class='n'>1,740</td><td class='n'>84%</td><td><div class="bar"><span style="width:83.7%"></span></div></td></tr><tr><td>Clearing lower</td><td class='n'>4,804</td><td class='n'>38%</td><td><div class="bar"><span style="width:37.6%"></span></div></td></tr><tr><td>Clearing higher</td><td class='n'>6,745</td><td class='n'>41%</td><td><div class="bar"><span style="width:40.5%"></span></div></td></tr></tbody></table></div></div>
+</div>
+<div class="prose">
+<p><b>Later invoices</b> on a PO go to <code>CTRL1</code> more often than the first one. That could fit partial deliveries whose quantities no longer match the PO, but it's also partly the supplier effect: POs with many invoices come from the "always <code>CTRL1</code>" suppliers more often.</p>
+<p><b>Amount differences don't explain it.</b> If price differences sent invoices to the queue, invoices whose clearing amount differs from the invoice amount should go there more often. The opposite is true. The differences are mostly exchange-rate effects.</p>
+</div>
+<div class="grid2">
+<div><h4>Weekday of validation</h4><div class="tbl "><table><thead><tr><th></th><th>Invoices</th><th>To CTRL1</th><th></th></tr></thead><tbody><tr><td>Mon</td><td class='n'>2,517</td><td class='n'>37%</td><td><div class="bar"><span style="width:37.5%"></span></div></td></tr><tr><td>Tue</td><td class='n'>2,760</td><td class='n'>48%</td><td><div class="bar"><span style="width:48.0%"></span></div></td></tr><tr><td>Wed</td><td class='n'>2,319</td><td class='n'>54%</td><td><div class="bar"><span style="width:53.6%"></span></div></td></tr><tr><td>Thu</td><td class='n'>2,511</td><td class='n'>46%</td><td><div class="bar"><span style="width:46.0%"></span></div></td></tr><tr><td>Fri</td><td class='n'>2,865</td><td class='n'>42%</td><td><div class="bar"><span style="width:41.6%"></span></div></td></tr><tr><td>Sat</td><td class='n'>285</td><td class='n'>40%</td><td><div class="bar"><span style="width:39.6%"></span></div></td></tr><tr><td>Sun</td><td class='n'>32</td><td class='n'>62%</td><td><div class="bar"><span style="width:62.5%"></span></div></td></tr></tbody></table></div></div>
+<div><h4>Month of validation (≥ 50 invoices)</h4><div class="tbl "><table><thead><tr><th></th><th>Invoices</th><th>To CTRL1</th><th></th></tr></thead><tbody><tr><td>Jul 2025</td><td class='n'>400</td><td class='n'>59%</td><td><div class="bar"><span style="width:59.0%"></span></div></td></tr><tr><td>Aug 2025</td><td class='n'>1,519</td><td class='n'>56%</td><td><div class="bar"><span style="width:55.8%"></span></div></td></tr><tr><td>Sep 2025</td><td class='n'>3,126</td><td class='n'>47%</td><td><div class="bar"><span style="width:47.0%"></span></div></td></tr><tr><td>Oct 2025</td><td class='n'>3,587</td><td class='n'>42%</td><td><div class="bar"><span style="width:41.8%"></span></div></td></tr><tr><td>Nov 2025</td><td class='n'>2,874</td><td class='n'>35%</td><td><div class="bar"><span style="width:34.8%"></span></div></td></tr><tr><td>Dec 2025</td><td class='n'>953</td><td class='n'>50%</td><td><div class="bar"><span style="width:49.5%"></span></div></td></tr><tr><td>Jan 2026</td><td class='n'>546</td><td class='n'>56%</td><td><div class="bar"><span style="width:55.7%"></span></div></td></tr><tr><td>Feb 2026</td><td class='n'>274</td><td class='n'>59%</td><td><div class="bar"><span style="width:58.8%"></span></div></td></tr></tbody></table></div></div>
+</div>
+<p class="prose">Timing varies but shows no consistent pattern. The share falls through the autumn, which matches the change in the case population at the end of the period more than a rule change.</p>
+
+<h2 id="model"><span class="step">6</span>How predictable is the road?</h2>
+<div class="prose"><p>A machine-learning model trained on the fields above predicts the road for 89% of invoices on POs it hasn't seen (AUC 0.95, where 0.5 is a coin flip). The supplier alone reaches 0.93; all other fields without the supplier only 0.81. The decision follows fixed attributes, so it's very likely a configured rule, not a random or clerk-by-clerk choice. Setup, validation, field importance and robustness checks are in the separate report <a href="report_znb1_ctrl1_model.html">How predictable is the manual queue?</a></p></div>
+
+<h2 id="next"><span class="step">Interpretation</span>Likely reasons and what to check</h2>
+<div class="prose">
+<p>The pattern points to a setting on the supplier or on the PO, not to a check on each invoice. These are typical SAP setups that would produce it. They are hypotheses that the log can't confirm:</p>
+</div>
+<ol class="rec">
+  <li><b>A flag on the supplier's master record</b>, e.g. a payment block or a "check invoices manually" setting that sends all of that supplier's invoices to a clerk.</li>
+  <li><b>POs not set up for automatic matching against the goods receipt</b>, e.g. manual one-off orders without the goods-receipt-based invoice verification flag. The invoice then can't wait for the goods receipt and goes straight to the queue.</li>
+  <li><b>Price or quantity tolerances</b> that hand-entered manual orders keep exceeding, especially for some suppliers and on later partial invoices.</li>
+</ol>
+<div class="callout">
+<p><b>Next step:</b> ask the AP team or SAP support what is set differently for the "always <code>CTRL1</code>" suppliers (Supplier361, Supplier381, Supplier378, Supplier362, Supplier380) compared with Supplier115 and Supplier44. The blocking reasons and messages on a sample of their invoices would give the actual rule.</p>
+</div>
+
+<footer>
+<p>Built with Python (conda env <code>datasci</code>) by <code>08_report_ctrl1_drivers.py</code> from <code>output/events.pkl</code> via <code>ctrl1_data.py</code> (run <code>01_prepare.py</code> first). Model figures come from <code>output/ctrl1_model_results.csv</code>, written by <code>09_report_ctrl1_model.py</code>.</p>
+</footer>
+</div>

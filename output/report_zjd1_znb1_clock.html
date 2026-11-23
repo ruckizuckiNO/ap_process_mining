@@ -1,0 +1,166 @@
+<meta charset="utf-8">
+<title>ZJD1 vs ZNB1 Lead Time</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (~72ch) with wide figure/table breakouts; steps follow the assignment order */
+:root {
+  --bg: #f6f8f7; --surface: #ffffff; --ink: #16201c; --muted: #5a6a63; --line: #d9e1dd;
+  --accent: #1f6f5c; --accent-soft: #e3efea; --ok: #2c7a4b; --warn: #a8670f; --bad: #b0333f;
+  --ok-bg: #e5f2ea; --warn-bg: #fbf0dc; --bad-bg: #f8e4e6; --plate: #ffffff;
+  --f-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+/* Light theme only, regardless of the viewer's system setting */
+:root, :root[data-theme="dark"] { color-scheme: light; }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.6 var(--f-body); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.prose { max-width: 72ch; }
+header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 8px; }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 600 clamp(32px, 5vw, 46px)/1.1 var(--f-display); margin: 12px 0 10px; text-wrap: balance; }
+h2 { font: 600 28px/1.2 var(--f-display); margin: 56px 0 6px; text-wrap: balance; }
+h2 .step { font: 500 13px/1 var(--f-mono); color: var(--accent); display: block; margin-bottom: 8px; letter-spacing: .06em; text-transform: uppercase; }
+h3 { font: 600 18px/1.3 var(--f-body); margin: 32px 0 6px; }
+h4 { font: 600 14px/1.3 var(--f-body); margin: 20px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+p, li { color: var(--ink); }
+.lede { font-size: 17px; color: var(--muted); max-width: 70ch; margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 18px; font: 13px/1.4 var(--f-mono); color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; }
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 18px; }
+.finding { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; min-width: 0; }
+.finding .k { font: 600 26px/1.1 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+.finding p { margin: 6px 0 0; font-size: 14.5px; }
+.callout { background: var(--accent-soft); border-radius: 8px; padding: 14px 18px; margin: 18px 0; max-width: 80ch; }
+.callout p { margin: 4px 0; }
+.code { font: 500 12.5px/1 var(--f-mono); background: var(--accent-soft); color: var(--accent); padding: 3px 6px; border-radius: 4px; white-space: nowrap; }
+.tbl { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th { text-align: left; font: 600 11.5px/1.3 var(--f-body); text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.n { text-align: right; font-family: var(--f-mono); font-size: 12.5px; white-space: nowrap; }
+td.ok { background: var(--ok-bg); } td.warn { background: var(--warn-bg); } td.bad { background: var(--bad-bg); }
+td.n.ok { color: var(--ok); } td.n.warn { color: var(--warn); } td.n.bad { color: var(--bad); }
+td small { color: var(--muted); font-family: var(--f-mono); font-size: 11px; }
+.pill { display: inline-block; font: 500 10.5px/1 var(--f-mono); padding: 3px 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); vertical-align: 1px; }
+.pill.sys { border-color: var(--accent); color: var(--accent); }
+.pill.ok { border-color: var(--ok); color: var(--ok); margin-top: 4px; }
+figure { margin: 18px 0; }
+.plate { background: var(--plate); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; }
+.plate img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+.two > * { min-width: 0; }
+details.type { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 8px 0; }
+details.type > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; list-style: none; }
+details.type > summary::-webkit-details-marker { display: none; }
+details.type > summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+details.type[open] > summary::before { transform: rotate(90deg); }
+details.type > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+details.type .meta { margin-left: auto; font: 12px var(--f-mono); color: var(--muted); }
+.type-body { padding: 0 16px 16px; border-top: 1px solid var(--line); }
+ol.trace { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+ol.trace li { font-size: 12px; background: var(--accent-soft); border-radius: 4px; padding: 2px 6px; }
+ol.trace li + li::before { content: "→ "; color: var(--muted); }
+.variants td:nth-child(2) { min-width: 280px; }
+ul.tight li { margin: 4px 0; }
+.rec { counter-reset: rec; list-style: none; padding: 0; display: grid; gap: 12px; max-width: 80ch; }
+.rec li { counter-increment: rec; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px 14px 56px; position: relative; }
+.rec li::before { content: counter(rec); position: absolute; left: 18px; top: 12px; font: 600 24px/1 var(--f-display); color: var(--accent); }
+dl.gloss { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 8px 20px; margin: 14px 0; max-width: 90ch; }
+dl.gloss dt { font-weight: 600; }
+dl.gloss dd { margin: 0; color: var(--ink); }
+@media (max-width: 560px) { dl.gloss { grid-template-columns: 1fr; gap: 2px; } dl.gloss dd { margin-bottom: 10px; } }
+.example { border: 1px dashed var(--accent); border-radius: 8px; padding: 14px 18px; margin: 18px 0; background: var(--surface); max-width: 90ch; }
+.example > .lbl { font: 500 11.5px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.example p { margin: 8px 0; }
+.example .tbl { margin: 10px 0; }
+.math { font: 13px/1.7 var(--f-mono); background: var(--accent-soft); border-radius: 6px; padding: 10px 14px; overflow-x: auto; white-space: pre; }
+tr.sys td { color: var(--muted); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; margin: 14px 0 0; padding: 0; list-style: none; }
+.toc a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--line); }
+.toc a:hover, .toc a:focus-visible { border-bottom-color: var(--accent); }
+code { font: 12.5px var(--f-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }
+footer { margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px; font-size: 13px; color: var(--muted); }
+/* Annotations from the routing analysis: amber rule so they read as later notes */
+.note { border-left: 3px solid var(--warn); background: var(--warn-bg); border-radius: 0 8px 8px 0; padding: 10px 16px; margin: 14px 0; max-width: 90ch; }
+.note > .lbl { font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warn); }
+.note p { margin: 6px 0; }
+.note .tbl { margin: 10px 0; }
+.finding.new { border-color: var(--warn); }
+.finding.new .k { color: var(--warn); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.bar { background: var(--accent-soft); border-radius: 3px; height: 10px; min-width: 90px; }
+.bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+td.hl { font-weight: 600; }
+ol.clock { list-style: none; padding: 0; margin: 18px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 10px; }
+ol.clock li { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; position: relative; min-width: 0; }
+ol.clock li b { display: block; font-size: 14px; }
+ol.clock li small { display: block; color: var(--muted); font: 12px var(--f-mono); margin-top: 2px; }
+ol.clock li.out { border-style: dashed; color: var(--muted); }
+ol.clock .tag { display: inline-block; margin-top: 8px; font: 500 10.5px/1.2 var(--f-mono); padding: 3px 6px; border-radius: 4px; }
+.tag.a { background: var(--warn-bg); color: var(--warn); }
+.tag.g { background: var(--ok-bg); color: var(--ok); }
+.tag.s { background: var(--accent-soft); color: var(--accent); }
+.tag.o { border: 1px dashed var(--line); color: var(--muted); }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Accounts payable · Process mining case · Side comparison</div>
+  <h1>ZJD1 vs ZNB1: invoices beyond 10 and 30 days</h1>
+  <p class="lede">Normal orders (<span class="code">ZJD1</span>) and manual orders (<span class="code">ZNB1</span>), counted per invoice, with the SLA clock started at arrival and at goods receipt.</p>
+  <div class="facts">
+    <span><b>5,514</b> ZJD1 POs · <b>9,821</b> invoices</span>
+    <span><b>4,746</b> ZNB1 POs · <b>12,874</b> invoices</span>
+    <span>SLA <b>10 d</b> (2% discount) and <b>30 d</b> (payment deadline)</span>
+  </div>
+</header>
+
+<h2 id="answer">Short answer</h2>
+<div class="findings">
+  <div class="finding"><div class="k">6.4% vs 13.1%</div><p>of invoices take longer than 10 days in ZJD1 and ZNB1 when both clocks start at goods receipt. ZNB1 is late about twice as often.</p></div>
+  <div class="finding"><div class="k">2.5% vs 2.3%</div><p>take longer than 30 days. On the legal payment deadline the two PO types are about equal.</p></div>
+  <div class="finding"><div class="k">10.1M vs 15.9M</div><p>NOK of 2% cash discount is missed. ZNB1 loses more although its POs are worth slightly less on average.</p></div>
+  <div class="finding"><div class="k">2.2% = 2.2%</div><p>With a goods-receipt step both are equally fast. The whole difference sits in the invoices without one, mostly the manual-queue route: 14.8% late in ZJD1, 25.7% in ZNB1.</p></div>
+</div>
+
+<h2 id="clock"><span class="step">Assumption</span>Where the clock starts and stops</h2>
+<div class="prose">
+<p>Both SLAs are about <b>payment</b>, but the event log doesn't contain payment or the invoice date. Lead time is therefore measured <b>per invoice</b> (<code>SAP_PO_No</code>) between two events that are in the log.</p>
+</div>
+<ol class="clock"><li class="start-a"><b>Invoice arrives</b><small>Data management</small><span class="tag a">start · arrival clock</span></li><li class=""><b>Initial validation</b><small>routing code set</small></li><li class="start-g"><b>Wait for goods receipt</b><small>object code WAIT_GR</small><span class="tag g">start · goods-receipt clock</span></li><li class="stop"><b>First posting</b><small>invoice payable</small><span class="tag s">stop · both clocks</span></li><li class="out"><b>Payment run</b><small>not in the log</small><span class="tag o">real SLA end, not measurable</span></li></ol>
+<dl class="gloss">
+  <dt>One PO, several invoices</dt><dd>A PO (<code>PO_ID</code>) can receive several invoices, e.g. for partial deliveries. Each invoice gets its own clock, so a PO whose second invoice arrives weeks later doesn't count as late because of that. ZJD1 has 1.78 posted invoices per PO, ZNB1 2.71.</dd>
+  <dt>Clock stop</dt><dd>The invoice's <b>first posting</b>: the first of <i>MM Posted Automatically</i>, <i>Posted manually</i>, <i>MM Autopost after manual process</i>. That is when the invoice becomes payable in SAP. The payment run afterwards isn't in the log, so "within 10 days" means <i>posted</i> within 10 days: a necessary condition for paying on time, not proof of it.</dd>
+  <dt>Clock start A: arrival</dt><dd>The invoice's first event (<i>Data management</i>), i.e. when it entered accounts payable. Time before scanning is invisible. This is the default clock for every PO type in the pipeline.</dd>
+  <dt>Clock start B: goods receipt</dt><dd>The payment term is assumed to start when the goods are received. The log has no goods-receipt date, so the first <i>Wait for goods receipt</i> event with object code <code>WAIT_GR</code> is used as a proxy, read as the moment the goods receipt was booked. <code>END_WAIT_GR</code> (the wait ended without a goods receipt and the invoice went to the manual queue) doesn't count. Invoices without a <code>WAIT_GR</code> step keep clock A: they are assumed to have their goods already, and the log gives no other date. That holds for 34% of ZJD1 and 46% of ZNB1 invoices.</dd>
+  <dt>Pipeline vs this page</dt><dd>The pipeline and the other reports use clock B only for ZNB1 (decided 2026-11-19), and clock A for ZJD1. Comparing those two numbers mixes two clocks. This page applies the same clock to both types.</dd>
+  <dt>Never posted</dt><dd>Invoices without a posting are left out: 538 in ZJD1, 902 in ZNB1.</dd>
+  <dt>Missed discount</dt><dd>2% of the invoice value for each invoice posted after more than 10 days. The value is only known per PO (<code>Case_Invoice_Value_NOK</code>), so it's split evenly over the PO's posted invoices.</dd>
+</dl>
+
+<h2 id="compare"><span class="step">Result</span>Per-invoice comparison</h2>
+<div class="tbl "><table><thead><tr><th>Clock start</th><th>Type</th><th>Invoices</th><th>Median days</th><th>&gt; 10 d</th><th>Count</th><th></th><th>&gt; 30 d</th><th>Count</th><th>Missed 2% (NOK)</th></tr></thead><tbody><tr><td>From arrival (first event)</td><td><span class="code">ZJD1</span></td><td class='n'>9,821</td><td class='n'>1.18</td><td class='n'><b>17.0%</b></td><td class='n'>1,672</td><td><div class="bar"><span style="width:71.4%"></span></div></td><td class='n'><b>7.3%</b></td><td class='n'>713</td><td class='n'>30.8M</td></tr><tr><td></td><td><span class="code">ZNB1</span></td><td class='n'>12,874</td><td class='n'>4.30</td><td class='n'><b>23.9%</b></td><td class='n'>3,071</td><td><div class="bar"><span style="width:100.0%"></span></div></td><td class='n'><b>8.1%</b></td><td class='n'>1,048</td><td class='n'>27.3M</td></tr><tr><td class='hl'>From goods receipt</td><td><span class="code">ZJD1</span></td><td class='n'>9,821</td><td class='n'>0.02</td><td class='n'><b>6.4%</b></td><td class='n'>633</td><td><div class="bar"><span style="width:27.0%"></span></div></td><td class='n'><b>2.5%</b></td><td class='n'>243</td><td class='n'>10.1M</td></tr><tr><td class='hl'></td><td><span class="code">ZNB1</span></td><td class='n'>12,874</td><td class='n'>0.54</td><td class='n'><b>13.1%</b></td><td class='n'>1,687</td><td><div class="bar"><span style="width:54.9%"></span></div></td><td class='n'><b>2.3%</b></td><td class='n'>293</td><td class='n'>15.9M</td></tr></tbody></table></div>
+<div class="callout">
+<p><b>The clock decides the ranking.</b> From arrival, ZNB1 looks worse (23.9% vs 17.0% above 10 days). The pipeline's mixed setup (ZNB1 from goods receipt, ZJD1 from arrival) turns that around: 13.1% vs 17.0%. With the same goods-receipt clock for both, ZNB1 is worse again: 13.1% vs 6.4%.</p>
+<p><b>ZJD1 gains most from the goods-receipt clock.</b> Its share above 10 days falls from 17.0% to 6.4% and the missed discount from 30.8M to 10.1M NOK. Most of ZJD1's waiting is for the goods, which is a purchasing delay, not an accounts-payable one.</p>
+</div>
+
+<h3>Split by goods-receipt step (clock from goods receipt)</h3>
+<div class="tbl "><table><thead><tr><th>Invoices</th><th>Type</th><th>Count</th><th>Share of type</th><th>Median days</th><th>&gt; 10 d</th><th>&gt; 30 d</th><th>Missed 2% (NOK)</th><th>Share of type's missed</th></tr></thead><tbody><tr><td>With a goods-receipt step</td><td><span class="code">ZJD1</span></td><td class='n'>6,518</td><td class='n'>66%</td><td class='n'>0.00</td><td class='n'><b>2.2%</b></td><td class='n'>1.0%</td><td class='n'>2.1M</td><td class='n'>21%</td></tr><tr><td></td><td><span class="code">ZNB1</span></td><td class='n'>6,915</td><td class='n'>54%</td><td class='n'>0.00</td><td class='n'><b>2.2%</b></td><td class='n'>0.8%</td><td class='n'>1.1M</td><td class='n'>7%</td></tr><tr><td>Without (clock from first event)</td><td><span class="code">ZJD1</span></td><td class='n'>3,303</td><td class='n'>34%</td><td class='n'>3.33</td><td class='n'><b>14.8%</b></td><td class='n'>5.5%</td><td class='n'>8.0M</td><td class='n'>79%</td></tr><tr><td></td><td><span class="code">ZNB1</span></td><td class='n'>5,959</td><td class='n'>46%</td><td class='n'>7.28</td><td class='n'><b>25.7%</b></td><td class='n'>4.0%</td><td class='n'>14.8M</td><td class='n'>93%</td></tr></tbody></table></div>
+<div class="callout">
+<p><b>With a goods-receipt step, ZJD1 and ZNB1 behave the same:</b> 2.2% and 2.2% above 10 days. Once the goods are booked, both post almost on time.</p>
+<p><b>Without one, ZNB1 is much slower.</b> In both types 92–93% of these invoices were sent to the manual control queue (<code>CTRL1</code>) at validation and waited for a clerk. ZNB1 has more of them (46% vs 34% of invoices), they're late more often (25.7% vs 14.8%), and they cause 93% of ZNB1's missed discount. For these invoices the clock still starts at arrival, so part of their delay may be waiting for goods that the log can't show.</p>
+</div>
+
+<footer>
+<p>Built with Python (conda env <code>datasci</code>) by <code>07_report_clock_compare.py</code> from <code>output/invoices.csv</code> and <code>cases.csv</code>. Run steps 01–04 first. The ZNB1 goods-receipt figures reproduce the headline in the main reports (1,687 late invoices, 15.9M NOK).</p>
+</footer>
+</div>

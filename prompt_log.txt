@@ -24,7 +24,7 @@ You just do your magic! Give me a report in addtion to all the coding you do. an
 i want a light theme in the report and also more explanations and examples for the reader
 
 [5] 2026-10-17 09:23 UTC
-good! how did you distinguish between bos(system) and human ?
+good! how did you distinguish between bot(system) and human ?
 
 [6] 2026-10-17 09:25 UTC
 include this in the report somehow
@@ -465,3 +465,38 @@ What is the total PO-value for all znb1 (PO-level not invoice level)
 
 [142] 2026-11-22
 push and commit everything
+
+[143] 2026-11-23
+ap_process_mining
+
+[144] 2026-11-23
+Can you adapt this report as follows? file:///Users/adrian/Desktop/Python-projects/INN354/ap_process_mining/output/report.html
+
+I want a short oview of the the total PO-amount per SAP-category and all the analaisis after that shall be entirely for znb1! Keep the origianl report and add the new one instead of overwriting it!
+
+[145] 2026-11-23
+The formatting is a bit off [screenshot: table of contents shows "1 Â· Workflow", "2 Â· KPIs" etc.]
+
+[146] 2026-11-23
+if we use the same logic with ONE PO can contain several invoices how are zdj1 vs znb1 with share above 10 days and above 30 days
+
+[147] 2026-11-23
+yes!
+
+[148] 2026-11-23
+create a separte .html report which shows this comparison and also mention the clock start stop assumption!
+
+[149] 2026-11-23
+For znb1, do we know the reason for why some are sent to the manual queue? I seem not to find one based on the data set we have available!
+
+[150] 2026-11-23
+wirte a seperate report with these findings!
+
+[151] 2026-11-23
+For the ML-part could you please create a separate report?
+
+[152] 2026-11-23
+still warm?
+
+[153] 2026-11-23
+commit and push

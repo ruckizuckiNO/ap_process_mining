@@ -28,6 +28,11 @@ A single step can be rerun on its own as long as its inputs in `output/` exist (
   - `03_control_capability.py`: X̄–S / I-MR control charts with Western Electric rules and Cpu/Ppu capability → `control_chart_results.csv`, `capability*.csv`.
   - `04_prioritise.py`: combines the above → `priority.csv`; also the routing decision at *Initial validation* (`SAP_Next_Processing_Type`: `WAITGR`, `CTRL1`, `ZWMGRW`, `DELE`) → `routing.csv`, `routing_codes.csv`, and who posts on the direct validation → *Posted manually* path → `direct_posting.csv`.
   - `05_report.py`: builds `output/report.html` from the CSVs and figures; numbers in the report text come from those files via f-strings.
+  - `06_report_znb1.py`: builds `output/report_znb1.html`: total PO value per PO type, then the whole analysis for ZNB1 only. Reuses the stylesheet of `05_report.py` (extracted from its source) and leaves `report.html` untouched.
+  - `07_report_clock_compare.py`: builds `output/report_zjd1_znb1_clock.html`, ZJD1 vs ZNB1 per invoice (>10 d / >30 d, missed discount) with the clock from arrival and from goods receipt for both types, plus the clock start/stop assumptions. A side comparison only: it does not change `GR_CLOCK_PO_TYPES`.
+  - `08_report_ctrl1_drivers.py`: builds `output/report_znb1_ctrl1.html`, what drives the CTRL1 vs WAITGR routing of ZNB1 invoices at validation. The log has no reason code; the routing follows the supplier (39 suppliers ≈ always CTRL1) and sticks to the PO. Its model figures come from `output/ctrl1_model_results.csv`, so run 09 first.
+  - `09_report_ctrl1_model.py`: builds `output/report_znb1_ctrl1_model.html`, the machine-learning check of that routing (logistic regression + gradient boosting, 5-fold CV grouped by PO, permutation importance, drop-one ablation, unseen-supplier and time-split checks, inline SVG charts). Needs scikit-learn. Writes `ctrl1_model_results.csv`.
+  - `ctrl1_data.py`: the shared invoice-level dataset and feature matrix for 08 and 09.
 - `ap_process_mining.ipynb` is a self-contained copy of the whole analysis that writes to `ap_output/`. Logic changes in the scripts must be mirrored there by hand.
 - `explore*.py` are untracked scratch files; don't build on them.
 - `events.pkl`, `cases.csv`, `invoices.csv` are gitignored and rebuilt by `01_prepare.py`; the other `output/` files and figures are committed.
