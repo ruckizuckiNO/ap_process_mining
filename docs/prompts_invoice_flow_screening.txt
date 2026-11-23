@@ -17,7 +17,7 @@ Session 1 – 17 Oct 2026: analysis, report (artifact) and notebook
 I will upload the the csv as well shortly
 
 [3] 2026-10-17 07:45 UTC
-You just do your magic! Give me a report in addition to all the coding you do. and use the conda env test if you install new packages
+You just do your magic! Give me a report in addtion to all the coding you do. and use the conda env test if you install new packages
 
 [4] 2026-10-17 09:18 UTC
 i want a light theme in the report and also more explanations and examples for the reader
@@ -77,51 +77,121 @@ shouldn't you use seconds instead of hours?
 [21] 2026-10-18 21:04 UTC
 no, it's fine. but what is a log
 
-[22] 2026-10-21 21:54 UTC
+[22] 2026-10-21 15:57 UTC
+what else can I include in the CLAUDE.md?
+
+[23] 2026-10-21 19:32 UTC
+commit and push
+
+[24] 2026-10-21 19:34 UTC
+yes just write a .gitignore and add .Rhistory
+
+[25] 2026-10-21 19:35 UTC
+commit and push
+
+[26] 2026-10-21 21:54 UTC
 some add. info about the data mining project.. coming soon
 
-[23] 2026-10-21 21:56 UTC
+[27] 2026-10-21 21:56 UTC
 [Image #4] [Image #5] [Image #6] [Image #7] [Image #8] [Image #9] [Image #10]
 
-[24] 2026-10-21 21:58 UTC
+[28] 2026-10-21 21:58 UTC
 did you also change something in the report? Maybe you should
 
-[25] 2026-10-21 22:02 UTC
+[29] 2026-10-21 22:02 UTC
 yes commit and push and also include the .ipynb
 
-[26] 2026-10-21 22:02 UTC
+[30] 2026-10-21 22:02 UTC
 yes, please
 
-[27] 2026-10-21 22:05 UTC
+[31] 2026-10-21 22:05 UTC
 do you knwo which company the log is from?
 
-[28] 2026-10-21 22:07 UTC
+[32] 2026-10-21 22:07 UTC
 what is dropshipping
 
 ====================================================================================================
 Session 3 – 22 Oct 2026: process-flow one-pager
 ====================================================================================================
 
-[29] 2026-10-22 16:06 UTC
+[33] 2026-10-22 16:06 UTC
 Can you run me through some examples of this different possible porcess flows, maybe a short one-pager pdf with some illustrations.
 
-[30] 2026-10-22 16:10 UTC
+[34] 2026-10-22 16:10 UTC
 Why has case B no need to wait for the goods received?
 
-[31] 2026-10-22 16:15 UTC
+[35] 2026-10-22 16:15 UTC
 the raw log is here: /Downloads/EN event log.csv
 
-[32] 2026-10-22 16:20 UTC
+[36] 2026-10-22 16:20 UTC
 yes, annotate everything which is important
 
-[33] 2026-10-22 16:24 UTC
+[37] 2026-10-22 16:24 UTC
 commit and push
 
-[34] 2026-10-22 16:39 UTC
+[38] 2026-10-22 16:39 UTC
 Is the pdf also on git?
 
-[35] 2026-10-22 16:39 UTC
+[39] 2026-10-22 16:39 UTC
 no, it's fine
 
-[36] 2026-10-22 17:12 UTC
+[40] 2026-10-22 17:12 UTC
 what kind of pipeline are you talking about?
+
+====================================================================================================
+Session 4 – 23 Oct 2026: ZNB1 missed cash discount, invoice level, suppliers, Task 2 redesign heuristics
+====================================================================================================
+
+[41] 2026-10-23 09:29 UTC
+For ZNB1, can you create an overview of median and average lead time plus the total missed discount of 2 % for the invoices which were posted after 10 days?[Image #1]
+
+[42] 2026-10-23 09:32 UTC
+do it
+
+[43] 2026-10-23 09:38 UTC
+I am not sure if we are on the same page, but the amount lost is due to postings >10 days, meaning we miss our 2%
+
+[44] 2026-10-23 09:39 UTC
+ja, mi må tenke PO og ikke faktura.
+
+[45] 2026-10-23 09:40 UTC
+B
+
+[46] 2026-10-23 09:55 UTC
+push and commit
+
+[47] 2026-10-23 10:21 UTC
+what does make more sense? Are the separate invoices really tracable?
+
+[48] 2026-10-23 10:24 UTC
+ja, vet ikke. det var sikkert deg.... men du kan tilpasse alt til fakturanivå
+
+[49] 2026-10-23 10:29 UTC
+push and commit
+
+[50] 2026-10-23 10:34 UTC
+I need also the amount of supplier per code category. include it in the dashboard
+
+[51] 2026-10-23 11:41 UTC
+does this make sense?[Image #2]
+
+[52] 2026-10-23 11:46 UTC
+men hvor mange fakturaer var over 10 respektive 30 dager?
+
+[53] 2026-10-23 12:23 UTC
+[Image #3] [Image #4] [Image #5] [Image #6] image 6 is our problem we like to takle. What heuristics and why should we use them. Give me detailed explanation. excel would be best
+
+[54] 2026-10-23 12:28 UTC
+[Image #7] dette skal vi gjøre. Dette er det vi identiserte [Image #8]
+
+[55] 2026-10-23 12:32 UTC
+Can i have this as an excel instead of copy/paste
+
+[56] 2026-10-23 12:42 UTC
+what is GR?
+
+[57] 2026-10-23 13:37 UTC
+can you give me a text file with the complete prompts for this artifact
+
+[58] 2026-10-23 17:46 UTC
+push and commit
