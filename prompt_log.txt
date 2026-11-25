@@ -674,3 +674,9 @@ instead of PO value i need invoice value
 [205] 2026-11-25
 push and commit
 
+[206] 2026-11-25
+Can you create/update the report of the clock assumption and the assumtpion that pos are divided by amount of invoices and that we only used PO amount NOK and not the cleared one. Only for the znb1 with ctrl1 with manual posted. deleted, never posted and such excluded!
+
+[207] 2026-11-25
+push and commit
+
