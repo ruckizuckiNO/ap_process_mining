@@ -494,3 +494,156 @@ wirte a seperate report with these findings!
 
 [151] 2026-11-23
 For the ML-part could you please create a separate report?
+
+[152] 2026-11-24
+file:///Users/adrian/Desktop/Python-projects/INN354/ap_process_mining/output/report_zjd1_znb1_clock.html
+
+
+I only need the invoice clock logic with a detailed explanation of how it is calculated. Comapre ZDJ1 vs. ZNB1 as alaready done
+
+[153] 2026-11-24
+For znb1 how is the clock working? Is this feasible? I mean going or ignoring wait gr?
+
+[154] 2026-11-24
+Okay. then please document this and use the same logic for the zdj1_znb1 clock file
+
+[155] 2026-11-24
+And please a separate document for the ones which ended up directly in CTR1
+
+[156] 2026-11-24
+One important caveat, also in the report. These invoices have no goods-receipt date, so their clock starts at arrival. Because ZNB1 bunches just under the 10-day limit, a few days of unseen waiting for goods would change the picture:
+
+at arrival to what where?
+
+[157] 2026-11-24
+Okay, so it is an invoice in the system when it enters CTRL1?
+
+[158] 2026-11-24
+Okay, So give me the shares for znb1 only manual que Ctrl1 with greater 10 days, greater 30 days
+
+[159] 2026-11-24
+Did you remove the ones wich were never posted or removed? also in the report_ctrl1_direct.html?
+
+[160] 2026-11-24
+But isn't most likely the amount of invoices generating the time passed from ctr1 to posted? We assume suppliers send invoices when the have delivered the goods
+
+[161] 2026-11-24
+note the comparisono with the good receipts route. state the median and 0.9 percentile
+
+[162] 2026-11-24
+what are variants that take a long time on the goods-receipt route?
+
+[163] 2026-11-24
+Okay. let's look at the clocks where we have end_wait_gr until posted for znb1
+
+[164] 2026-11-24
+Can you change all the analysis and we look only at 
+znb1
+ctrl1 which have a END_WAIT_GR and count form END_WAIT_GR to posted
+
+[165] 2026-11-24
+what is the pattern for the ones ctrl1. What is the first come first serve theory and how can we support it?
+
+[166] 2026-11-24
+Ok, look at the manual ones
+- only the suppliers which are 100% via CTRL1
+- only the ones which goe from ctrl1 to posted
+- overview of invoice amount total
+- overview of missed discount
+- overview of share later 30 days
+
+[167] 2026-11-24
+I need a suitable grapth and table i can use furhter!
+
+[168] 2026-11-24
+zjd1 the ones which have goods receipt step can we simulate a sensible distribution of the the time from goods receipt until posted which we can use as an intervals for znb1 manual ones?
+
+[169] 2026-11-24
+create an overview we can use for the presentation
+
+[170] 2026-11-24
+I need the same analysis with a filter on PO-value below 1.75 MNOK
+
+[171] 2026-11-24
+The users who handle these 35 100% only manual suppliers. how many postings do they make on a typical work day. Overview please in a chart
+
+[172] 2026-11-24
+thake all other postings by the same users accross all orders into account
+
+[173] 2026-11-24
+no, give me only work days monday to friday
+
+[174] 2026-11-24
+so correct if handle the ones below 1.75 mnok automatically and assume that 5.5% need involvment of a clerk they would have around 2930 less to handle manually?
+
+[175] 2026-11-24
+My idea was that 5.5% of the zdj1 way from wGR to posted are above 10 days. If we automate and treat the POs from zNB1 below 1.75 mnok as zdj1 ones we would assume that .945 would also be having troubles and therefore be posted later than 10 days
+
+[176] 2026-11-24
+summerize these findings
+
+[177] 2026-11-24
+is user1341 working everyday or just on some days or for few hours each day. Set up an overview and look at all the his logs
+
+[178] 2026-11-24
+what is the pattern for znb1 related postings and user1341?
+
+[179] 2026-11-24
+Yes! and also i need to know the total postings he does for the 100% manual suppliers during his active time and how many per day he works
+
+[180] 2026-11-24
+a short but important sanity check. In the case where one PO has several invoices do these invoices have several ctrl1 stamps respectively start times?
+[181] 2026-11-25
+Can I get a figure which shows the total PO-value per category, like zdj1, znb1 and so on?
+
+[182] 2026-11-25
+And a PO-value distribution for zjd1 and znb1 respectively
+
+[183] 2026-11-25
+maybe with boxplot?
+
+[184] 2026-11-25
+the path data mgmt - validation - manual post is the one with ctrl1 for znb1 correct?
+
+[185] 2026-11-25
+and how many invoices does znb1 have in total
+
+[186] 2026-11-25
+I need an overview of the always manual suppliers. 100 % directly to ctrl1
+
+[187] 2026-11-25
+that's good but i need an additonal graph showing only the invoice amount and not missed discount or invoice postet after xxx
+
+[188] 2026-11-25
+znb1_always_manual_pareto_top4
+
+and this changed to total invoice amount no, missed discount
+
+[189] 2026-11-25
+keep including suppliers until we cross 80% (pareto)
+
+[190] 2026-11-25
+why is this graph saying 25 always manual suppliers and this one znb1_ctrl1_100pct_suppliers_amount 35
+
+[191] 2026-11-25
+yes!
+
+[192] 2026-11-25
+Okay, looking only at the following
+- 100 % manual suppliers only
+- deleted and never posted invoices disregarded
+
+I need a graph showing the potential exposure of missed cash discount (2%) for the ones > 10 days.
+
+[193] 2026-11-25
+now we suddenly have 36 suppliers....
+
+[194] 2026-11-25
+remove this one
+
+[195] 2026-11-25
+no it's fine. now i need an overview of the share of missed discounts if we would have had a cut at PO-value of MNOK 1.5, 1.75, 2 and 2.25 repectively
+
+[196] 2026-11-25
+commit and push everything
+

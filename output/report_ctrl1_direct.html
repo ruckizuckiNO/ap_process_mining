@@ -1,0 +1,186 @@
+<meta charset="utf-8">
+<title>Direct to CTRL1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (~72ch) with wide figure/table breakouts; steps follow the assignment order */
+:root {
+  --bg: #f6f8f7; --surface: #ffffff; --ink: #16201c; --muted: #5a6a63; --line: #d9e1dd;
+  --accent: #1f6f5c; --accent-soft: #e3efea; --ok: #2c7a4b; --warn: #a8670f; --bad: #b0333f;
+  --ok-bg: #e5f2ea; --warn-bg: #fbf0dc; --bad-bg: #f8e4e6; --plate: #ffffff;
+  --f-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+/* Light theme only, regardless of the viewer's system setting */
+:root, :root[data-theme="dark"] { color-scheme: light; }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.6 var(--f-body); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.prose { max-width: 72ch; }
+header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 8px; }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 600 clamp(32px, 5vw, 46px)/1.1 var(--f-display); margin: 12px 0 10px; text-wrap: balance; }
+h2 { font: 600 28px/1.2 var(--f-display); margin: 56px 0 6px; text-wrap: balance; }
+h2 .step { font: 500 13px/1 var(--f-mono); color: var(--accent); display: block; margin-bottom: 8px; letter-spacing: .06em; text-transform: uppercase; }
+h3 { font: 600 18px/1.3 var(--f-body); margin: 32px 0 6px; }
+h4 { font: 600 14px/1.3 var(--f-body); margin: 20px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+p, li { color: var(--ink); }
+.lede { font-size: 17px; color: var(--muted); max-width: 70ch; margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 18px; font: 13px/1.4 var(--f-mono); color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; }
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 18px; }
+.finding { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; min-width: 0; }
+.finding .k { font: 600 26px/1.1 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+.finding p { margin: 6px 0 0; font-size: 14.5px; }
+.callout { background: var(--accent-soft); border-radius: 8px; padding: 14px 18px; margin: 18px 0; max-width: 80ch; }
+.callout p { margin: 4px 0; }
+.code { font: 500 12.5px/1 var(--f-mono); background: var(--accent-soft); color: var(--accent); padding: 3px 6px; border-radius: 4px; white-space: nowrap; }
+.tbl { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th { text-align: left; font: 600 11.5px/1.3 var(--f-body); text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.n { text-align: right; font-family: var(--f-mono); font-size: 12.5px; white-space: nowrap; }
+td.ok { background: var(--ok-bg); } td.warn { background: var(--warn-bg); } td.bad { background: var(--bad-bg); }
+td.n.ok { color: var(--ok); } td.n.warn { color: var(--warn); } td.n.bad { color: var(--bad); }
+td small { color: var(--muted); font-family: var(--f-mono); font-size: 11px; }
+.pill { display: inline-block; font: 500 10.5px/1 var(--f-mono); padding: 3px 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); vertical-align: 1px; }
+.pill.sys { border-color: var(--accent); color: var(--accent); }
+.pill.ok { border-color: var(--ok); color: var(--ok); margin-top: 4px; }
+figure { margin: 18px 0; }
+.plate { background: var(--plate); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; }
+.plate img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+.two > * { min-width: 0; }
+details.type { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 8px 0; }
+details.type > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; list-style: none; }
+details.type > summary::-webkit-details-marker { display: none; }
+details.type > summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+details.type[open] > summary::before { transform: rotate(90deg); }
+details.type > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+details.type .meta { margin-left: auto; font: 12px var(--f-mono); color: var(--muted); }
+.type-body { padding: 0 16px 16px; border-top: 1px solid var(--line); }
+ol.trace { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+ol.trace li { font-size: 12px; background: var(--accent-soft); border-radius: 4px; padding: 2px 6px; }
+ol.trace li + li::before { content: "→ "; color: var(--muted); }
+.variants td:nth-child(2) { min-width: 280px; }
+ul.tight li { margin: 4px 0; }
+.rec { counter-reset: rec; list-style: none; padding: 0; display: grid; gap: 12px; max-width: 80ch; }
+.rec li { counter-increment: rec; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px 14px 56px; position: relative; }
+.rec li::before { content: counter(rec); position: absolute; left: 18px; top: 12px; font: 600 24px/1 var(--f-display); color: var(--accent); }
+dl.gloss { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 8px 20px; margin: 14px 0; max-width: 90ch; }
+dl.gloss dt { font-weight: 600; }
+dl.gloss dd { margin: 0; color: var(--ink); }
+@media (max-width: 560px) { dl.gloss { grid-template-columns: 1fr; gap: 2px; } dl.gloss dd { margin-bottom: 10px; } }
+.example { border: 1px dashed var(--accent); border-radius: 8px; padding: 14px 18px; margin: 18px 0; background: var(--surface); max-width: 90ch; }
+.example > .lbl { font: 500 11.5px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.example p { margin: 8px 0; }
+.example .tbl { margin: 10px 0; }
+.math { font: 13px/1.7 var(--f-mono); background: var(--accent-soft); border-radius: 6px; padding: 10px 14px; overflow-x: auto; white-space: pre; }
+tr.sys td { color: var(--muted); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; margin: 14px 0 0; padding: 0; list-style: none; }
+.toc a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--line); }
+.toc a:hover, .toc a:focus-visible { border-bottom-color: var(--accent); }
+code { font: 12.5px var(--f-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }
+footer { margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px; font-size: 13px; color: var(--muted); }
+/* Annotations from the routing analysis: amber rule so they read as later notes */
+.note { border-left: 3px solid var(--warn); background: var(--warn-bg); border-radius: 0 8px 8px 0; padding: 10px 16px; margin: 14px 0; max-width: 90ch; }
+.note > .lbl { font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warn); }
+.note p { margin: 6px 0; }
+.note .tbl { margin: 10px 0; }
+.finding.new { border-color: var(--warn); }
+.finding.new .k { color: var(--warn); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.bar { background: var(--accent-soft); border-radius: 3px; height: 10px; min-width: 80px; }
+.bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Accounts payable · Process mining case · Manual queue</div>
+  <h1>Invoices sent straight to the manual queue</h1>
+  <p class="lede">ZJD1 and ZNB1 invoices that SAP routes to the manual control queue (<code>CTRL1</code>) at their first <i>Initial validation</i>, skipping the goods-receipt check: how they move, how long they take, and what they cost in missed discount.</p>
+  <div class="facts">
+    <span><b>3,304</b> ZJD1 invoices (32% of the type)</span>
+    <span><b>5,993</b> ZNB1 invoices (44%)</span>
+    <span>limits <b>10 d</b> and <b>30 d</b></span>
+  </div>
+</header>
+
+<h2 id="answer">Short answer</h2>
+<div class="findings">
+  <div class="finding"><div class="k">11.1% vs 22.9%</div><p>of these invoices take longer than 10 days in ZJD1 and ZNB1, against 4.3% and 5.6% of all other invoices of the type.</p></div>
+  <div class="finding"><div class="k">50% / 80%</div><p>of the type's missed discount (5.0M and 12.7M NOK) comes from these invoices.</p></div>
+  <div class="finding"><div class="k">83% / 87%</div><p>go from validation straight to <i>Posted manually</i>. The lead time is almost all waiting for a clerk.</p></div>
+  <div class="finding"><div class="k">Caveat</div><p>Only 1.3% of the ZNB1 invoices have a goods-receipt step, so their clock starts at arrival and any wait for goods is hidden. If each of these invoices had 5 days of unseen goods wait, ZNB1's queue would be no later than the rest of ZNB1 (<a href="#hidden">section 6</a>).</p></div>
+</div>
+
+<h2 id="define"><span class="step">1</span>Which invoices, and how the clock runs</h2>
+<ol class="rec">
+  <li><b>Selection.</b> One invoice = one <code>PO_ID</code> × <code>SAP_PO_No</code>. An invoice is included if the routing code (<code>SAP_Next_Processing_Type</code>) on its <b>first</b> <i>Initial validation</i> is <code>CTRL1</code>. Invoices that reach the queue later (e.g. after an <code>END_WAIT_GR</code> on the goods-receipt road) are not included.</li>
+  <li><b>Clock start.</b> The same rule as in the invoice-clock report: the first <i>Wait for goods receipt</i> event with <code>WAIT_GR</code>, else the invoice's first event. For these invoices that is almost always the first event, <i>Data management</i> (arrival in AP); validation follows a median 1 seconds later (ZNB1). The few with a later <code>WAIT_GR</code> step (0.8% in ZJD1, 1.3% in ZNB1) went back through the goods-receipt check after a restart.</li>
+  <li><b>Clock stop.</b> The first posting (<i>MM Posted Automatically</i>, <i>Posted manually</i>, <i>MM Autopost after manual process</i>). Days = stop − start in seconds / 86,400, calendar days.</li>
+  <li><b>Base and discount.</b> Only posted invoices count. Late = more than 10 (or 30) days. The missed 2% uses the PO value split evenly over all the PO's posted invoices, the same rule as in the other reports.</li>
+</ol>
+
+<h2 id="overview"><span class="step">2</span>ZJD1 vs ZNB1</h2>
+<div class="tbl "><table><thead><tr><th></th><th><span class="code">ZJD1</span></th><th><span class="code">ZNB1</span></th></tr></thead><tbody><tr><td>All invoices of the type</td><td class='n'>10,359</td><td class='n'>13,776</td></tr><tr><td><b>Sent straight to CTRL1</b></td><td class='n'><b>3,304</b> (32%)</td><td class='n'><b>5,993</b> (44%)</td></tr><tr><td>on POs</td><td class='n'>1,709</td><td class='n'>1,936</td></tr><tr><td>Never posted (left out)</td><td class='n'>243</td><td class='n'>383</td></tr><tr><td>Posted (the base below)</td><td class='n'>3,061</td><td class='n'>5,610</td></tr><tr><td>Have a WAIT_GR step later</td><td class='n'>0.8%</td><td class='n'>1.3%</td></tr><tr><td>Median days to posting</td><td class='n'>3.0</td><td class='n'>7.2</td></tr><tr><td>75th / 90th percentile, days</td><td class='n'>6.8 / 11.0</td><td class='n'>9.2 / 13.3</td></tr><tr><td><b>Share &gt; 10 days</b></td><td class='n'><b>11.1%</b> (339)</td><td class='n'><b>22.9%</b> (1,282)</td></tr><tr><td><b>Share &gt; 30 days</b></td><td class='n'><b>3.7%</b> (113)</td><td class='n'><b>1.6%</b> (92)</td></tr><tr><td>Share &gt; 10 days, all other invoices of the type</td><td class='n'>4.3%</td><td class='n'>5.6%</td></tr><tr><td>Missed 2% discount (NOK)</td><td class='n'>5.0M</td><td class='n'>12.7M</td></tr><tr><td>Share of the type's missed discount</td><td class='n'>50%</td><td class='n'>80%</td></tr><tr><td>Share of the type's late invoices</td><td class='n'>54%</td><td class='n'>76%</td></tr></tbody></table></div>
+<div class="callout">
+<p><b>ZNB1 sends more invoices to the queue and handles them more slowly.</b> 44% of ZNB1 invoices go there against 32% of ZJD1, and 22.9% of them are late against 11.1%. Together they cause 80% of ZNB1's missed discount.</p>
+</div>
+
+<h3>What happens right after validation</h3>
+<div class="tbl "><table><thead><tr><th>Next step</th><th>ZJD1</th><th>ZNB1</th></tr></thead><tbody><tr><td>Posted manually</td><td class='n'>82.7%</td><td class='n'>87.6%</td></tr><tr><td>Invoice document deleted</td><td class='n'>6.8%</td><td class='n'>5.6%</td></tr><tr><td>Sent for approval</td><td class='n'>6.4%</td><td class='n'>3.1%</td></tr><tr><td>Transfer to MM</td><td class='n'>2.4%</td><td class='n'>1.6%</td></tr><tr><td>Data management</td><td class='n'>0.9%</td><td class='n'>1.4%</td></tr><tr><td>Other</td><td class='n'>0.8%</td><td class='n'>0.7%</td></tr></tbody></table></div>
+<p class="prose">The path is short: in most cases a clerk posts the invoice, and nothing else happens in between. Approval loops, transfers to MM and deletions are the exceptions.</p>
+
+<h3>How long they take</h3>
+<div class="tbl "><table><thead><tr><th>Days to posting</th><th>ZJD1</th><th></th><th>ZNB1</th><th></th></tr></thead><tbody><tr><td>≤ 1 day</td><td class='n'>28.7%</td><td><div class="bar"><span style="width:68.9%"></span></div></td><td class='n'>14.4%</td><td><div class="bar"><span style="width:34.6%"></span></div></td></tr><tr><td>1–3 days</td><td class='n'>21.0%</td><td><div class="bar"><span style="width:50.3%"></span></div></td><td class='n'>11.3%</td><td><div class="bar"><span style="width:27.2%"></span></div></td></tr><tr><td>3–5 days</td><td class='n'>17.4%</td><td><div class="bar"><span style="width:41.7%"></span></div></td><td class='n'>9.8%</td><td><div class="bar"><span style="width:23.4%"></span></div></td></tr><tr><td>5–10 days</td><td class='n'>21.9%</td><td><div class="bar"><span style="width:52.5%"></span></div></td><td class='n'>41.7%</td><td><div class="bar"><span style="width:100.0%"></span></div></td></tr><tr><td>10–30 days</td><td class='n'>7.4%</td><td><div class="bar"><span style="width:17.7%"></span></div></td><td class='n'>21.2%</td><td><div class="bar"><span style="width:50.9%"></span></div></td></tr><tr><td>&gt; 30 days</td><td class='n'>3.7%</td><td><div class="bar"><span style="width:8.9%"></span></div></td><td class='n'>1.6%</td><td><div class="bar"><span style="width:3.9%"></span></div></td></tr></tbody></table></div>
+<p class="prose">ZJD1 spreads out, with 29% posted within a day. ZNB1 bunches at 5–10 days (42%, median 7.2 days), which fits a queue that is cleared about once a week, and 21% slip just past the 10-day limit into 10–30 days.</p>
+
+<h2 id="who"><span class="step">3</span>Who posts them</h2>
+<div class="tbl "><table><thead><tr><th>Type</th><th>Posted by</th><th>Invoices</th><th>Share</th><th>Median days</th><th>&gt; 10 d</th><th>Missed 2% (NOK)</th></tr></thead><tbody><tr><td><span class="code">ZJD1</span></td><td>User1177</td><td class='n'>726</td><td class='n'>24%</td><td class='n'>0.9</td><td class='n'>6%</td><td class='n'>1.0M</td></tr><tr><td></td><td>User1482</td><td class='n'>587</td><td class='n'>19%</td><td class='n'>2.9</td><td class='n'>5%</td><td class='n'>0.2M</td></tr><tr><td></td><td>User1341</td><td class='n'>420</td><td class='n'>14%</td><td class='n'>7.4</td><td class='n'>17%</td><td class='n'>1.2M</td></tr><tr><td></td><td>User400</td><td class='n'>262</td><td class='n'>9%</td><td class='n'>2.3</td><td class='n'>13%</td><td class='n'>0.5M</td></tr><tr><td></td><td>User394</td><td class='n'>261</td><td class='n'>9%</td><td class='n'>1.1</td><td class='n'>3%</td><td class='n'>0.1M</td></tr><tr><td><span class="code">ZNB1</span></td><td>User1341</td><td class='n'>2,615</td><td class='n'>47%</td><td class='n'>8.2</td><td class='n'>30%</td><td class='n'>8.7M</td></tr><tr><td></td><td>User1482</td><td class='n'>523</td><td class='n'>9%</td><td class='n'>5.3</td><td class='n'>25%</td><td class='n'>0.9M</td></tr><tr><td></td><td>User1564</td><td class='n'>464</td><td class='n'>8%</td><td class='n'>1.6</td><td class='n'>7%</td><td class='n'>0.1M</td></tr><tr><td></td><td>User400</td><td class='n'>402</td><td class='n'>7%</td><td class='n'>2.0</td><td class='n'>8%</td><td class='n'>0.3M</td></tr><tr><td></td><td>User712</td><td class='n'>387</td><td class='n'>7%</td><td class='n'>6.8</td><td class='n'>29%</td><td class='n'>0.9M</td></tr></tbody></table></div>
+<div class="prose"><p>93% (ZJD1) and 96% (ZNB1) of the postings are made by people. In ZNB1, User1341 posts 47% of these invoices alone; in ZJD1 the busiest clerk, User1177, posts 24%. How fast the queue moves depends heavily on a few people (see <code>notes/znb1_why_manual_route_stalls.txt</code> for the ZNB1 queue in detail).</p></div>
+
+<h2 id="suppliers"><span class="step">4</span>Suppliers with the most missed discount</h2>
+<div class="tbl "><table><thead><tr><th>Type</th><th>Supplier</th><th>Invoices</th><th>&gt; 10 d</th><th>Missed 2% (NOK)</th><th>Share of type's CTRL1 missed</th></tr></thead><tbody><tr><td><span class="code">ZJD1</span></td><td>Supplier378</td><td class='n'>326</td><td class='n'>16%</td><td class='n'>1.1M</td><td class='n'>21%</td></tr><tr><td></td><td>Supplier373</td><td class='n'>34</td><td class='n'>76%</td><td class='n'>1.0M</td><td class='n'>19%</td></tr><tr><td></td><td>Supplier282</td><td class='n'>74</td><td class='n'>30%</td><td class='n'>0.3M</td><td class='n'>6%</td></tr><tr><td></td><td>Supplier510</td><td class='n'>30</td><td class='n'>57%</td><td class='n'>0.2M</td><td class='n'>4%</td></tr><tr><td></td><td>Supplier161</td><td class='n'>48</td><td class='n'>44%</td><td class='n'>0.2M</td><td class='n'>4%</td></tr><tr><td><span class="code">ZNB1</span></td><td>Supplier381</td><td class='n'>400</td><td class='n'>41%</td><td class='n'>4.5M</td><td class='n'>35%</td></tr><tr><td></td><td>Supplier361</td><td class='n'>1,055</td><td class='n'>27%</td><td class='n'>2.3M</td><td class='n'>18%</td></tr><tr><td></td><td>Supplier380</td><td class='n'>233</td><td class='n'>47%</td><td class='n'>0.8M</td><td class='n'>6%</td></tr><tr><td></td><td>Supplier362</td><td class='n'>265</td><td class='n'>25%</td><td class='n'>0.7M</td><td class='n'>5%</td></tr><tr><td></td><td>Supplier363</td><td class='n'>140</td><td class='n'>39%</td><td class='n'>0.6M</td><td class='n'>4%</td></tr></tbody></table></div>
+<p class="prose">The five largest suppliers by missed discount account for 55% (ZJD1) and 69% (ZNB1) of the missed discount on these invoices. Why a supplier's invoices go to <code>CTRL1</code> at all is in <a href="report_znb1_ctrl1.html">Why do ZNB1 invoices go to the manual queue?</a></p>
+
+<h2 id="month"><span class="step">5</span>By month of arrival</h2>
+<div class="tbl "><table><thead><tr><th>Month</th><th>ZJD1 invoices</th><th>Median days</th><th>&gt; 10 d</th><th>ZNB1 invoices</th><th>Median days</th><th>&gt; 10 d</th></tr></thead><tbody><tr><td>Jul 2025</td><td class='n'>137</td><td class='n'>2.2</td><td class='n'>19%</td><td class='n'>232</td><td class='n'>7.3</td><td class='n'>25%</td></tr><tr><td>Aug 2025</td><td class='n'>421</td><td class='n'>3.2</td><td class='n'>14%</td><td class='n'>818</td><td class='n'>10.0</td><td class='n'>51%</td></tr><tr><td>Sep 2025</td><td class='n'>583</td><td class='n'>3.9</td><td class='n'>11%</td><td class='n'>1,348</td><td class='n'>7.5</td><td class='n'>22%</td></tr><tr><td>Oct 2025</td><td class='n'>781</td><td class='n'>2.6</td><td class='n'>7%</td><td class='n'>1,366</td><td class='n'>4.5</td><td class='n'>11%</td></tr><tr><td>Nov 2025</td><td class='n'>806</td><td class='n'>2.9</td><td class='n'>12%</td><td class='n'>954</td><td class='n'>6.6</td><td class='n'>15%</td></tr><tr><td>Dec 2025</td><td class='n'>211</td><td class='n'>2.1</td><td class='n'>9%</td><td class='n'>459</td><td class='n'>7.3</td><td class='n'>19%</td></tr><tr><td>Jan 2026</td><td class='n'>74</td><td class='n'>4.4</td><td class='n'>26%</td><td class='n'>288</td><td class='n'>7.5</td><td class='n'>44%</td></tr><tr><td>Feb 2026</td><td class='n'>48</td><td class='n'>1.0</td><td class='n'>0%</td><td class='n'>145</td><td class='n'>5.6</td><td class='n'>12%</td></tr></tbody></table></div>
+<p class="prose">Months with fewer than 30 posted invoices in either type are left out. The slow summer months fit the holiday period; from October the queue moves faster.</p>
+
+<h2 id="compare-gr"><span class="step">6</span>Comparison with the goods-receipt road</h2>
+<div class="prose"><p>Each time segment as <b>median / 90th percentile</b> in days, for posted invoices by route at their first validation. <code>WAITGR</code> is the goods-receipt road (goods-receipt check, then usually automatic posting); <code>CTRL1</code> is the manual queue covered by this report.</p></div>
+<div class="tbl "><table><thead><tr><th>Days: median / 90th percentile</th><th><span class="code">ZJD1</span> <code>WAITGR</code></th><th><span class="code">ZJD1</span> <code>CTRL1</code></th><th><span class="code">ZNB1</span> <code>WAITGR</code></th><th><span class="code">ZNB1</span> <code>CTRL1</code></th></tr></thead><tbody><tr><td>Posted invoices</td><td class='n'>6,704</td><td class='n'>3,061</td><td class='n'>7,154</td><td class='n'>5,610</td></tr><tr><td>with a goods-receipt step (WAIT_GR)</td><td class='n'>97%</td><td class='n'>1%</td><td class='n'>96%</td><td class='n'>1%</td></tr><tr><td>Arrival → goods receipt booked</td><td class='n'>0.0 / 22.0</td><td class='n'>not in log</td><td class='n'>1.0 / 30.0</td><td class='n'>not in log</td></tr><tr><td>Goods receipt booked → posting</td><td class='n'>0.0 / 1.5</td><td class='n'>not in log</td><td class='n'>0.0 / 1.1</td><td class='n'>not in log</td></tr><tr><td><b>Arrival → posting</b></td><td class='n'><b>0.0 / 26.1</b></td><td class='n'><b>3.1 / 11.2</b></td><td class='n'><b>2.0 / 37.1</b></td><td class='n'><b>7.2 / 13.3</b></td></tr><tr><td>Share &gt; 10 days, arrival → posting</td><td class='n'>19.3%</td><td class='n'>11.3%</td><td class='n'>23.7%</td><td class='n'>23.6%</td></tr><tr><td><b>Invoice clock</b> (goods receipt or arrival → posting)</td><td class='n'><b>0.0 / 2.7</b></td><td class='n'><b>3.0 / 11.0</b></td><td class='n'><b>0.0 / 2.9</b></td><td class='n'><b>7.2 / 13.3</b></td></tr><tr><td>Share &gt; 10 days, invoice clock</td><td class='n'>3.9%</td><td class='n'>11.1%</td><td class='n'>4.9%</td><td class='n'>22.9%</td></tr><tr><td>Share &gt; 30 days, invoice clock</td><td class='n'>1.7%</td><td class='n'>3.7%</td><td class='n'>2.4%</td><td class='n'>1.6%</td></tr></tbody></table></div>
+<div class="callout">
+<p><b>Measured from arrival, both ZNB1 roads miss 10 days about equally often</b> (23.7% vs 23.6%), <b>but in different ways.</b> The goods-receipt road is usually fast with a long tail: 2.0 / 37.1 days. Almost all of that is waiting for the goods receipt (1.0 / 30.0 days); once it's booked, posting follows almost at once (0.0 / 1.1 days). The manual queue is consistently slow with a short tail: 7.2 / 13.3 days, all of it time to posting, as there's no goods-receipt step.</p>
+<p><b>With the invoice clock</b> the goods-receipt road drops to 0.0 / 2.9 days (4.9% over 10 days), while the manual queue stays at 7.2 / 13.3 days (22.9%).</p>
+</div>
+
+<h2 id="drivers"><span class="step">7</span>What drives the time in the ZNB1 queue?</h2>
+<div class="prose"><p>Time from validation (entering <code>CTRL1</code>) to posting, for the 5,385 ZNB1 queue invoices posted by a person. If the number of invoices in the queue drove the wait, invoices entering a long queue would wait longer.</p></div>
+<div class="tbl "><table><thead><tr><th>Open ZNB1 queue items when the invoice entered</th><th>Range</th><th>Median days</th><th>90th pct</th><th>&gt; 10 d</th></tr></thead><tbody><tr><td>Smallest fifth</td><td class='n'>1–148</td><td class='n'>7.4</td><td class='n'>13.6</td><td class='n'>27%</td></tr><tr><td>2nd</td><td class='n'>149–214</td><td class='n'>6.4</td><td class='n'>12.8</td><td class='n'>24%</td></tr><tr><td>3rd</td><td class='n'>215–253</td><td class='n'>5.3</td><td class='n'>12.0</td><td class='n'>17%</td></tr><tr><td>4th</td><td class='n'>254–317</td><td class='n'>7.5</td><td class='n'>13.6</td><td class='n'>30%</td></tr><tr><td>Largest fifth</td><td class='n'>318–479</td><td class='n'>7.4</td><td class='n'>11.2</td><td class='n'>15%</td></tr></tbody></table></div>
+<div class="prose">
+<p><b>Queue size doesn't explain the wait.</b> The rank correlation between queue size at entry and the wait is 0.01. Week by week, the number of new queue invoices and the median wait correlate at -0.09. The busiest week (22 Sep 2025, 369 invoices) had a median wait of 8.3 days; the slowest week (18 Aug 2025) had 186 invoices and a median of 13.3 days.</p>
+<p><b>Who posts it does:</b></p>
+</div>
+<div class="tbl "><table><thead><tr><th>Posted by</th><th>Invoices</th><th>Share</th><th>Median days</th><th>90th pct</th><th>&gt; 10 d</th></tr></thead><tbody><tr><td>User1341</td><td class='n'>2,615</td><td class='n'>49%</td><td class='n'>8.2</td><td class='n'>13.3</td><td class='n'>30%</td></tr><tr><td>User1482</td><td class='n'>523</td><td class='n'>10%</td><td class='n'>5.3</td><td class='n'>15.1</td><td class='n'>25%</td></tr><tr><td>User1564</td><td class='n'>464</td><td class='n'>9%</td><td class='n'>1.7</td><td class='n'>7.9</td><td class='n'>7%</td></tr><tr><td>User400</td><td class='n'>402</td><td class='n'>7%</td><td class='n'>2.1</td><td class='n'>9.0</td><td class='n'>8%</td></tr><tr><td>User712</td><td class='n'>387</td><td class='n'>7%</td><td class='n'>6.9</td><td class='n'>13.9</td><td class='n'>29%</td></tr></tbody></table></div>
+<p class="prose">The wait is about the same whichever weekday the invoice arrives, which fits a queue worked through on a roughly weekly rhythm, mostly by one person, rather than a queue that grows with volume. Staff availability (summer holidays, see section 5) matters more than the number of invoices.</p>
+
+<h2 id="hidden"><span class="step">8</span>Assumption: invoices come after delivery</h2>
+<div class="prose">
+<p><b>Assumption used:</b> suppliers send the invoice after delivering the goods. Then a manual-queue invoice has its goods from the start, the clock from arrival is fair, and its whole lead time is accounts-payable time.</p>
+<p><b>What speaks against it:</b> on the goods-receipt road the goods receipt is booked a median 1.0 days after the invoice arrives in ZNB1 (90th percentile 30.0), and 0.0 days in ZJD1 (90th percentile 22.0). So either some invoices do arrive before the goods, or the warehouse books the receipt late. If clerks waited for that too, part of the queue time would be goods wait. Check: how the figures change if each invoice's clock started a fixed number of days later.</p>
+</div>
+<div class="tbl "><table><thead><tr><th>Assumed unseen goods wait</th><th>ZJD1 &gt; 10 d</th><th>ZJD1 missed</th><th>ZNB1 &gt; 10 d</th><th>ZNB1 missed</th></tr></thead><tbody><tr><td>None (as measured)</td><td class='n'>11.1%</td><td class='n'>5.0M</td><td class='n'>22.9%</td><td class='n'>12.7M</td></tr><tr><td>1 day</td><td class='n'>10.0%</td><td class='n'>4.5M</td><td class='n'>18.4%</td><td class='n'>10.5M</td></tr><tr><td>3 days</td><td class='n'>8.3%</td><td class='n'>4.0M</td><td class='n'>12.1%</td><td class='n'>6.7M</td></tr><tr><td>5 days</td><td class='n'>6.3%</td><td class='n'>3.1M</td><td class='n'>5.3%</td><td class='n'>3.2M</td></tr><tr><td>7 days</td><td class='n'>5.8%</td><td class='n'>2.7M</td><td class='n'>4.7%</td><td class='n'>2.9M</td></tr></tbody></table></div>
+<div class="callout"><p><b>Under the assumption, the measured figures stand</b> (22.9% of ZNB1 queue invoices over 10 days). The check shows why the assumption matters: most ZNB1 queue invoices are posted 5–10 days after arrival (42%), so 5 days of goods wait would bring the late share (5.3%) down to the level of all other ZNB1 invoices (5.6%). Whether clerks hold invoices for missing goods should be confirmed with the AP team.</p></div>
+
+<footer>
+<p>Built with Python (conda env <code>datasci</code>) by <code>11_report_ctrl1_direct.py</code> from <code>output/events.pkl</code>, <code>invoices.csv</code> and <code>cases.csv</code>. Clock rules: <a href="report_invoice_clock.html">The invoice clock</a> and <code>docs/assumptions.html</code>.</p>
+</footer>
+</div>

@@ -1,0 +1,230 @@
+<meta charset="utf-8">
+<title>Invoice Clock ZJD1 ZNB1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (~72ch) with wide figure/table breakouts; steps follow the assignment order */
+:root {
+  --bg: #f6f8f7; --surface: #ffffff; --ink: #16201c; --muted: #5a6a63; --line: #d9e1dd;
+  --accent: #1f6f5c; --accent-soft: #e3efea; --ok: #2c7a4b; --warn: #a8670f; --bad: #b0333f;
+  --ok-bg: #e5f2ea; --warn-bg: #fbf0dc; --bad-bg: #f8e4e6; --plate: #ffffff;
+  --f-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+/* Light theme only, regardless of the viewer's system setting */
+:root, :root[data-theme="dark"] { color-scheme: light; }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.6 var(--f-body); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.prose { max-width: 72ch; }
+header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 8px; }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 600 clamp(32px, 5vw, 46px)/1.1 var(--f-display); margin: 12px 0 10px; text-wrap: balance; }
+h2 { font: 600 28px/1.2 var(--f-display); margin: 56px 0 6px; text-wrap: balance; }
+h2 .step { font: 500 13px/1 var(--f-mono); color: var(--accent); display: block; margin-bottom: 8px; letter-spacing: .06em; text-transform: uppercase; }
+h3 { font: 600 18px/1.3 var(--f-body); margin: 32px 0 6px; }
+h4 { font: 600 14px/1.3 var(--f-body); margin: 20px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+p, li { color: var(--ink); }
+.lede { font-size: 17px; color: var(--muted); max-width: 70ch; margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 18px; font: 13px/1.4 var(--f-mono); color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; }
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 18px; }
+.finding { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; min-width: 0; }
+.finding .k { font: 600 26px/1.1 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+.finding p { margin: 6px 0 0; font-size: 14.5px; }
+.callout { background: var(--accent-soft); border-radius: 8px; padding: 14px 18px; margin: 18px 0; max-width: 80ch; }
+.callout p { margin: 4px 0; }
+.code { font: 500 12.5px/1 var(--f-mono); background: var(--accent-soft); color: var(--accent); padding: 3px 6px; border-radius: 4px; white-space: nowrap; }
+.tbl { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th { text-align: left; font: 600 11.5px/1.3 var(--f-body); text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.n { text-align: right; font-family: var(--f-mono); font-size: 12.5px; white-space: nowrap; }
+td.ok { background: var(--ok-bg); } td.warn { background: var(--warn-bg); } td.bad { background: var(--bad-bg); }
+td.n.ok { color: var(--ok); } td.n.warn { color: var(--warn); } td.n.bad { color: var(--bad); }
+td small { color: var(--muted); font-family: var(--f-mono); font-size: 11px; }
+.pill { display: inline-block; font: 500 10.5px/1 var(--f-mono); padding: 3px 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); vertical-align: 1px; }
+.pill.sys { border-color: var(--accent); color: var(--accent); }
+.pill.ok { border-color: var(--ok); color: var(--ok); margin-top: 4px; }
+figure { margin: 18px 0; }
+.plate { background: var(--plate); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; }
+.plate img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+.two > * { min-width: 0; }
+details.type { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 8px 0; }
+details.type > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; list-style: none; }
+details.type > summary::-webkit-details-marker { display: none; }
+details.type > summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+details.type[open] > summary::before { transform: rotate(90deg); }
+details.type > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+details.type .meta { margin-left: auto; font: 12px var(--f-mono); color: var(--muted); }
+.type-body { padding: 0 16px 16px; border-top: 1px solid var(--line); }
+ol.trace { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+ol.trace li { font-size: 12px; background: var(--accent-soft); border-radius: 4px; padding: 2px 6px; }
+ol.trace li + li::before { content: "→ "; color: var(--muted); }
+.variants td:nth-child(2) { min-width: 280px; }
+ul.tight li { margin: 4px 0; }
+.rec { counter-reset: rec; list-style: none; padding: 0; display: grid; gap: 12px; max-width: 80ch; }
+.rec li { counter-increment: rec; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px 14px 56px; position: relative; }
+.rec li::before { content: counter(rec); position: absolute; left: 18px; top: 12px; font: 600 24px/1 var(--f-display); color: var(--accent); }
+dl.gloss { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 8px 20px; margin: 14px 0; max-width: 90ch; }
+dl.gloss dt { font-weight: 600; }
+dl.gloss dd { margin: 0; color: var(--ink); }
+@media (max-width: 560px) { dl.gloss { grid-template-columns: 1fr; gap: 2px; } dl.gloss dd { margin-bottom: 10px; } }
+.example { border: 1px dashed var(--accent); border-radius: 8px; padding: 14px 18px; margin: 18px 0; background: var(--surface); max-width: 90ch; }
+.example > .lbl { font: 500 11.5px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.example p { margin: 8px 0; }
+.example .tbl { margin: 10px 0; }
+.math { font: 13px/1.7 var(--f-mono); background: var(--accent-soft); border-radius: 6px; padding: 10px 14px; overflow-x: auto; white-space: pre; }
+tr.sys td { color: var(--muted); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; margin: 14px 0 0; padding: 0; list-style: none; }
+.toc a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--line); }
+.toc a:hover, .toc a:focus-visible { border-bottom-color: var(--accent); }
+code { font: 12.5px var(--f-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }
+footer { margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px; font-size: 13px; color: var(--muted); }
+/* Annotations from the routing analysis: amber rule so they read as later notes */
+.note { border-left: 3px solid var(--warn); background: var(--warn-bg); border-radius: 0 8px 8px 0; padding: 10px 16px; margin: 14px 0; max-width: 90ch; }
+.note > .lbl { font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warn); }
+.note p { margin: 6px 0; }
+.note .tbl { margin: 10px 0; }
+.finding.new { border-color: var(--warn); }
+.finding.new .k { color: var(--warn); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.bar { background: var(--accent-soft); border-radius: 3px; height: 10px; min-width: 90px; }
+.bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.tag { display: inline-block; font: 500 10.5px/1.2 var(--f-mono); padding: 3px 6px; border-radius: 4px; white-space: nowrap; }
+.tag.a { background: var(--warn-bg); color: var(--warn); }
+.tag.g { background: var(--ok-bg); color: var(--ok); }
+.tag.s { background: var(--accent-soft); color: var(--accent); }
+.tag.n { border: 1px dashed var(--line); color: var(--muted); }
+.tag.o { border: 1px dashed var(--line); color: var(--muted); }
+ol.clock { list-style: none; padding: 0; margin: 18px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 10px; }
+ol.clock li { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; min-width: 0; }
+ol.clock li b { display: block; font-size: 14px; }
+ol.clock li small { display: block; color: var(--muted); font: 12px var(--f-mono); margin: 2px 0 8px; }
+ol.clock li.out { border-style: dashed; color: var(--muted); }
+.rec li code { white-space: nowrap; }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Accounts payable · Process mining case · Invoice clock</div>
+  <h1>The invoice clock: ZJD1 vs ZNB1</h1>
+  <p class="lede">How the time from goods receipt to posting is measured for each invoice, step by step, and how normal orders (<span class="code">ZJD1</span>) and manual orders (<span class="code">ZNB1</span>) compare against the 10-day and 30-day limits.</p>
+  <div class="facts">
+    <span><b>9,821</b> ZJD1 invoices</span>
+    <span><b>12,874</b> ZNB1 invoices</span>
+    <span>limits <b>10 d</b> (2% discount) and <b>30 d</b> (payment deadline)</span>
+  </div>
+</header>
+
+<h2 id="answer">Short answer</h2>
+<div class="findings">
+  <div class="finding"><div class="k">6.4% vs 13.1%</div><p>of posted invoices take longer than 10 days in ZJD1 and ZNB1. ZNB1 is late about twice as often.</p></div>
+  <div class="finding"><div class="k">2.5% vs 2.3%</div><p>take longer than 30 days. On the payment deadline the two are about equal.</p></div>
+  <div class="finding"><div class="k">10.1M vs 15.9M</div><p>NOK of 2% cash discount is missed on the late invoices.</p></div>
+  <div class="finding"><div class="k">2.2% = 2.2%</div><p>With a goods-receipt step both types are equally fast. The gap is in the invoices without one: 14.8% late in ZJD1, 25.7% in ZNB1.</p></div>
+</div>
+
+<h2 id="logic"><span class="step">1</span>How the invoice clock is calculated</h2>
+<div class="prose"><p>The cash discount and the payment deadline both run from when the supplier's claim is due, which is assumed to be the <b>goods receipt</b>. They end at <b>payment</b>. The event log has neither a goods-receipt date nor a payment date, so the clock uses the closest events that are in the log:</p></div>
+<ol class="clock">
+  <li><b>Data management</b><small>invoice arrives in AP</small><span class="tag a">start if no goods-receipt step</span></li>
+  <li><b>Initial validation</b><small>routing code set</small></li>
+  <li><b>Wait for goods receipt</b><small>object code WAIT_GR</small><span class="tag g">start: goods receipt</span></li>
+  <li><b>First posting</b><small>invoice payable</small><span class="tag s">stop</span></li>
+  <li class="out"><b>Payment run</b><small>not in the log</small><span class="tag o">real SLA end, not measurable</span></li>
+</ol>
+<ol class="rec">
+  <li><b>One clock per invoice.</b> A purchase order (<code>PO_ID</code>) can receive several invoices, e.g. one per partial delivery. Each invoice has its own document number <code>SAP_PO_No</code> and starts again with <i>Data management</i>. The unit is one invoice = one <code>PO_ID</code> × <code>SAP_PO_No</code> pair; all events with that pair belong to it.</li>
+  <li><b>Order the events.</b> By timestamp, with <code>Event_ID</code> breaking ties. <code>Item_No</code> isn't used, because it isn't in time order for about 45,000 events.</li>
+  <li><b>Clock start.</b> The timestamp of the invoice's <b>first</b> <i>Wait for goods receipt</i> event with <code>SAP_Object_Code</code> = <code>WAIT_GR</code>. SAP logs this event when the goods-receipt check finds the booked goods receipt, so it is read as the goods-receipt date.
+    <ul class="tight">
+      <li>A <i>Wait for goods receipt</i> event with <code>END_WAIT_GR</code> (the wait ended <i>without</i> a goods receipt and the invoice was released to the manual queue) or with no object code does <b>not</b> count.</li>
+      <li>If the invoice has no <code>WAIT_GR</code> event, the clock starts at its <b>first event</b> (<i>Data management</i>, arrival in accounts payable). These are mostly invoices sent straight to the manual queue at validation. The log gives no goods-receipt date for them (see <a href="#feasible">Is this clock fair?</a>).</li>
+    </ul></li>
+  <li><b>Clock stop.</b> The invoice's <b>first posting</b>: the earliest of <i>MM Posted Automatically</i>, <i>Posted manually</i>, <i>MM Autopost after manual process</i>. Posting makes the invoice payable. Later postings of the same invoice don't move the stop. The payment itself isn't in the log.</li>
+  <li><b>Lead time in days.</b> Stop minus start in seconds, divided by 86,400. Calendar days with fractions, so weekends and holidays count, as they do for payment terms.</li>
+  <li><b>Base.</b> Only <b>posted</b> invoices have a stop time. Invoices that were never posted are left out of every share and count.</li>
+  <li><b>Late or not.</b> Late means a lead time of <b>more than</b> 10 days (cash discount) or more than 30 days (payment deadline). Share = late invoices ÷ posted invoices.</li>
+  <li><b>Missed discount.</b> The value is only given per PO (<code>Case_Invoice_Value_NOK</code>, the same on every row of a PO). It's split evenly over the PO's posted invoices, and each invoice later than 10 days misses 2% of its share.</li>
+</ol>
+<div class="math">clock_start = first ts of (Wait for goods receipt, WAIT_GR)  if the invoice has one,  else first ts of the invoice
+clock_stop  = first ts of a posting activity
+days        = (clock_stop − clock_start) in seconds / 86,400
+late_10     = days &gt; 10          late_30 = days &gt; 30
+share_10    = Σ late_10 / number of posted invoices
+missed      = Σ over late_10 invoices of  2% × PO value / posted invoices on the PO</div>
+
+<h2 id="example"><span class="step">2</span>Worked example: PurDoc184235 (<span class="code">ZNB1</span>)</h2>
+<div class="prose"><p>This PO received two invoices. Every event in the log for it:</p></div>
+<div class="tbl "><table><thead><tr><th>#</th><th>Timestamp</th><th>Activity</th><th>Invoice</th><th>Object code</th><th>Role in the clock</th></tr></thead><tbody><tr><td class='n'>1</td><td class='n'>01 Sep 17:36:34</td><td>Data management</td><td class='n'>6136582 (A)</td><td></td><td><span class="tag n">first event, not used</span></td></tr><tr><td class='n'>2</td><td class='n'>01 Sep 17:36:35</td><td>Initial validation</td><td class='n'>6136582 (A)</td><td></td><td></td></tr><tr><td class='n'>3</td><td class='n'>04 Sep 17:48:21</td><td>Wait for goods receipt</td><td class='n'>6136582 (A)</td><td><code>WAIT_GR</code></td><td><span class="tag g">clock start (goods receipt)</span></td></tr><tr><td class='n'>4</td><td class='n'>04 Sep 17:48:35</td><td>MM Posted Automatically</td><td class='n'>6136582 (A)</td><td></td><td><span class="tag s">clock stop (first posting)</span></td></tr><tr><td class='n'>5</td><td class='n'>17 Nov 17:33:32</td><td>Data management</td><td class='n'>6481696 (B)</td><td></td><td><span class="tag a">clock start (first event, no goods receipt)</span></td></tr><tr><td class='n'>6</td><td class='n'>17 Nov 17:33:32</td><td>Get goods receipt from WM</td><td class='n'>6481696 (B)</td><td></td><td></td></tr><tr><td class='n'>7</td><td class='n'>17 Nov 17:33:33</td><td>Initial validation</td><td class='n'>6481696 (B)</td><td></td><td></td></tr><tr><td class='n'>8</td><td class='n'>17 Nov 17:36:21</td><td>Wait for goods receipt</td><td class='n'>6481696 (B)</td><td></td><td><span class="tag n">no object code: doesn't count</span></td></tr><tr><td class='n'>9</td><td class='n'>18 Nov 14:03:16</td><td>Wait for goods receipt</td><td class='n'>6481696 (B)</td><td><code>END_WAIT_GR</code></td><td><span class="tag n">END_WAIT_GR: doesn't count</span></td></tr><tr><td class='n'>10</td><td class='n'>18 Nov 14:04:57</td><td>Transfer to MM</td><td class='n'>6481696 (B)</td><td><code>MM_TRANS</code></td><td></td></tr><tr><td class='n'>11</td><td class='n'>18 Nov 14:05:02</td><td>Data management</td><td class='n'>6481696 (B)</td><td></td><td><span class="tag n">restart of the same invoice, not used</span></td></tr><tr><td class='n'>12</td><td class='n'>18 Nov 14:05:04</td><td>Initial validation</td><td class='n'>6481696 (B)</td><td></td><td></td></tr><tr><td class='n'>13</td><td class='n'>02 Dec 15:20:13</td><td>Posted manually</td><td class='n'>6481696 (B)</td><td><code>POST</code></td><td><span class="tag s">clock stop (first posting)</span></td></tr></tbody></table></div>
+<div class="math">Invoice A (6136582)
+  clock start = 04 Sep 2025 17:48:21   (goods receipt)
+  clock stop  = 04 Sep 2025 17:48:35   (first posting)
+  days        = 14 s / 86,400 = 0.000 days
+  &gt; 10 days?  no      &gt; 30 days?  no
+
+Invoice B (6481696)
+  clock start = 17 Nov 2025 17:33:32   (first event (no WAIT_GR step))
+  clock stop  = 02 Dec 2025 15:20:13   (first posting)
+  days        = 1,288,001 s / 86,400 = 14.907 days
+  &gt; 10 days?  yes      &gt; 30 days?  no
+
+Discount
+  PO value 217,941.36 NOK / 2 posted invoices = 108,970.68 NOK per invoice
+  missed   = 2% x 108,970.68 x 1 late invoice(s) = 2,179.41 NOK</div>
+<div class="prose">
+<p>Invoice A shows why the start matters: it arrived 3.0 days before the goods receipt and was posted seconds after it. From goods receipt it's on time; from arrival it would count the wait for the goods against accounts payable.</p>
+<p>The other invoice had <i>Wait for goods receipt</i> steps too, but never with <code>WAIT_GR</code>: one has no object code and the other is <code>END_WAIT_GR</code>. The wait ended without a goods receipt, the invoice went to the manual queue and was posted by a person two weeks later. Without a <code>WAIT_GR</code> event its clock starts at its first event, and it misses the 10-day limit.</p>
+</div>
+
+<h2 id="compare"><span class="step">3</span>ZJD1 vs ZNB1</h2>
+<div class="prose"><p>The same clock applied to both PO types:</p></div>
+<div class="tbl "><table><thead><tr><th></th><th><span class="code">ZJD1</span></th><th><span class="code">ZNB1</span></th></tr></thead><tbody><tr><td>Purchase orders (POs)</td><td class='n'>5,514</td><td class='n'>4,746</td></tr><tr><td>Invoices on these POs</td><td class='n'>10,359</td><td class='n'>13,776</td></tr><tr><td>Never posted (left out)</td><td class='n'>538</td><td class='n'>902</td></tr><tr><td>Posted invoices (the base)</td><td class='n'><b>9,821</b></td><td class='n'><b>12,874</b></td></tr><tr><td>Posted invoices per PO</td><td class='n'>1.78</td><td class='n'>2.71</td></tr><tr><td>With a goods-receipt step</td><td class='n'>66%</td><td class='n'>54%</td></tr><tr><td>Median days to posting</td><td class='n'>0.02</td><td class='n'>0.54</td></tr><tr><td>90th percentile, days</td><td class='n'>7.3</td><td class='n'>11.4</td></tr><tr><td>Invoices &gt; 10 days</td><td class='n'>633</td><td class='n'>1,687</td></tr><tr><td><b>Share &gt; 10 days</b></td><td class='n'><b>6.4%</b></td><td class='n'><b>13.1%</b></td></tr><tr><td>Invoices &gt; 30 days</td><td class='n'>243</td><td class='n'>293</td></tr><tr><td><b>Share &gt; 30 days</b></td><td class='n'><b>2.5%</b></td><td class='n'><b>2.3%</b></td></tr><tr><td>Missed 2% discount (NOK)</td><td class='n'>10.1M</td><td class='n'>15.9M</td></tr><tr><td>Missed discount per posted invoice (NOK)</td><td class='n'>1,030</td><td class='n'>1,233</td></tr></tbody></table></div>
+<div class="tbl "><table><thead><tr><th>Type</th><th>&gt; 10 days</th><th></th><th>&gt; 30 days</th><th></th></tr></thead><tbody><tr><td><span class="code">ZJD1</span></td><td class='n'>6.4%</td><td><div class="bar"><span style="width:49.2%"></span></div></td><td class='n'>2.5%</td><td><div class="bar"><span style="width:18.9%"></span></div></td></tr><tr><td><span class="code">ZNB1</span></td><td class='n'>13.1%</td><td><div class="bar"><span style="width:100.0%"></span></div></td><td class='n'>2.3%</td><td><div class="bar"><span style="width:17.4%"></span></div></td></tr></tbody></table></div>
+<div class="callout">
+<p><b>ZNB1 misses the 10-day limit about twice as often</b> (13.1% vs 6.4%) and loses more discount (15.9M vs 10.1M NOK), although its POs are worth slightly less on average. Above 30 days the two are about the same (2.5% vs 2.3%).</p>
+</div>
+
+<h3>Split by clock start</h3>
+<div class="tbl "><table><thead><tr><th>Clock starts at</th><th>Type</th><th>Invoices</th><th>Share of type</th><th>Median days</th><th>&gt; 10 d</th><th>&gt; 30 d</th><th>Missed 2% (NOK)</th><th>Share of type's missed</th></tr></thead><tbody><tr><td>With a goods-receipt step (clock from goods receipt)</td><td><span class="code">ZJD1</span></td><td class='n'>6,518</td><td class='n'>66%</td><td class='n'>0.00</td><td class='n'><b>2.2%</b></td><td class='n'>1.0%</td><td class='n'>2.1M</td><td class='n'>21%</td></tr><tr><td></td><td><span class="code">ZNB1</span></td><td class='n'>6,915</td><td class='n'>54%</td><td class='n'>0.00</td><td class='n'><b>2.2%</b></td><td class='n'>0.8%</td><td class='n'>1.1M</td><td class='n'>7%</td></tr><tr><td>Without (clock from first event)</td><td><span class="code">ZJD1</span></td><td class='n'>3,303</td><td class='n'>34%</td><td class='n'>3.33</td><td class='n'><b>14.8%</b></td><td class='n'>5.5%</td><td class='n'>8.0M</td><td class='n'>79%</td></tr><tr><td></td><td><span class="code">ZNB1</span></td><td class='n'>5,959</td><td class='n'>46%</td><td class='n'>7.28</td><td class='n'><b>25.7%</b></td><td class='n'>4.0%</td><td class='n'>14.8M</td><td class='n'>93%</td></tr></tbody></table></div>
+<div class="callout">
+<p><b>With a goods-receipt step, ZJD1 and ZNB1 are equally fast:</b> 2.2% and 2.2% above 10 days. Once the goods are booked, both post almost at once.</p>
+<p><b>Without one, ZNB1 is much slower.</b> In both types these are mostly invoices sent to the manual control queue (<code>CTRL1</code>) at validation. ZNB1 has more of them (46% vs 34% of invoices), they're late more often (25.7% vs 14.8%), and they account for 93% of ZNB1's missed discount. Part of that gap may be waiting for goods that the log can't show for these invoices (see <a href="#feasible">Is the goods-receipt clock fair?</a>).</p>
+</div>
+
+<h2 id="feasible"><span class="step">Check</span>Is the goods-receipt clock fair?</h2>
+<div class="prose"><p>Starting the clock at <code>WAIT_GR</code> instead of arrival removes the time an invoice waits for its goods, which accounts payable can't speed up. Two questions decide whether that's sound: is the event a good goods-receipt date, and can it be applied to every invoice?</p></div>
+<h3>1 · <code>WAIT_GR</code> is a usable goods-receipt date</h3>
+<div class="tbl"><table><thead><tr><th>Type</th><th>Posted invoices with WAIT_GR</th><th>Posted &lt; 1 min after it</th><th>Next step is automatic posting</th><th>Arrival → WAIT_GR, median days</th><th>75th pct</th><th>90th pct</th></tr></thead><tbody><tr><td><span class="code">ZJD1</span></td><td class='n'>6,518</td><td class='n'>67%</td><td class='n'>68%</td><td class='n'>0.0</td><td class='n'>5.0</td><td class='n'>22.0</td></tr><tr><td><span class="code">ZNB1</span></td><td class='n'>6,915</td><td class='n'>66%</td><td class='n'>67%</td><td class='n'>1.0</td><td class='n'>6.0</td><td class='n'>30.0</td></tr></tbody></table></div>
+<div class="prose"><p>Most invoices are posted within a minute of the event, and the next step is usually <i>MM Posted Automatically</i>: the event is the moment SAP found the goods receipt and released the invoice. The lag between the real booking and SAP's check is probably at most about a day (the median wait looks like a daily check), small against a 10-day limit. The wait before it is real: a quarter of these invoices wait several days for their goods, and one in ten waits weeks.</p></div>
+<h3>2 · But it exists only on one route</h3>
+<div class="prose"><p>At <i>Initial validation</i> SAP sends an invoice either to the goods-receipt check (<code>WAITGR</code>) or to the manual control queue (<code>CTRL1</code>). Only the first road produces a <code>WAIT_GR</code> event. Share of posted invoices taking longer than 10 days, by route and clock:</p></div>
+<div class="tbl"><table><thead><tr><th>Type</th><th>Route at validation</th><th>Posted invoices</th><th>Have WAIT_GR</th><th>&gt; 10 d, clock from arrival</th><th>&gt; 10 d, clock from goods receipt</th></tr></thead><tbody><tr><td><span class="code">ZJD1</span></td><td><code>WAITGR</code> <small>goods-receipt check</small></td><td class='n'>6,704</td><td class='n'>97%</td><td class='n'>19.3%</td><td class='n'><b>3.9%</b></td></tr><tr><td></td><td><code>CTRL1</code> <small>manual queue</small></td><td class='n'>3,061</td><td class='n'>1%</td><td class='n'>11.3%</td><td class='n'><b>11.1%</b></td></tr><tr><td><span class="code">ZNB1</span></td><td><code>WAITGR</code> <small>goods-receipt check</small></td><td class='n'>7,154</td><td class='n'>96%</td><td class='n'>23.7%</td><td class='n'><b>4.9%</b></td></tr><tr><td></td><td><code>CTRL1</code> <small>manual queue</small></td><td class='n'>5,610</td><td class='n'>1%</td><td class='n'>23.6%</td><td class='n'><b>22.9%</b></td></tr></tbody></table></div>
+<div class="callout">
+<p><b>The two routes are treated differently.</b> From arrival, ZNB1's two routes are late about equally often (23.7% and 23.6%). The goods-receipt clock removes the wait for goods on the <code>WAITGR</code> route (4.9%), but it can't on the <code>CTRL1</code> route (22.9%), because only 1.3% of those invoices have a goods-receipt date in the log. If clerks in the manual queue also wait for goods (holding an invoice until delivery), that wait still counts against them.</p>
+<p><b>Consequence:</b> comparisons between the two routes aren't like-for-like. "The manual queue causes most of the missed discount" is partly a result of the clock and not proven by the log.</p>
+</div>
+<h3>3 · Which clock for which question</h3>
+<div class="tbl"><table><thead><tr><th></th><th>Clock from goods receipt (WAIT_GR)</th><th>Clock from arrival (ignore WAIT_GR)</th></tr></thead><tbody><tr><td>Measures</td><td>How fast accounts payable is once it can act</td><td>Time from arrival in AP to payable</td></tr><tr><td>Fair to AP?</td><td>Yes on the <code>WAITGR</code> route; not on <code>CTRL1</code></td><td>No: supplier and purchasing delays count against AP</td></tr><tr><td>Same rule on every route?</td><td>No</td><td>Yes</td></tr><tr><td>Money actually lost</td><td>Lower bound</td><td>Closer to it, if payment terms run from the invoice date (and still low, because the invoice date usually comes before arrival)</td></tr><tr><td>Use as</td><td><b>Headline for AP performance</b></td><td><b>Upper bound / money at risk</b></td></tr></tbody></table></div>
+<div class="prose"><p><b>Decision:</b> keep the goods-receipt clock as the headline, always show the arrival clock next to it, and don't compare the two routes without this caveat. What the company's payment terms count from (invoice date or goods receipt) should be checked; the log can't show it.</p></div>
+
+<h2 id="limits"><span class="step">4</span>Assumptions and limits</h2>
+<ul class="tight prose">
+  <li><b>Goods receipt is a proxy.</b> The <code>WAIT_GR</code> event marks when SAP found the goods receipt, not necessarily when it was booked. For invoices without that step the clock starts at arrival, so any wait for goods before arrival is invisible, and any wait after arrival is counted.</li>
+  <li><b>Posting isn't payment.</b> "Within 10 days" means posted within 10 days, which is needed to pay on time but doesn't prove it.</li>
+  <li><b>Invoice value is estimated</b> by splitting the PO value evenly over its posted invoices. The real amount per invoice is in SAP.</li>
+  <li><b>Not the pipeline default for ZJD1.</b> The other reports start the ZJD1 clock at arrival (the goods-receipt start is set for ZNB1 only), so their ZJD1 figures are higher. The ZNB1 figures here match the other reports exactly (1,687 late invoices, 15.9M NOK).</li>
+</ul>
+
+<footer>
+<p>Built with Python (conda env <code>datasci</code>) by <code>10_report_invoice_clock.py</code> from <code>output/invoices.csv</code> (columns <code>start</code>, <code>goods_receipt</code>, <code>first_post</code>, built in <code>01_prepare.py</code>), <code>cases.csv</code> and <code>events.pkl</code>.</p>
+</footer>
+</div>

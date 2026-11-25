@@ -8,6 +8,7 @@ import re
 
 import pandas as pd
 
+from clock_doc import logic_html, feasibility
 from common import (OUT, ROOT, PO_TYPES, POSTING_ACTIVITIES, SLA_SOFT_DAYS, SLA_HARD_DAYS, GR_ACTIVITY, GR_OBJECT_CODE,
                     GR_CLOCK_PO_TYPES, load_invoices, load_cases)
 
@@ -107,6 +108,9 @@ timeline = '<ol class="clock">' + "".join(
     + ('<span class="tag o">real SLA end, not measurable</span>' if cls == "out" else "")
     + "</li>" for a, b, cls in STEPS) + "</ol>"
 
+LOGIC = logic_html(two_clocks=True)
+FEAS, FS = feasibility(TYPES)
+
 EXTRA_CSS = """
 .bar { background: var(--accent-soft); border-radius: 3px; height: 10px; min-width: 90px; }
 .bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
@@ -155,14 +159,10 @@ page = f"""<meta charset="utf-8">
 <p>Both SLAs are about <b>payment</b>, but the event log doesn't contain payment or the invoice date. Lead time is therefore measured <b>per invoice</b> (<code>SAP_PO_No</code>) between two events that are in the log.</p>
 </div>
 {timeline}
+{LOGIC}
 <dl class="gloss">
-  <dt>One PO, several invoices</dt><dd>A PO (<code>PO_ID</code>) can receive several invoices, e.g. for partial deliveries. Each invoice gets its own clock, so a PO whose second invoice arrives weeks later doesn't count as late because of that. ZJD1 has {num(a1['n'] / a1['pos'], 2)} posted invoices per PO, ZNB1 {num(a2['n'] / a2['pos'], 2)}.</dd>
-  <dt>Clock stop</dt><dd>The invoice's <b>first posting</b>: the first of <i>{"</i>, <i>".join(POSTING_ACTIVITIES)}</i>. That is when the invoice becomes payable in SAP. The payment run afterwards isn't in the log, so "within 10 days" means <i>posted</i> within 10 days: a necessary condition for paying on time, not proof of it.</dd>
-  <dt>Clock start A: arrival</dt><dd>The invoice's first event (<i>Data management</i>), i.e. when it entered accounts payable. Time before scanning is invisible. This is the default clock for every PO type in the pipeline.</dd>
-  <dt>Clock start B: goods receipt</dt><dd>The payment term is assumed to start when the goods are received. The log has no goods-receipt date, so the first <i>{GR_ACTIVITY}</i> event with object code <code>{GR_OBJECT_CODE}</code> is used as a proxy, read as the moment the goods receipt was booked. <code>END_WAIT_GR</code> (the wait ended without a goods receipt and the invoice went to the manual queue) doesn't count. Invoices without a <code>{GR_OBJECT_CODE}</code> step keep clock A: they are assumed to have their goods already, and the log gives no other date. That holds for {pct(1 - GRSHARE['ZJD1'], 0)} of ZJD1 and {pct(1 - GRSHARE['ZNB1'], 0)} of ZNB1 invoices.</dd>
   <dt>Pipeline vs this page</dt><dd>The pipeline and the other reports use clock B only for {", ".join(GR_CLOCK_PO_TYPES)} (decided 2026-11-19), and clock A for ZJD1. Comparing those two numbers mixes two clocks. This page applies the same clock to both types.</dd>
   <dt>Never posted</dt><dd>Invoices without a posting are left out: {num(not_posted.get('ZJD1', 0))} in ZJD1, {num(not_posted.get('ZNB1', 0))} in ZNB1.</dd>
-  <dt>Missed discount</dt><dd>2% of the invoice value for each invoice posted after more than 10 days. The value is only known per PO (<code>Case_Invoice_Value_NOK</code>), so it's split evenly over the PO's posted invoices.</dd>
 </dl>
 
 <h2 id="compare"><span class="step">Result</span>Per-invoice comparison</h2>
@@ -178,6 +178,8 @@ page = f"""<meta charset="utf-8">
 <p><b>With a goods-receipt step, ZJD1 and ZNB1 behave the same:</b> {pct(s1t['s10'])} and {pct(s2t['s10'])} above 10 days. Once the goods are booked, both post almost on time.</p>
 <p><b>Without one, ZNB1 is much slower.</b> In both types 92–93% of these invoices were sent to the manual control queue (<code>CTRL1</code>) at validation and waited for a clerk. ZNB1 has more of them ({pct(s2f['n'] / g2['n'], 0)} vs {pct(s1f['n'] / g1['n'], 0)} of invoices), they're late more often ({pct(s2f['s10'])} vs {pct(s1f['s10'])}), and they cause {pct(s2f['missed'] / g2['missed'], 0)} of ZNB1's missed discount. For these invoices the clock still starts at arrival, so part of their delay may be waiting for goods that the log can't show.</p>
 </div>
+
+{FEAS}
 
 <footer>
 <p>Built with Python (conda env <code>datasci</code>) by <code>07_report_clock_compare.py</code> from <code>output/invoices.csv</code> and <code>cases.csv</code>. Run steps 01–04 first. The ZNB1 goods-receipt figures reproduce the headline in the main reports ({num(g2['n10'])} late invoices, {mnok(g2['missed'])} NOK).</p>

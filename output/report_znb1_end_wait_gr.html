@@ -1,0 +1,182 @@
+<meta charset="utf-8">
+<title>ZNB1 END_WAIT_GR Clock</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (~72ch) with wide figure/table breakouts; steps follow the assignment order */
+:root {
+  --bg: #f6f8f7; --surface: #ffffff; --ink: #16201c; --muted: #5a6a63; --line: #d9e1dd;
+  --accent: #1f6f5c; --accent-soft: #e3efea; --ok: #2c7a4b; --warn: #a8670f; --bad: #b0333f;
+  --ok-bg: #e5f2ea; --warn-bg: #fbf0dc; --bad-bg: #f8e4e6; --plate: #ffffff;
+  --f-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+/* Light theme only, regardless of the viewer's system setting */
+:root, :root[data-theme="dark"] { color-scheme: light; }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.6 var(--f-body); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.prose { max-width: 72ch; }
+header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 8px; }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 600 clamp(32px, 5vw, 46px)/1.1 var(--f-display); margin: 12px 0 10px; text-wrap: balance; }
+h2 { font: 600 28px/1.2 var(--f-display); margin: 56px 0 6px; text-wrap: balance; }
+h2 .step { font: 500 13px/1 var(--f-mono); color: var(--accent); display: block; margin-bottom: 8px; letter-spacing: .06em; text-transform: uppercase; }
+h3 { font: 600 18px/1.3 var(--f-body); margin: 32px 0 6px; }
+h4 { font: 600 14px/1.3 var(--f-body); margin: 20px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+p, li { color: var(--ink); }
+.lede { font-size: 17px; color: var(--muted); max-width: 70ch; margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 18px; font: 13px/1.4 var(--f-mono); color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; }
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 18px; }
+.finding { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; min-width: 0; }
+.finding .k { font: 600 26px/1.1 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+.finding p { margin: 6px 0 0; font-size: 14.5px; }
+.callout { background: var(--accent-soft); border-radius: 8px; padding: 14px 18px; margin: 18px 0; max-width: 80ch; }
+.callout p { margin: 4px 0; }
+.code { font: 500 12.5px/1 var(--f-mono); background: var(--accent-soft); color: var(--accent); padding: 3px 6px; border-radius: 4px; white-space: nowrap; }
+.tbl { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th { text-align: left; font: 600 11.5px/1.3 var(--f-body); text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.n { text-align: right; font-family: var(--f-mono); font-size: 12.5px; white-space: nowrap; }
+td.ok { background: var(--ok-bg); } td.warn { background: var(--warn-bg); } td.bad { background: var(--bad-bg); }
+td.n.ok { color: var(--ok); } td.n.warn { color: var(--warn); } td.n.bad { color: var(--bad); }
+td small { color: var(--muted); font-family: var(--f-mono); font-size: 11px; }
+.pill { display: inline-block; font: 500 10.5px/1 var(--f-mono); padding: 3px 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); vertical-align: 1px; }
+.pill.sys { border-color: var(--accent); color: var(--accent); }
+.pill.ok { border-color: var(--ok); color: var(--ok); margin-top: 4px; }
+figure { margin: 18px 0; }
+.plate { background: var(--plate); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; }
+.plate img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+.two > * { min-width: 0; }
+details.type { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 8px 0; }
+details.type > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; list-style: none; }
+details.type > summary::-webkit-details-marker { display: none; }
+details.type > summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+details.type[open] > summary::before { transform: rotate(90deg); }
+details.type > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+details.type .meta { margin-left: auto; font: 12px var(--f-mono); color: var(--muted); }
+.type-body { padding: 0 16px 16px; border-top: 1px solid var(--line); }
+ol.trace { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+ol.trace li { font-size: 12px; background: var(--accent-soft); border-radius: 4px; padding: 2px 6px; }
+ol.trace li + li::before { content: "→ "; color: var(--muted); }
+.variants td:nth-child(2) { min-width: 280px; }
+ul.tight li { margin: 4px 0; }
+.rec { counter-reset: rec; list-style: none; padding: 0; display: grid; gap: 12px; max-width: 80ch; }
+.rec li { counter-increment: rec; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px 14px 56px; position: relative; }
+.rec li::before { content: counter(rec); position: absolute; left: 18px; top: 12px; font: 600 24px/1 var(--f-display); color: var(--accent); }
+dl.gloss { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 8px 20px; margin: 14px 0; max-width: 90ch; }
+dl.gloss dt { font-weight: 600; }
+dl.gloss dd { margin: 0; color: var(--ink); }
+@media (max-width: 560px) { dl.gloss { grid-template-columns: 1fr; gap: 2px; } dl.gloss dd { margin-bottom: 10px; } }
+.example { border: 1px dashed var(--accent); border-radius: 8px; padding: 14px 18px; margin: 18px 0; background: var(--surface); max-width: 90ch; }
+.example > .lbl { font: 500 11.5px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.example p { margin: 8px 0; }
+.example .tbl { margin: 10px 0; }
+.math { font: 13px/1.7 var(--f-mono); background: var(--accent-soft); border-radius: 6px; padding: 10px 14px; overflow-x: auto; white-space: pre; }
+tr.sys td { color: var(--muted); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; margin: 14px 0 0; padding: 0; list-style: none; }
+.toc a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--line); }
+.toc a:hover, .toc a:focus-visible { border-bottom-color: var(--accent); }
+code { font: 12.5px var(--f-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }
+footer { margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px; font-size: 13px; color: var(--muted); }
+/* Annotations from the routing analysis: amber rule so they read as later notes */
+.note { border-left: 3px solid var(--warn); background: var(--warn-bg); border-radius: 0 8px 8px 0; padding: 10px 16px; margin: 14px 0; max-width: 90ch; }
+.note > .lbl { font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warn); }
+.note p { margin: 6px 0; }
+.note .tbl { margin: 10px 0; }
+.finding.new { border-color: var(--warn); }
+.finding.new .k { color: var(--warn); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.bar { background: var(--accent-soft); border-radius: 3px; height: 10px; min-width: 80px; }
+.bar span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Accounts payable · Process mining case · ZNB1 manual queue</div>
+  <h1>ZNB1: from <code>END_WAIT_GR</code> to posting</h1>
+  <p class="lede"><span class="code">ZNB1</span> invoices that waited in SAP's goods-receipt check until the wait ended <i>without</i> a goods receipt (<code>END_WAIT_GR</code>), which sends them to the manual control queue (<code>CTRL1</code>). Here their clock runs from <code>END_WAIT_GR</code> to the first posting, and they are compared with the invoices sent straight to <code>CTRL1</code> at validation.</p>
+  <div class="facts">
+    <span><b>387</b> invoices</span>
+    <span><b>174</b> POs</span>
+    <span><b>49</b> suppliers</span>
+    <span>comparison: <b>5,610</b> straight to CTRL1</span>
+  </div>
+</header>
+
+<h2 id="answer">Short answer</h2>
+<div class="findings">
+  <div class="finding"><div class="k">0.0 / 8.0 days</div><p>median / 90th percentile from <code>END_WAIT_GR</code> to posting. 67% are posted within a day.</p></div>
+  <div class="finding"><div class="k">9.6% / 2.6%</div><p>take longer than 10 / 30 days, against 23.6% / 1.9% of the invoices sent straight to <code>CTRL1</code>.</p></div>
+  <div class="finding"><div class="k">58.9% → 9.6%</div><p>Counted from arrival, as the current rule does, most of them look late. Almost all of that time was spent in the goods-receipt check (11.1 / 42.0 days), not in accounts payable.</p></div>
+  <div class="finding"><div class="k">27 of 37</div><p>still-late invoices had extra steps after <code>END_WAIT_GR</code>: a restart, <i>Transfer to MM</i> or a price-difference approval.</p></div>
+</div>
+
+<h2 id="select"><span class="step">1</span>Which invoices, and how the clock runs</h2>
+<div class="tbl "><table><thead><tr><th>Selection</th><th>Invoices</th></tr></thead><tbody><tr><td>ZNB1 invoices</td><td class='n'>13,776</td></tr><tr><td>with an <code>END_WAIT_GR</code> event</td><td class='n'>440</td></tr><tr><td>… of which also a <code>WAIT_GR</code> event (goods-receipt clock applies, left out)</td><td class='n'>17</td></tr><tr><td>… no <code>WAIT_GR</code></td><td class='n'>423</td></tr><tr><td>… never posted (left out)</td><td class='n'>36</td></tr><tr><td><b>Posted: the invoices of this report</b></td><td class='n'>387</td></tr></tbody></table></div>
+<ol class="rec">
+  <li><b>One invoice</b> = one <code>PO_ID</code> × <code>SAP_PO_No</code>; events ordered by timestamp, then <code>Event_ID</code>.</li>
+  <li><b>Included:</b> ZNB1 invoices with a <i>Wait for goods receipt</i> event whose <code>SAP_Object_Code</code> is <code>END_WAIT_GR</code> and no <code>WAIT_GR</code> event, that were posted. Every <code>END_WAIT_GR</code> event sets the routing code to <code>CTRL1</code> (100%), so these invoices all end up in the manual queue. By route at validation: <code>WAITGR</code> 314, <code>ZWMGRW</code> 58, <code>CTRL1</code> 15.</li>
+  <li><b>Clock start:</b> the invoice's first <code>END_WAIT_GR</code> event, the moment the goods-receipt wait ended and accounts payable could act. 5 invoices have more than one; the first one counts.</li>
+  <li><b>Clock stop:</b> the first posting (<i>MM Posted Automatically</i>, <i>Posted manually</i>, <i>MM Autopost after manual process</i>). Days = stop − start in seconds / 86,400, calendar days.</li>
+  <li><b>Late</b> = more than 10 (or 30) days. Missed discount = 2% of the PO value split evenly over the PO's posted invoices, for each late invoice.</li>
+  <li><b>Comparison group:</b> ZNB1 invoices routed to <code>CTRL1</code> at their first validation, posted, clock from arrival (<i>Data management</i>) to first posting. That report (<a href="report_ctrl1_direct.html">Invoices sent straight to the manual queue</a>) uses the invoice clock, which starts at goods receipt for the 1% that later get one, so its share over 10 days is slightly lower. The 15 <code>END_WAIT_GR</code> invoices that were sent to <code>CTRL1</code> at validation and only later went through the goods-receipt check are in both groups.</li>
+</ol>
+
+<h2 id="results"><span class="step">2</span>Results</h2>
+<div class="tbl "><table><thead><tr><th></th><th><code>END_WAIT_GR</code> → posting<br><small>this report</small></th><th>Same invoices, arrival → posting<br><small>current rule</small></th><th>Straight to CTRL1, arrival → posting<br><small>comparison</small></th></tr></thead><tbody><tr><td>Posted invoices</td><td class='n'>387</td><td class='n'>387</td><td class='n'>5,610</td></tr><tr><td><b>Days: median / 90th percentile</b></td><td class='n'><b>0.0 / 8.0</b></td><td class='n'><b>15.8 / 44.6</b></td><td class='n'><b>7.2 / 13.3</b></td></tr><tr><td>Posted within 1 day</td><td class='n'>67%</td><td class='n'>4%</td><td class='n'>13%</td></tr><tr><td><b>&gt; 10 days</b></td><td class='n'><b>9.6%</b> (37)</td><td class='n'><b>58.9%</b> (228)</td><td class='n'><b>23.6%</b> (1,322)</td></tr><tr><td><b>&gt; 30 days</b></td><td class='n'><b>2.6%</b> (10)</td><td class='n'><b>32.6%</b> (126)</td><td class='n'><b>1.9%</b> (108)</td></tr><tr><td>Missed 2% discount (NOK)</td><td class='n'>0.21M</td><td class='n'>1.93M</td><td class='n'>12.97M</td></tr></tbody></table></div>
+<div class="callout">
+<p><b>From <code>END_WAIT_GR</code>, these invoices are handled faster than the direct <code>CTRL1</code> ones:</b> median / 90th percentile 0.0 / 8.0 vs 7.2 / 13.3 days, 9.6% vs 23.6% over 10 days. Once the wait ends, a clerk usually posts the invoice the same day.</p>
+<p><b>Counted from arrival, the same invoices look like the worst group</b> (58.9% over 10 days, 32.6% over 30), because the clock then includes the weeks in the goods-receipt check.</p>
+</div>
+<h3>Where the time goes (median / 90th percentile, days)</h3>
+<div class="tbl "><table><thead><tr><th>Segment</th><th>Days</th></tr></thead><tbody><tr><td>Arrival → validation</td><td class='n'>0.0 / 0.0</td></tr><tr><td>Validation → <code>END_WAIT_GR</code> (in the goods-receipt check)</td><td class='n'>11.1 / 42.0</td></tr><tr><td><code>END_WAIT_GR</code> → posting</td><td class='n'>0.0 / 8.0</td></tr><tr><td>Arrival → posting</td><td class='n'>15.8 / 44.6</td></tr></tbody></table></div>
+<h3>Days to posting, both groups</h3>
+<div class="tbl "><table><thead><tr><th>Days to posting</th><th>From <code>END_WAIT_GR</code></th><th></th><th>Straight to CTRL1, from arrival</th><th></th></tr></thead><tbody><tr><td>≤ 1 day</td><td class='n'>67.2%</td><td><div class="bar"><span style="width:100.0%"></span></div></td><td class='n'>13.4%</td><td><div class="bar"><span style="width:20.0%"></span></div></td></tr><tr><td>1–3 days</td><td class='n'>8.3%</td><td><div class="bar"><span style="width:12.3%"></span></div></td><td class='n'>11.2%</td><td><div class="bar"><span style="width:16.7%"></span></div></td></tr><tr><td>3–5 days</td><td class='n'>5.9%</td><td><div class="bar"><span style="width:8.8%"></span></div></td><td class='n'>9.9%</td><td><div class="bar"><span style="width:14.8%"></span></div></td></tr><tr><td>5–10 days</td><td class='n'>9.0%</td><td><div class="bar"><span style="width:13.5%"></span></div></td><td class='n'>41.8%</td><td><div class="bar"><span style="width:62.3%"></span></div></td></tr><tr><td>10–30 days</td><td class='n'>7.0%</td><td><div class="bar"><span style="width:10.4%"></span></div></td><td class='n'>21.6%</td><td><div class="bar"><span style="width:32.2%"></span></div></td></tr><tr><td>&gt; 30 days</td><td class='n'>2.6%</td><td><div class="bar"><span style="width:3.8%"></span></div></td><td class='n'>1.9%</td><td><div class="bar"><span style="width:2.9%"></span></div></td></tr></tbody></table></div>
+
+<h2 id="after"><span class="step">3</span>What happens after <code>END_WAIT_GR</code></h2>
+<div class="tbl "><table><thead><tr><th>Steps between END_WAIT_GR and posting → posting</th><th>Invoices</th><th>Share</th><th>Days: median / p90</th><th>&gt; 10 d</th><th>Missed 2% (NOK)</th></tr></thead><tbody><tr><td>(nothing) → Posted manually</td><td class='n'>286</td><td class='n'>74%</td><td class='n'>0.0 / 2.6</td><td class='n'>10</td><td class='n'>0.03M</td></tr><tr><td>Transfer to MM → Data management → Initial validation → Posted manually</td><td class='n'>56</td><td class='n'>14%</td><td class='n'>7.1 / 21.3</td><td class='n'>14</td><td class='n'>0.08M</td></tr><tr><td>Sent for approval → Approved (price diff) → MM Autopost after manual process</td><td class='n'>31</td><td class='n'>8%</td><td class='n'>0.0 / 28.9</td><td class='n'>6</td><td class='n'>0.02M</td></tr><tr><td>Sent for approval → Approved MM → MM Autopost after manual process</td><td class='n'>5</td><td class='n'>1%</td><td class='n'>0.7 / 4.9</td><td class='n'>0</td><td class='n'>0.00M</td></tr><tr><td>Restarted → Data management → Initial validation → Posted manually</td><td class='n'>4</td><td class='n'>1%</td><td class='n'>22.9 / 31.3</td><td class='n'>4</td><td class='n'>0.05M</td></tr><tr><td>Data management → Initial validation → Posted manually</td><td class='n'>2</td><td class='n'>1%</td><td class='n'>19.7 / 25.6</td><td class='n'>2</td><td class='n'>0.00M</td></tr><tr><td>Sent for approval → Approval rejected → Sent for approval → Approved (price diff) → MM Autopost after manual process</td><td class='n'>1</td><td class='n'>0%</td><td class='n'>30.0 / 30.0</td><td class='n'>1</td><td class='n'>0.02M</td></tr><tr><td><i>2 other paths</i></td><td class='n'>2</td><td class='n'>1%</td><td class='n'>–</td><td class='n'>0</td><td class='n'>0.00M</td></tr></tbody></table></div>
+<p class="prose">74% go straight to posting. The rest pass through a restart (<i>Data management</i> → <i>Initial validation</i> again), <i>Transfer to MM</i> (purchasing has to correct the PO) or a price-difference approval. These detours cause 27 of the 37 invoices that are still late from <code>END_WAIT_GR</code>.</p>
+
+<h2 id="who"><span class="step">4</span>Who posts them</h2>
+<div class="tbl "><table><thead><tr><th>Posted by</th><th>Invoices</th><th>Share</th><th>Days: median / p90</th><th>&gt; 10 d</th></tr></thead><tbody><tr><td>User1177</td><td class='n'>103</td><td class='n'>27%</td><td class='n'>0.0 / 0.0</td><td class='n'>2%</td></tr><tr><td>User400</td><td class='n'>90</td><td class='n'>23%</td><td class='n'>4.0 / 17.8</td><td class='n'>14%</td></tr><tr><td>User1482</td><td class='n'>46</td><td class='n'>12%</td><td class='n'>0.0 / 15.2</td><td class='n'>13%</td></tr><tr><td>User394</td><td class='n'>40</td><td class='n'>10%</td><td class='n'>0.2 / 5.1</td><td class='n'>5%</td></tr><tr><td>User1587 <span class="pill sys">system</span></td><td class='n'>38</td><td class='n'>10%</td><td class='n'>0.0 / 29.3</td><td class='n'>18%</td></tr><tr><td>User1082</td><td class='n'>23</td><td class='n'>6%</td><td class='n'>0.0 / 2.8</td><td class='n'>4%</td></tr></tbody></table></div>
+<p class="prose">90% are posted by people. The work is spread over more clerks than the direct <code>CTRL1</code> queue, where one clerk posts about half of the ZNB1 invoices.</p>
+
+<h2 id="suppliers"><span class="step">5</span>Suppliers</h2>
+<div class="tbl "><table><thead><tr><th>Supplier</th><th>Invoices</th><th>Arrival → END_WAIT_GR, median days</th><th>END_WAIT_GR → posting, median days</th><th>&gt; 10 d from END_WAIT_GR</th><th>&gt; 10 d from arrival</th></tr></thead><tbody><tr><td>Supplier44</td><td class='n'>65</td><td class='n'>37.2</td><td class='n'>0.0</td><td class='n'>0</td><td class='n'>64</td></tr><tr><td>Supplier92</td><td class='n'>59</td><td class='n'>1.9</td><td class='n'>7.0</td><td class='n'>11</td><td class='n'>22</td></tr><tr><td>Supplier59</td><td class='n'>36</td><td class='n'>21.0</td><td class='n'>0.0</td><td class='n'>5</td><td class='n'>32</td></tr><tr><td>Supplier284</td><td class='n'>30</td><td class='n'>7.1</td><td class='n'>0.0</td><td class='n'>0</td><td class='n'>0</td></tr><tr><td>Supplier295</td><td class='n'>23</td><td class='n'>62.3</td><td class='n'>0.0</td><td class='n'>0</td><td class='n'>15</td></tr><tr><td>Supplier357</td><td class='n'>19</td><td class='n'>27.2</td><td class='n'>0.0</td><td class='n'>0</td><td class='n'>18</td></tr><tr><td>Supplier235</td><td class='n'>17</td><td class='n'>3.1</td><td class='n'>0.2</td><td class='n'>0</td><td class='n'>1</td></tr><tr><td>Supplier285</td><td class='n'>15</td><td class='n'>24.1</td><td class='n'>0.0</td><td class='n'>0</td><td class='n'>14</td></tr></tbody></table></div>
+<p class="prose">The eight largest suppliers account for 68% of these invoices. The long part is the wait before <code>END_WAIT_GR</code>, so for these suppliers the delay sits with the goods receipt (delivery or booking), not with accounts payable.</p>
+
+<h2 id="month"><span class="step">6</span>By month of <code>END_WAIT_GR</code></h2>
+<div class="tbl "><table><thead><tr><th>Month</th><th>Invoices</th><th>Arrival → END_WAIT_GR, median days</th><th>END_WAIT_GR → posting, median days</th><th>&gt; 10 d</th></tr></thead><tbody><tr><td>Jul 2025</td><td class='n'>7</td><td class='n'>2.0</td><td class='n'>8.0</td><td class='n'>43%</td></tr><tr><td>Aug 2025</td><td class='n'>10</td><td class='n'>1.9</td><td class='n'>5.1</td><td class='n'>20%</td></tr><tr><td>Sep 2025</td><td class='n'>34</td><td class='n'>7.1</td><td class='n'>0.2</td><td class='n'>3%</td></tr><tr><td>Oct 2025</td><td class='n'>111</td><td class='n'>5.8</td><td class='n'>0.2</td><td class='n'>13%</td></tr><tr><td>Nov 2025</td><td class='n'>103</td><td class='n'>2.8</td><td class='n'>1.1</td><td class='n'>9%</td></tr><tr><td>Dec 2025</td><td class='n'>79</td><td class='n'>34.2</td><td class='n'>0.0</td><td class='n'>6%</td></tr><tr><td>Jan 2026</td><td class='n'>40</td><td class='n'>22.9</td><td class='n'>0.0</td><td class='n'>8%</td></tr><tr><td>Feb 2026</td><td class='n'>3</td><td class='n'>63.2</td><td class='n'>0.0</td><td class='n'>0%</td></tr></tbody></table></div>
+
+<h2 id="event"><span class="step">7</span>What the <code>END_WAIT_GR</code> event is</h2>
+<div class="prose">
+<p>All 445 <code>END_WAIT_GR</code> events in ZNB1 are logged by User1587 (100% by a system user). They fall on weekdays only (0% at weekends), 80% between 07:00 and 17:59, with the most at 14:00. That fits either a scheduled job or a clerk releasing the wait in the invoice cockpit under the system's name; the log can't tell which.</p>
+<p>Either way, until <code>END_WAIT_GR</code> the invoice was held in SAP's goods-receipt check, not in the manual queue. Starting the clock there treats these invoices the same way as the ones with a <code>WAIT_GR</code> event: the wait for the goods doesn't count against accounts payable.</p>
+</div>
+
+<h2 id="effect"><span class="step">8</span>Effect on the ZNB1 headline</h2>
+<div class="prose"><p>Side calculation, not applied in the pipeline: all posted ZNB1 invoices, with only the clock start of these 387 invoices changed.</p></div>
+<div class="tbl "><table><thead><tr><th>ZNB1 clock rule</th><th>&gt; 10 days</th><th>&gt; 30 days</th><th>Missed 2% discount (NOK)</th></tr></thead><tbody><tr><td>Current rule (goods receipt, else arrival)</td><td class='n'>1,687 (13.1%)</td><td class='n'>293 (2.3%)</td><td class='n'>15.88M</td></tr><tr><td>With <code>END_WAIT_GR</code> as start for these invoices</td><td class='n'>1,496 (11.6%)</td><td class='n'>177 (1.4%)</td><td class='n'>14.16M</td></tr></tbody></table></div>
+
+<h2 id="limits"><span class="step">9</span>Limits</h2>
+<ul class="tight prose">
+  <li><code>END_WAIT_GR</code> is not a goods-receipt date. It marks when the invoice left the goods-receipt check; whether the goods had arrived by then is unknown.</li>
+  <li>The comparison group's clock starts at arrival. Under the assumption that suppliers invoice after delivery, that's fair; otherwise it includes some goods wait (see the direct-<code>CTRL1</code> report).</li>
+  <li>Small group: 387 invoices, so supplier and month figures rest on few cases.</li>
+  <li>Invoice values are estimated by splitting the PO value evenly over its posted invoices.</li>
+</ul>
+
+<footer>
+<p>Built with Python (conda env <code>datasci</code>) by <code>12_report_end_wait_gr.py</code> from <code>output/events.pkl</code>, <code>invoices.csv</code> and <code>cases.csv</code>. Related: <a href="report_ctrl1_direct.html">Invoices sent straight to the manual queue</a>, <a href="report_invoice_clock.html">The invoice clock</a>.</p>
+</footer>
+</div>
