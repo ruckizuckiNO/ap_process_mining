@@ -647,3 +647,30 @@ no it's fine. now i need an overview of the share of missed discounts if we woul
 [196] 2026-11-25
 commit and push everything
 
+[197] 2026-11-25
+Okay. Now something more advance. To estimate the share of each cut which still we be above 10 days i want to look at the zdj1 (normal orders) and use a machine learning alogrythm (gradient bossting regression) to estimate it based on the PO-amount. Do your magic and create a report!
+
+[198] 2026-11-25
+continue
+
+[199] 2026-11-25
+any proof that ctrl1 of znb1 is worked on a FIFO fashion?
+
+[200] 2026-11-25
+can you sum it up in a slide or .html report?
+
+[201] 2026-11-25
+graph which shows user1341 and the manual ones ctrl1 from znb1 and how late these are. <= 10 days and > 10 <=30 and >30days
+
+[202] 2026-11-25
+a finacial overview. missed discount counts for invoices posted >10 days - late interest penalty for invoices > 30 days. assume 12.5 % p.a.
+
+[203] 2026-11-25
+In combination with the defined invoice thresholds i want an overview which gives me the percentiles (histogram or similar) of the ctrl1 manual postings by invoice amount where the histogram is cut left at the threshhold
+
+[204] 2026-11-25
+instead of PO value i need invoice value
+
+[205] 2026-11-25
+push and commit
+

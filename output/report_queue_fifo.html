@@ -1,0 +1,163 @@
+<meta charset="utf-8">
+<title>ZNB1 Manual Queue: FIFO?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (~72ch) with wide figure/table breakouts; steps follow the assignment order */
+:root {
+  --bg: #f6f8f7; --surface: #ffffff; --ink: #16201c; --muted: #5a6a63; --line: #d9e1dd;
+  --accent: #1f6f5c; --accent-soft: #e3efea; --ok: #2c7a4b; --warn: #a8670f; --bad: #b0333f;
+  --ok-bg: #e5f2ea; --warn-bg: #fbf0dc; --bad-bg: #f8e4e6; --plate: #ffffff;
+  --f-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+/* Light theme only, regardless of the viewer's system setting */
+:root, :root[data-theme="dark"] { color-scheme: light; }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.6 var(--f-body); }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 40px 80px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.prose { max-width: 72ch; }
+header { border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 8px; }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 600 clamp(32px, 5vw, 46px)/1.1 var(--f-display); margin: 12px 0 10px; text-wrap: balance; }
+h2 { font: 600 28px/1.2 var(--f-display); margin: 56px 0 6px; text-wrap: balance; }
+h2 .step { font: 500 13px/1 var(--f-mono); color: var(--accent); display: block; margin-bottom: 8px; letter-spacing: .06em; text-transform: uppercase; }
+h3 { font: 600 18px/1.3 var(--f-body); margin: 32px 0 6px; }
+h4 { font: 600 14px/1.3 var(--f-body); margin: 20px 0 6px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+p, li { color: var(--ink); }
+.lede { font-size: 17px; color: var(--muted); max-width: 70ch; margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 18px; font: 13px/1.4 var(--f-mono); color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; }
+.findings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 18px; }
+.finding { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; min-width: 0; }
+.finding .k { font: 600 26px/1.1 var(--f-display); color: var(--accent); font-variant-numeric: tabular-nums; }
+.finding p { margin: 6px 0 0; font-size: 14.5px; }
+.callout { background: var(--accent-soft); border-radius: 8px; padding: 14px 18px; margin: 18px 0; max-width: 80ch; }
+.callout p { margin: 4px 0; }
+.code { font: 500 12.5px/1 var(--f-mono); background: var(--accent-soft); color: var(--accent); padding: 3px 6px; border-radius: 4px; white-space: nowrap; }
+.tbl { overflow-x: auto; margin: 14px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th { text-align: left; font: 600 11.5px/1.3 var(--f-body); text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.n { text-align: right; font-family: var(--f-mono); font-size: 12.5px; white-space: nowrap; }
+td.ok { background: var(--ok-bg); } td.warn { background: var(--warn-bg); } td.bad { background: var(--bad-bg); }
+td.n.ok { color: var(--ok); } td.n.warn { color: var(--warn); } td.n.bad { color: var(--bad); }
+td small { color: var(--muted); font-family: var(--f-mono); font-size: 11px; }
+.pill { display: inline-block; font: 500 10.5px/1 var(--f-mono); padding: 3px 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); vertical-align: 1px; }
+.pill.sys { border-color: var(--accent); color: var(--accent); }
+.pill.ok { border-color: var(--ok); color: var(--ok); margin-top: 4px; }
+figure { margin: 18px 0; }
+.plate { background: var(--plate); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; }
+.plate img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+.two > * { min-width: 0; }
+details.type { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); margin: 8px 0; }
+details.type > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; list-style: none; }
+details.type > summary::-webkit-details-marker { display: none; }
+details.type > summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
+details.type[open] > summary::before { transform: rotate(90deg); }
+details.type > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+details.type .meta { margin-left: auto; font: 12px var(--f-mono); color: var(--muted); }
+.type-body { padding: 0 16px 16px; border-top: 1px solid var(--line); }
+ol.trace { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+ol.trace li { font-size: 12px; background: var(--accent-soft); border-radius: 4px; padding: 2px 6px; }
+ol.trace li + li::before { content: "→ "; color: var(--muted); }
+.variants td:nth-child(2) { min-width: 280px; }
+ul.tight li { margin: 4px 0; }
+.rec { counter-reset: rec; list-style: none; padding: 0; display: grid; gap: 12px; max-width: 80ch; }
+.rec li { counter-increment: rec; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px 14px 56px; position: relative; }
+.rec li::before { content: counter(rec); position: absolute; left: 18px; top: 12px; font: 600 24px/1 var(--f-display); color: var(--accent); }
+dl.gloss { display: grid; grid-template-columns: minmax(120px, max-content) 1fr; gap: 8px 20px; margin: 14px 0; max-width: 90ch; }
+dl.gloss dt { font-weight: 600; }
+dl.gloss dd { margin: 0; color: var(--ink); }
+@media (max-width: 560px) { dl.gloss { grid-template-columns: 1fr; gap: 2px; } dl.gloss dd { margin-bottom: 10px; } }
+.example { border: 1px dashed var(--accent); border-radius: 8px; padding: 14px 18px; margin: 18px 0; background: var(--surface); max-width: 90ch; }
+.example > .lbl { font: 500 11.5px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.example p { margin: 8px 0; }
+.example .tbl { margin: 10px 0; }
+.math { font: 13px/1.7 var(--f-mono); background: var(--accent-soft); border-radius: 6px; padding: 10px 14px; overflow-x: auto; white-space: pre; }
+tr.sys td { color: var(--muted); }
+.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; margin: 14px 0 0; padding: 0; list-style: none; }
+.toc a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--line); }
+.toc a:hover, .toc a:focus-visible { border-bottom-color: var(--accent); }
+code { font: 12.5px var(--f-mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; }
+footer { margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px; font-size: 13px; color: var(--muted); }
+/* Annotations from the routing analysis: amber rule so they read as later notes */
+.note { border-left: 3px solid var(--warn); background: var(--warn-bg); border-radius: 0 8px 8px 0; padding: 10px 16px; margin: 14px 0; max-width: 90ch; }
+.note > .lbl { font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--warn); }
+.note p { margin: 6px 0; }
+.note .tbl { margin: 10px 0; }
+.finding.new { border-color: var(--warn); }
+.finding.new .k { color: var(--warn); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+:root { --hi: #2a78d6; --lo: #9aa7a1; }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 14px 0; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .mid { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
+.chart .stem { stroke: var(--lo); stroke-width: 2; opacity: .5; } .chart .stem.hi { stroke: var(--hi); opacity: .8; }
+.chart .dot { fill: var(--lo); stroke: var(--surface); stroke-width: 1.5; } .chart .dot.hi { fill: var(--hi); }
+.chart .tick { font: 11px var(--f-mono); fill: var(--muted); }
+.chart .note { font: 11px var(--f-body); fill: var(--muted); }
+.chart .ttl { font: 600 13px var(--f-body); fill: var(--ink); }
+.chart .lab { font: 12px var(--f-mono); fill: var(--ink); } .chart .lab.b { font-weight: 600; fill: var(--hi); }
+.axcap { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); padding: 0 20px 0 96px; }
+.stack .chart { max-width: 760px; }
+td.hl, td.hl b { color: var(--hi); }
+th small { font-weight: 400; text-transform: none; letter-spacing: 0; }
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Accounts payable · Process mining case · ZNB1 manual queue (CTRL1)</div>
+  <h1>One clerk works the queue first-in-first-out, and that is where the discount is lost</h1>
+  <p class="lede">Is the ZNB1 manual queue worked first-in-first-out? For User1341, yes, almost strictly. For the other clerks, no. Nobody sorts by PO value. User1341 posts most of the invoices from the always-manual suppliers, and almost all of their missed 2% discount.</p>
+  <div class="facts">
+    <span><b>0.94</b> age rank for User1341 (1 = FIFO)</span>
+    <span><b>8.2</b> days median wait</span>
+    <span><b>88%</b> of the missed discount</span>
+    <span><b>≈ 0.5</b> value rank for every clerk</span>
+  </div>
+</header>
+
+<h2 id="answer">Short answer</h2>
+<div class="findings">
+  <div class="finding"><div class="k">FIFO</div><p>User1341 posted the oldest waiting invoice 94% of the time, with a median of 145 invoices in the queue. Same-day postings follow arrival order (τ = 0.87).</p></div>
+  <div class="finding"><div class="k">Not FIFO</div><p>The other 9 clerks score 0.23–0.62; several pick <i>newer</i> invoices first and keep waits short (0.2–6.0 days).</p></div>
+  <div class="finding"><div class="k">No value priority</div><p>Value rank 0.45–0.62, for most clerks close to 0.5 (User1341: 0.49). A large PO waits about as long as a small one.</p></div>
+  <div class="finding"><div class="k">8.63M NOK</div><p>of the 9.77M missed discount of the 100%-manual suppliers is on invoices User1341 posted (80% of the invoices). A strict, slow FIFO queue lets large invoices pass the 10-day deadline.</p></div>
+</div>
+
+<h2 id="evidence"><span class="step">1</span>The evidence</h2>
+<div class="stack">
+<div class="chart"><svg viewBox="0 0 640 300" role="img" aria-label="Age rank: does the clerk post the oldest invoice?"><text x="96" y="16" class="ttl">Age rank: does the clerk post the oldest invoice?</text><line x1="96.0" x2="96.0" y1="26" y2="274" class="grid"/><text x="96.0" y="290" class="tick" text-anchor="middle">0</text><line x1="227.0" x2="227.0" y1="26" y2="274" class="grid"/><text x="227.0" y="290" class="tick" text-anchor="middle">0.25</text><line x1="358.0" x2="358.0" y1="26" y2="274" class="mid"/><text x="358.0" y="290" class="tick" text-anchor="middle">0.5</text><line x1="489.0" x2="489.0" y1="26" y2="274" class="grid"/><text x="489.0" y="290" class="tick" text-anchor="middle">0.75</text><line x1="620.0" x2="620.0" y1="26" y2="274" class="grid"/><text x="620.0" y="290" class="tick" text-anchor="middle">1</text><text x="362.0" y="36" class="note">random</text><line x1="358.0" x2="588.6" y1="38" y2="38" class="stem hi"/><circle cx="588.6" cy="38" r="6" class="dot hi"><title>User1341: 0.94 · 2,638 postings · median wait 8.2 days</title></circle><text x="86" y="42" class="lab b" text-anchor="end">User1341</text><line x1="358.0" x2="379.0" y1="62" y2="62" class="stem"/><circle cx="379.0" cy="62" r="4.5" class="dot"><title>User1482: 0.54 · 826 postings · median wait 3.7 days</title></circle><text x="86" y="66" class="lab" text-anchor="end">User1482</text><line x1="358.0" x2="253.2" y1="86" y2="86" class="stem"/><circle cx="253.2" cy="86" r="4.5" class="dot"><title>User400: 0.30 · 805 postings · median wait 0.9 days</title></circle><text x="86" y="90" class="lab" text-anchor="end">User400</text><line x1="358.0" x2="216.5" y1="110" y2="110" class="stem"/><circle cx="216.5" cy="110" r="4.5" class="dot"><title>User1177: 0.23 · 725 postings · median wait 0.2 days</title></circle><text x="86" y="114" class="lab" text-anchor="end">User1177</text><line x1="358.0" x2="326.6" y1="134" y2="134" class="stem"/><circle cx="326.6" cy="134" r="4.5" class="dot"><title>User712: 0.44 · 682 postings · median wait 4.0 days</title></circle><text x="86" y="138" class="lab" text-anchor="end">User712</text><line x1="358.0" x2="242.7" y1="158" y2="158" class="stem"/><circle cx="242.7" cy="158" r="4.5" class="dot"><title>User1564: 0.28 · 575 postings · median wait 1.1 days</title></circle><text x="86" y="162" class="lab" text-anchor="end">User1564</text><line x1="358.0" x2="295.1" y1="182" y2="182" class="stem"/><circle cx="295.1" cy="182" r="4.5" class="dot"><title>User394: 0.38 · 533 postings · median wait 1.0 days</title></circle><text x="86" y="186" class="lab" text-anchor="end">User394</text><line x1="358.0" x2="310.8" y1="206" y2="206" class="stem"/><circle cx="310.8" cy="206" r="4.5" class="dot"><title>User489: 0.41 · 443 postings · median wait 1.1 days</title></circle><text x="86" y="210" class="lab" text-anchor="end">User489</text><line x1="358.0" x2="326.6" y1="230" y2="230" class="stem"/><circle cx="326.6" cy="230" r="4.5" class="dot"><title>User1331: 0.44 · 212 postings · median wait 1.8 days</title></circle><text x="86" y="234" class="lab" text-anchor="end">User1331</text><line x1="358.0" x2="420.9" y1="254" y2="254" class="stem"/><circle cx="420.9" cy="254" r="4.5" class="dot"><title>User1082: 0.62 · 133 postings · median wait 6.0 days</title></circle><text x="86" y="258" class="lab" text-anchor="end">User1082</text></svg><div class="axcap"><span>← newest first</span><span>oldest first (FIFO) →</span></div></div>
+<div class="chart"><svg viewBox="0 0 640 300" role="img" aria-label="Value rank: does the clerk post the largest PO first?"><text x="96" y="16" class="ttl">Value rank: does the clerk post the largest PO first?</text><line x1="96.0" x2="96.0" y1="26" y2="274" class="grid"/><text x="96.0" y="290" class="tick" text-anchor="middle">0</text><line x1="227.0" x2="227.0" y1="26" y2="274" class="grid"/><text x="227.0" y="290" class="tick" text-anchor="middle">0.25</text><line x1="358.0" x2="358.0" y1="26" y2="274" class="mid"/><text x="358.0" y="290" class="tick" text-anchor="middle">0.5</text><line x1="489.0" x2="489.0" y1="26" y2="274" class="grid"/><text x="489.0" y="290" class="tick" text-anchor="middle">0.75</text><line x1="620.0" x2="620.0" y1="26" y2="274" class="grid"/><text x="620.0" y="290" class="tick" text-anchor="middle">1</text><text x="362.0" y="36" class="note">random</text><line x1="358.0" x2="352.8" y1="38" y2="38" class="stem hi"/><circle cx="352.8" cy="38" r="6" class="dot hi"><title>User1341: 0.49 · 2,638 postings · median wait 8.2 days</title></circle><text x="86" y="42" class="lab b" text-anchor="end">User1341</text><line x1="358.0" x2="368.5" y1="62" y2="62" class="stem"/><circle cx="368.5" cy="62" r="4.5" class="dot"><title>User1482: 0.52 · 826 postings · median wait 3.7 days</title></circle><text x="86" y="66" class="lab" text-anchor="end">User1482</text><line x1="358.0" x2="379.0" y1="86" y2="86" class="stem"/><circle cx="379.0" cy="86" r="4.5" class="dot"><title>User400: 0.54 · 805 postings · median wait 0.9 days</title></circle><text x="86" y="90" class="lab" text-anchor="end">User400</text><line x1="358.0" x2="373.7" y1="110" y2="110" class="stem"/><circle cx="373.7" cy="110" r="4.5" class="dot"><title>User1177: 0.53 · 725 postings · median wait 0.2 days</title></circle><text x="86" y="114" class="lab" text-anchor="end">User1177</text><line x1="358.0" x2="352.8" y1="134" y2="134" class="stem"/><circle cx="352.8" cy="134" r="4.5" class="dot"><title>User712: 0.49 · 682 postings · median wait 4.0 days</title></circle><text x="86" y="138" class="lab" text-anchor="end">User712</text><line x1="358.0" x2="420.9" y1="158" y2="158" class="stem"/><circle cx="420.9" cy="158" r="4.5" class="dot"><title>User1564: 0.62 · 575 postings · median wait 1.1 days</title></circle><text x="86" y="162" class="lab" text-anchor="end">User1564</text><line x1="358.0" x2="347.5" y1="182" y2="182" class="stem"/><circle cx="347.5" cy="182" r="4.5" class="dot"><title>User394: 0.48 · 533 postings · median wait 1.0 days</title></circle><text x="86" y="186" class="lab" text-anchor="end">User394</text><line x1="358.0" x2="352.8" y1="206" y2="206" class="stem"/><circle cx="352.8" cy="206" r="4.5" class="dot"><title>User489: 0.49 · 443 postings · median wait 1.1 days</title></circle><text x="86" y="210" class="lab" text-anchor="end">User489</text><line x1="358.0" x2="389.4" y1="230" y2="230" class="stem"/><circle cx="389.4" cy="230" r="4.5" class="dot"><title>User1331: 0.56 · 212 postings · median wait 1.8 days</title></circle><text x="86" y="234" class="lab" text-anchor="end">User1331</text><line x1="358.0" x2="331.8" y1="254" y2="254" class="stem"/><circle cx="331.8" cy="254" r="4.5" class="dot"><title>User1082: 0.45 · 133 postings · median wait 6.0 days</title></circle><text x="86" y="258" class="lab" text-anchor="end">User1082</text></svg><div class="axcap"><span>← smallest first</span><span>largest first →</span></div></div>
+</div>
+<p class="prose" style="font-size:13px;color:var(--muted)">One dot per clerk with at least 100 manual ZNB1 postings, sorted by postings. 0.5 = no order (random). Hover a dot for the numbers.</p>
+<div class="tbl"><table><thead><tr><th>Clerk</th><th>Postings</th><th>Median wait (days)</th><th>Invoices waiting at posting (median)</th><th>Age rank<br><small>1 = oldest first</small></th><th>Same-day order τ<br><small>1 = arrival order</small></th><th>Value rank<br><small>1 = largest first</small></th></tr></thead><tbody><tr><td class=hl><b>User1341</b></td><td class='n'>2,638</td><td class='n'>8.2</td><td class='n'>145</td><td class='n'><b>0.94</b></td><td class='n'>0.87</td><td class='n'>0.49</td></tr><tr><td><b>User1482</b></td><td class='n'>826</td><td class='n'>3.7</td><td class='n'>25</td><td class='n'><b>0.54</b></td><td class='n'>0.52</td><td class='n'>0.52</td></tr><tr><td><b>User400</b></td><td class='n'>805</td><td class='n'>0.9</td><td class='n'>25</td><td class='n'><b>0.30</b></td><td class='n'>0.19</td><td class='n'>0.54</td></tr><tr><td><b>User1177</b></td><td class='n'>725</td><td class='n'>0.2</td><td class='n'>29</td><td class='n'><b>0.23</b></td><td class='n'>0.27</td><td class='n'>0.53</td></tr><tr><td><b>User712</b></td><td class='n'>682</td><td class='n'>4.0</td><td class='n'>27</td><td class='n'><b>0.44</b></td><td class='n'>0.10</td><td class='n'>0.49</td></tr><tr><td><b>User1564</b></td><td class='n'>575</td><td class='n'>1.1</td><td class='n'>18</td><td class='n'><b>0.28</b></td><td class='n'>0.08</td><td class='n'>0.62</td></tr><tr><td><b>User394</b></td><td class='n'>533</td><td class='n'>1.0</td><td class='n'>14</td><td class='n'><b>0.38</b></td><td class='n'>0.09</td><td class='n'>0.48</td></tr><tr><td><b>User489</b></td><td class='n'>443</td><td class='n'>1.1</td><td class='n'>9</td><td class='n'><b>0.41</b></td><td class='n'>0.17</td><td class='n'>0.49</td></tr><tr><td><b>User1331</b></td><td class='n'>212</td><td class='n'>1.8</td><td class='n'>8</td><td class='n'><b>0.44</b></td><td class='n'>0.13</td><td class='n'>0.56</td></tr><tr><td><b>User1082</b></td><td class='n'>133</td><td class='n'>6.0</td><td class='n'>15</td><td class='n'><b>0.62</b></td><td class='n'>0.48</td><td class='n'>0.45</td></tr></tbody></table></div>
+
+<h2 id="method"><span class="step">2</span>How it was tested</h2>
+<div class="prose">
+<p><b>Queue.</b> Per clerk: the ZNB1 invoices that clerk eventually posted manually, from the moment each entered <code>CTRL1</code> to its posting (7,572 postings by 10 clerks).</p>
+<p><b>Age rank.</b> At every posting: the share of the clerk's other waiting invoices that arrived <i>later</i> than the one posted, averaged over all postings. 1 = always the oldest (FIFO), 0.5 = random, 0 = always the newest.</p>
+<p><b>Same-day order.</b> Kendall τ between posting order and arrival order among one day's postings. <b>Value rank.</b> As the age rank, but by PO value.</p>
+<p><b>Why it isn't chance.</b> With a median of 145 invoices waiting at each of 2,638 postings, picking the oldest 94% of the time can't happen by accident.</p>
+</div>
+
+<h2 id="action"><span class="step">3</span>What it means</h2>
+<ul class="tight prose">
+  <li><b>Sort the queue by deadline and value.</b> User1341's queue takes 8.2 days at the median, close to the 10-day limit, and ignores value. Working it by discount deadline × amount would protect the large invoices without automating anything.</li>
+  <li><b>Spread the load.</b> The other clerks clear their queues in days. The FIFO queue is a capacity bottleneck on one person, tied to the suppliers assigned to them.</li>
+</ul>
+<div class="callout"><p><b>Caveats.</b> The log has no queue view, sort order or assignment data, so the queue is rebuilt from the invoices each clerk <i>posted</i>. The pattern is clear behaviour, not a documented rule. Assignment appears to follow the supplier, so each clerk's queue has a different supplier mix.</p></div>
+
+<footer>
+<p>Built by <code>14_report_queue_fifo.py</code> from <code>notes/znb1_queue_order_test.csv</code> (<code>notes/znb1_queue_order_test.py</code>) and <code>notes/znb1_ctrl1_100pct_suppliers.xlsx</code> (invoices posted straight from the queue, arrival clock, missed discount = 2% of invoices posted after more than 10 days).</p>
+</footer>
+</div>
