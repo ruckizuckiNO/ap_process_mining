@@ -53,6 +53,13 @@ KPIS = {
     "manual_count": "Manual activities (count)",
 }
 
+# KPIs on the control charts: one value per posted invoice cycle, time measured on the invoice clock above
+CHART_KPIS = {
+    "events": "Events per invoice",
+    "time_to_post_days": "Days to first posting (invoice clock)",
+    "manual_count": "Manual events per invoice",
+}
+
 
 def load_events() -> pd.DataFrame:
     return pd.read_pickle(EVENTS_PKL)

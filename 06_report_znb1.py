@@ -213,9 +213,17 @@ ex_poster = EV.loc[(EV.PO_ID == EX_REWORK) & (EV.Activity_ID == "Posted manually
 
 # Control charts
 sub = ctrl[ctrl.po_type == T].set_index("kpi")
-kpi_name = {"trace_length": "Trace length", "throughput_days": "Throughput time", "manual_count": "Manual activities"}
+kpi_name = {"events": "Events per invoice", "time_to_post_days": "Days to first posting", "manual_count": "Manual events per invoice"}
+clockv = pd.read_csv(OUT / "control_chart_clock_views.csv").set_index("view")
+cv = {k: clockv.iloc[i] for i, k in enumerate(["head", "gr", "arr", "upper"])}
+z_ttp = sub.loc["time_to_post_days"]
+cc_first, cc_last, cc_fu = (pd.Timestamp(z_ttp[k]) for k in ("window_first", "window_last", "followup_start"))
+wk_pass = [kpi_name[k].lower() for k in kpi_name if sub.loc[k].weekly_I_in_control in (True, "True")]
+wk_fail = [kpi_name[k].lower() for k in kpi_name if sub.loc[k].weekly_I_in_control not in (True, "True")]
+wk_text = ((" and ".join(wk_pass).capitalize() + (" passes" if len(wk_pass) == 1 else " pass") + " that test; ") if wk_pass else "No KPI passes that test: ") + \
+    (" and ".join(wk_fail) + (" doesn't." if len(wk_fail) == 1 else " don't.") if wk_pass else ", ".join(wk_fail) + " all fail.")
 ctrl_rows = []
-for k in ["trace_length", "throughput_days", "manual_count"]:
+for k in ["events", "time_to_post_days", "manual_count"]:
     r = sub.loc[k]
     rules = ", ".join(rr for rr in ["R1", "R2", "R3", "R4", "R5"] if r[rr] > 0) or "none"
     wk = "passes" if r.weekly_I_in_control in (True, "True") else "fails"
@@ -279,7 +287,7 @@ page = f"""<meta charset="utf-8">
   <div class="finding"><div class="k">{pct(m1.share, 0)}</div><p>of ZNB1 invoices are posted manually, after a median of {m1['median']:.1f} days. They cause {pct(m1.missed / miss, 0)} of the missed discount. Automatically posted invoices are done the same day.</p></div>
   <div class="finding"><div class="k">{pct(r_.CTRL1, 0)}</div><p>of ZNB1 invoices are sent to the manual control queue (<code>CTRL1</code>) already at validation, so the manual posting is decided up front, not after a failed auto-post.</p></div>
   <div class="finding"><div class="k">{num(t.variants)}</div><p>variants for {num(t.cases)} POs. Mostly because a PO holds {p.mean_invoice_cycles:.1f} invoices on average and their steps interleave; real rework within an invoice is only {pct(p.rework_rate, 0)}.</p></div>
-  <div class="finding"><div class="k">Cpu {ci.Cpu_soft10:.2f}</div><p>against the 10-day SLA, per invoice. ZNB1 isn't capable on any measure, and none of its three KPIs is in statistical control.</p></div>
+  <div class="finding"><div class="k">Cpu {ci.Cpu_soft10:.2f}</div><p>against the 10-day SLA, per invoice. ZNB1 isn't capable on any measure, and none of its three per-invoice KPIs is in statistical control.</p></div>
   <div class="finding"><div class="k">{pct(p.manual_share, 0)}</div><p>of all manual work in accounts payable comes from ZNB1, although it has only {pct(p.case_share, 1)} of the POs.</p></div>
 </div>
 
@@ -358,15 +366,16 @@ page = f"""<meta charset="utf-8">
 
 <h2 id="step3"><span class="step">Step 3</span>Control and capability</h2>
 <div class="prose">
-<p>All KPIs are transformed with log(x + 1), which pulls in the long tail of slow POs. POs are grouped by the week in which they started, and each week is one subgroup on an <b>X̄–S chart</b>. The Western Electric rules are applied: <b>R1</b> one point beyond 3σ, <b>R2</b> 2 of 3 beyond 2σ, <b>R3</b> 4 of 5 beyond 1σ, <b>R4</b> 8 in a row on one side, <b>R5</b> 6 in a row rising or falling. A KPI is in control only if no point breaks a rule.</p>
+<p>The charts follow the invoice clock: one point per <b>posted invoice</b>, time from goods receipt (first <code>WAIT_GR</code> event) or, without one, from the first event to the <b>first posting</b>. The KPIs are events, days to first posting and manual events per invoice, all transformed with log(x + 1), which pulls in the long tail of slow invoices. Invoices are grouped by the week in which their clock started ({num(z_ttp.invoices)} invoices with clock start {cc_first:%d %b %Y} – {cc_last:%d %b %Y}; from {cc_fu:%d %b} only follow-up invoices of older POs, shaded), and each week is one subgroup on an <b>X̄–S chart</b>. The Western Electric rules are applied: <b>R1</b> one point beyond 3σ, <b>R2</b> 2 of 3 beyond 2σ, <b>R3</b> 4 of 5 beyond 1σ, <b>R4</b> 8 in a row on one side, <b>R5</b> 6 in a row rising or falling. A KPI is in control only if no point breaks a rule.</p>
 </div>
 {table(["KPI", "Weeks flagged", "Rules broken (X̄)", "S chart R1", "Weekly means as I-chart"], ctrl_rows)}
-{fig(f"figures/control_charts/cc_{T}.png", "ZNB1: control charts for the three log-transformed KPIs. Red points violate at least one rule.", "wide")}
+{fig(f"figures/control_charts/cc_{T}.png", "ZNB1: control charts per posted invoice, time on the invoice clock. Red points violate at least one rule.", "wide")}
 <div class="example">
-  <div class="lbl">Example · reading the throughput chart</div>
-  <p>Each dot on the X̄ chart is the <b>average log throughput time of all POs that started in that week</b>. The weeks of 21 and 28 July both lie more than 2σ above the average (R2): invoices that started then were unusually slow. The average then falls six weeks in a row through August (R5). The week of 29 September is above the upper limit (R1). The last two November weeks are below the lower limit (R1) after a run of low weeks (R3). The shrinking case population at the end of the period is the most likely reason, but the data alone can't confirm it.</p>
+  <div class="lbl">Example · reading the days-to-posting chart</div>
+  <p>Each dot on the middle X̄ chart is the <b>average log days to first posting of all invoices whose clock started in that week</b>; the centre line is e<sup>{z_ttp.center:.2f}</sup> − 1 = {z_ttp.center_days:.1f} days as a geometric mean. From late July to late September the weeks lie above the average, many beyond the upper limit (R1) and in long runs (R4). In October and November they sit below it. In the shaded follow-up period they climb back above it until early February; the last two weeks drop far below because those invoices had only days to be posted before the log ends. Part of that is mix: invoices on the goods-receipt clock post within a geometric mean of {cv['gr'].center_days:.1f} days, invoices on the arrival clock (mostly the <code>CTRL1</code> road) in {cv['arr'].center_days:.1f} days, and the goods-receipt share grows over the period.</p>
 </div>
-<div class="callout"><p><b>How to read this:</b> with a few hundred POs a week the limits are narrow, so small shifts count as special causes. Charting the weekly means as individual values treats normal week-to-week variation as common cause. Trace length passes that test; throughput time and manual work don't.</p></div>
+{fig(f"figures/control_charts/cc_{T}_by_clock.png", f"ZNB1 days to first posting by clock: headline invoice clock ({num(cv['head'].invoices)} invoices), only GR-clock invoices ({num(cv['gr'].invoices)}), only arrival-clock invoices ({num(cv['arr'].invoices)}), and the arrival clock for every invoice (upper bound).", "wide")}
+<div class="callout"><p><b>How to read this:</b> with several hundred invoices a week the limits are narrow, so small shifts count as special causes. Charting the weekly means as individual values treats normal week-to-week variation as common cause. {wk_text} Even split by clock, both groups break the rules ({int(cv['gr'].points_flagged)} and {int(cv['arr'].points_flagged)} of {int(cv['gr'].subgroups)} weeks flagged), so the drift is not only a mix effect. Compare GR-clock and arrival-clock invoices with care: they differ in route as well as in clock (see the assumptions document §3).</p></div>
 
 <h3 id="sla">Capability against the payment SLAs</h3>
 <div class="prose"><p>Cpu = (log(USL + 1) − μ) / 3σ, with μ and σ from the log-transformed times and σ estimated within weeks. USL is 10 days (cash discount) and 30 days (legal payment deadline). Cpu ≥ 1 means the limit is met with a 3σ margin. Where the clock stops matters, because a PO can hold several invoices:</p></div>

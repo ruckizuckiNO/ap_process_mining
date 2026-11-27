@@ -29,7 +29,7 @@
   Session 6   19–20 Nov 2026     ZNB1 deep dive: suppliers missing 10/30 days,
                                  clerks (User1341, User1177), manual queue,
                                  assumptions, process-path .pptx
-  Session 7   22–25 Nov 2026     Pareto charts, auto-triage
+  Session 7   22–27 Nov 2026     Pareto charts, auto-triage
                                  potential, variant analysis, ZNB1 report,
                                  invoice clock, CTRL1 queue, PO-value cuts with
                                  gradient boosting, FIFO check, assumptions
@@ -473,7 +473,7 @@
 
 
 ================================================================================
-  SESSION 7 – 22 to 25 Nov 2026
+  SESSION 7 – 22 to 27 Nov 2026
   ZNB1 quick wins, Pareto charts, auto-triage potential, User1341 daily load,
   variant analysis, ZNB1 report, invoice clock, CTRL1 queue, PO-value cuts
   with gradient boosting, FIFO check, assumptions
@@ -819,3 +819,18 @@
     that pos are divided by amount of invoices and that we only used PO amount
     NOK and not the cleared one. Only for the znb1 with ctrl1 with manual
     posted. deleted, never posted and such excluded!
+
+  --- 27 Nov 2026 -------------------------------------------------------------
+
+[196] 2026-11-27
+    The control charts which were created very early on - could you please
+    update these so that they match the clock-logic we defined? And can you also
+    create an .html file explaining everything in detail. How the charts are
+    read, what they are for and so on.
+
+[197] 2026-11-27
+    regarding the control charts and the created .html why is it stated that the
+    clock runs from june 2025 to november 2025? The dataset is longer.
+
+[198] 2026-11-27
+    Yes!

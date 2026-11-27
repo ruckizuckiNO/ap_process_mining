@@ -1,0 +1,5 @@
+po_type,view,invoices,R1,R2,R3,R4,R5,points_flagged,subgroups,center,center_days,sigma_within,s_chart_R1,weekly_I_violations,weekly_I_in_control
+ZNB1,"Headline: invoice clock (GR if WAIT_GR, else arrival)",12871,19,22,25,23,6,30,35,1.0032182797183509,1.7270441119130837,1.0920662254444984,4,23,False
+ZNB1,Only invoices on the GR clock,6912,8,14,21,24,0,28,35,0.2268120401301901,0.25459403244616635,0.5962499980527618,22,24,False
+ZNB1,Only invoices on the arrival clock,5959,12,17,17,11,0,20,35,1.9037921894403462,5.711296755332296,0.8306276999439339,9,17,False
+ZNB1,Upper bound: arrival clock for every invoice,12871,16,18,18,0,0,22,35,1.573851363922239,3.825196039540904,1.1903515220321381,5,9,False

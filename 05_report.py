@@ -259,11 +259,22 @@ for c in order:
                     f"<td class='n'>{num(r.mean_manual, 2)}</td><td class='n'>{pct(r.touchless_rate, 0)}</td><td class='n'>{r.mean_invoice_cycles:.2f}</td><td class='n'>{pct(r.rework_rate, 0)}</td>")
 
 # ---------------------------------------------------------------- step 3
+# Control charts run per posted invoice on the invoice clock (see 03_control_capability.py)
+n_out = int((~ctrl.groupby("po_type").in_control.all()).sum())
+wk_ok = int((ctrl.weekly_I_in_control.astype(str) == "True").sum())
+wk_n = int(ctrl.weekly_I_in_control.notna().sum())
+cc_inv = int(ctrl.drop_duplicates("po_type").invoices.sum())
+z_ttp = ctrl[(ctrl.po_type == "ZNB1") & (ctrl.kpi == "time_to_post_days")].iloc[0]
+cc_first, cc_last, cc_fu = (pd.Timestamp(ctrl[k].iloc[0]) for k in ("window_first", "window_last", "followup_start"))
+_zi = INV[(INV.po_type == "ZNB1") & INV.posted].copy()
+_zi["gr"] = _zi.clock_start > _zi.start
+gr_early = _zi[_zi.clock_start < "2025-09-01"].gr.mean()
+gr_late = _zi[(_zi.clock_start >= "2025-11-01") & (_zi.clock_start < "2025-12-01")].gr.mean()
 ctrl_rows = []
 for c in order:
     sub = ctrl[ctrl.po_type == c].set_index("kpi")
     cells = []
-    for k in ["trace_length", "throughput_days", "manual_count"]:
+    for k in ["events", "time_to_post_days", "manual_count"]:
         r = sub.loc[k]
         flagged, n = int(r.points_flagged), int(r.subgroups)
         rules = ", ".join(rr for rr in ["R1", "R2", "R3", "R4", "R5"] if r[rr] > 0) or "none"
@@ -282,7 +293,7 @@ for c in order:
 
 cc_details = "".join(
     f'<details class="type"><summary>{code(c)} <b>{PO_TYPES[c]}</b><span class="meta">{ctrl[ctrl.po_type == c].chart.iloc[0]}</span></summary>'
-    f'<div class="type-body">{fig(f"figures/control_charts/cc_{c}.png", f"{c}: control charts for the three log-transformed KPIs. Red points violate at least one rule.", "wide")}</div></details>'
+    f'<div class="type-body">{fig(f"figures/control_charts/cc_{c}.png", f"{c}: control charts per posted invoice, time on the invoice clock. Red points violate at least one rule.", "wide")}</div></details>'
     for c in order)
 
 # ---------------------------------------------------------------- step 4
@@ -448,7 +459,7 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
   <div class="finding"><div class="k">{code('ZNB1')} {code('ZJD1')}</div><p>Manual and normal orders are only 5.5% of the cases but carry the highest-value invoices. Invoice by invoice, {pct(cap_inv.loc['ZNB1', 'observed_breach_soft10'], 0)} and {pct(cap_inv.loc['ZJD1', 'observed_breach_soft10'], 0)} take longer than 10 days, mostly those waiting for manual posting. They account for {pct(disc_focus / disc_total, 0)} of the missed cash discount.</p></div>
   <div class="finding"><div class="k">{mnok(disc_total)} NOK</div><p>of 2% cash discount is missed on {num(pr.late_invoices.sum())} invoices that were posted after more than 10 days.</p></div>
   <div class="finding"><div class="k">{code('NB2')} {pct(pr.loc['NB2', 'manual_share'], 0)}</div><p>of all manual work comes from returns to vendor. They meet the SLAs well, so this is a cost problem, not a deadline problem.</p></div>
-  <div class="finding"><div class="k">10 of 11</div><p>processes are out of control on the weekly X̄–S charts. The exception, ZRPM, has only 5 cases. A large part of the signal is a drift in the case population from October onward, so read these verdicts together with the data caveats.</p></div>
+  <div class="finding"><div class="k">{n_out} of 11</div><p>processes are out of control on the control charts (per invoice, time on the invoice clock). With hundreds of invoices per week the limits are very narrow, and the invoice population shifts over the period, so read these verdicts together with the data caveats.</p></div>
   <div class="finding new"><div class="k">At validation</div><p>the road is already chosen. {rc('CTRL1')} of validations send the invoice straight to the manual control queue (<code>CTRL1</code>) and skip the goods-receipt check. That is {ctrl1('ZNB1')} of ZNB1 invoices and {ctrl1('ZJD1')} of ZJD1 invoices, so their manual posting is decided up front, not after a failed auto-post. <a href="#routing">Details</a></p></div>
 </div>
 
@@ -558,7 +569,7 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
 
 <h2 id="step3"><span class="step">Step 3</span>High-level screening: control and capability</h2>
 <div class="prose">
-<p>All KPIs are transformed with log(x + 1). Cases are grouped by the week in which they started. PO types with at least 5 cases per week on average get <b>X̄–S charts</b> with limits for each subgroup size. ZNBF and ZRPM get <b>individuals (I-MR) charts</b> on single cases. The Shewhart rules applied are those of the Western Electric handbook:</p>
+<p>The control charts use the same unit and clock as the SLA analysis: one point per <b>posted invoice</b> (PO × <code>SAP_PO_No</code>), and the time runs from the <b>clock start to the first posting</b>. The clock starts at the invoice's first event, except for {code('ZNB1')}, where it starts at goods receipt (the first <code>WAIT_GR</code> event) when the invoice has one. The three KPIs are events per invoice, days to first posting and manual (non-bot) events per invoice, all transformed with log(x + 1). Invoices are grouped by the week in which their clock started. All posted invoices over the whole log are charted (clock starts {cc_first:%d %b %Y} – {cc_last:%d %b %Y}; only the incomplete last week of the log is left out), {num(cc_inv)} invoices in all. POs only start until {(cc_fu - pd.Timedelta(days=1)):%d %b %Y}, so from {cc_fu:%d %b} the charts show follow-up invoices of older POs only; that period is shaded. PO types with at least 5 invoices per week on average get <b>X̄–S charts</b> with limits for each subgroup size. ZNBF and ZRPM get <b>individuals (I-MR) charts</b> on single invoices. The Shewhart rules applied are those of the Western Electric handbook:</p>
 <ul class="tight">
 <li><b>R1</b> one point beyond 3σ</li>
 <li><b>R2</b> 2 of 3 consecutive points beyond 2σ on the same side</li>
@@ -574,12 +585,12 @@ footer {{ margin-top: 64px; border-top: 1px solid var(--line); padding-top: 18px
 </div>
 <div class="example">
   <div class="lbl">Example · reading a control chart</div>
-  <p>Open <code>ZNB1</code> below. Each dot on the left X̄ chart is the <b>average log throughput time of all cases that started in that week</b>. The green line is the overall average and the dashed red lines are the ±3σ limits. They get narrower in weeks with more cases, because an average of many cases varies less. The right S chart shows how spread out the cases were within each week.</p>
-  <p>Red dots break a rule. In ZNB1, the weeks of 21 and 28 July both lie more than 2σ above the average (R2): invoices that started then were unusually slow. The average then falls six weeks in a row through August (R5). The week of 29 September is above the upper limit (R1). The last two November weeks are below the lower limit (R1) after a run of low weeks (R3). For ZNB1 the late cases are faster, unlike most other PO types. The change in the case population at the end of the period (see Data) is the most likely reason, but the data alone cannot confirm it. A process with no red dots on either chart is "in control": its variation comes only from everyday randomness.</p>
+  <p>Open <code>ZNB1</code> below. Each dot on the middle-left X̄ chart is the <b>average log days to first posting of all invoices whose clock started in that week</b>. The green line is the overall average (e<sup>{z_ttp.center:.2f}</sup> − 1 = {z_ttp.center_days:.1f} days as a geometric mean) and the dashed red lines are the ±3σ limits. They get narrower in weeks with more invoices, because an average of many invoices varies less. The right S chart shows how spread out the invoices were within each week.</p>
+  <p>Red dots break a rule. In ZNB1, the weeks from late July to late September lie above the average, many beyond the upper limit (R1) and in long runs (R4). In October and November the average sits below the centre line. In the shaded follow-up period (December to early February) it climbs back above it, and the last two weeks fall far below: those invoices had only days to be posted before the log ends, so the slow ones are not in the data yet. Part of the summer-to-autumn fall is a change of mix: the share of invoices on the fast goods-receipt clock rises from {pct(gr_early, 0)} (clock start before September) to {pct(gr_late, 0)} (November). The extra chart <code>cc_ZNB1_by_clock.png</code> splits the two clocks: the arrival-clock invoices (the manual queue) still fall from summer to autumn, so it is not only a mix effect. A process with no red dots on either chart is "in control": its variation comes only from everyday randomness.</p>
 </div>
-{table(["Code", "Chart", "Trace length", "Throughput time", "Manual activities"], ctrl_rows)}
+{table(["Code", "Chart", "Events per invoice", "Days to first posting", "Manual events per invoice"], ctrl_rows)}
 <div class="callout">
-<p><b>How to read this:</b> with thousands of cases per week, the limits of an X̄ chart become very narrow, so even small shifts between weeks count as special causes. As a robustness check, the weekly means were also charted as individual values. That treats normal week-to-week variation as common cause. Only a few charts pass even that test (marked "weekly-means OK"). The pattern repeats across PO types: stable in July and August, then rising throughput time and manual work from September, partly because of the shrinking, slower set of cases in the last two months. ZRPM passes only because it has 5 points, which proves nothing.</p>
+<p><b>How to read this:</b> with hundreds or thousands of invoices per week, the limits of an X̄ chart become very narrow, so even small shifts between weeks count as special causes. As a robustness check, the weekly means were also charted as individual values. That treats normal week-to-week variation as common cause. Only {wk_ok} of {wk_n} charts pass even that test (marked "weekly-means OK"). Three effects run through all PO types: the weekly volume first builds up (only POs that started in the log window are included, so early weeks are small) and falls off in October and November; after November only follow-up invoices of older POs remain (shaded); and invoices whose clock starts in the last weeks have had little time to be posted, which pulls those weeks down. A full explanation of the charts is in <code>report_control_charts.html</code>.</p>
 </div>
 {cc_details}
 
