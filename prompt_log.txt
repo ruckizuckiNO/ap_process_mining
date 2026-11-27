@@ -2,8 +2,6 @@
   PROMPT LOG – INN354 Accounts-Payable Process Mining
 ================================================================================
 
-  Report artifact   Invoice Flow Screening
-  Repository        https://github.com/ruckizuckiNO/ap_process_mining
 
   About this log
   - All prompts written in the Claude Code sessions that built and changed the
@@ -834,3 +832,9 @@
 
 [198] 2026-11-27
     Yes!
+
+[199] 2026-11-27
+    Is it correct that no new POs start in 2026?
+
+[200] 2026-11-27
+    Yes, please change wording!

@@ -12,7 +12,8 @@ Charts
   which treats normal week-to-week variation as common cause. With hundreds of invoices per week the
   strict X̄ limits become very narrow, so both verdicts are reported.
 - All posted invoices are charted, over the whole log (1 Jul 2025 – 3 Mar 2026). Only the last, incomplete week
-  (the log ends on a Tuesday) is left out. POs only start until 30 Nov 2025, so clocks that start later belong to
+  (the log ends on a Tuesday) is left out. No new POs enter the log after 30 Nov 2025 (the extract holds POs whose first AP event falls in
+  Jul–Nov 2025, followed until Mar 2026), so clocks that start later belong to
   follow-up invoices of older POs; the charts shade that follow-up period.
 - For ZNB1 an extra figure splits time to first posting by clock (GR clock vs. arrival clock) and shows the
   arrival clock for all invoices as the upper-bound view.
@@ -52,7 +53,7 @@ inv_all["arrival_ttp_days"] = (inv_all.first_post - inv_all.start).dt.total_seco
 inv_all["clock_week"] = inv_all.clock_start.dt.to_period("W-SUN").dt.start_time
 for k in ["events", "manual_count", "time_to_post_days", "arrival_ttp_days"]:
     inv_all[f"log_{k}"] = np.log(inv_all[k] + 1)
-FOLLOWUP_START = cases.start_week.max() + pd.Timedelta(days=7)  # no PO starts after this week: follow-up invoices only
+FOLLOWUP_START = cases.start_week.max() + pd.Timedelta(days=7)  # no new POs enter the log after this week: follow-up invoices only
 LAST_FULL_WEEK_END = ev.ts.max().normalize() - pd.Timedelta(days=ev.ts.max().weekday())  # Monday of the log's last week
 posted = inv_all[inv_all.posted]
 inv = posted[posted.clock_week < LAST_FULL_WEEK_END].reset_index()
@@ -103,7 +104,7 @@ def draw(ax, x, y, center, lcl, ucl, hits, title, ylabel):
     if isinstance(x, pd.DatetimeIndex):
         if x.max() >= FOLLOWUP_START:
             ax.axvspan(FOLLOWUP_START - pd.Timedelta(days=3.5), x.max() + pd.Timedelta(days=3.5), color="#e8a33d",
-                       alpha=0.12, lw=0, zorder=0, label="follow-up invoices only (no new POs)")
+                       alpha=0.12, lw=0, zorder=0, label="follow-up invoices only (no new POs enter the log)")
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
         ax.tick_params(axis="x", rotation=45)
 
