@@ -81,14 +81,8 @@ no, it's fine. but what is a log
 [22] 2026-10-21 15:57 UTC
 what else can I include in the CLAUDE.md?
 
-[23] 2026-10-21 19:32 UTC
-commit and push
-
 [24] 2026-10-21 19:34 UTC
 yes just write a .gitignore and add .Rhistory
-
-[25] 2026-10-21 19:35 UTC
-commit and push
 
 [26] 2026-10-21 21:54 UTC
 some add. info about the data mining project.. coming soon
@@ -127,9 +121,6 @@ the raw log is here: /Downloads/EN event log.csv
 [36] 2026-10-22 16:20 UTC
 yes, annotate everything which is important
 
-[37] 2026-10-22 16:24 UTC
-commit and push
-
 [38] 2026-10-22 16:39 UTC
 Is the pdf also on git?
 
@@ -158,17 +149,12 @@ ja, mi må tenke PO og ikke faktura.
 [45] 2026-10-23 09:40 UTC
 B
 
-[46] 2026-10-23 09:55 UTC
-push and commit
 
 [47] 2026-10-23 10:21 UTC
 what does make more sense? Are the separate invoices really tracable?
 
 [48] 2026-10-23 10:24 UTC
 ja, vet ikke. det var sikkert deg.... men du kan tilpasse alt til fakturanivå
-
-[49] 2026-10-23 10:29 UTC
-push and commit
 
 [50] 2026-10-23 10:34 UTC
 I need also the amount of supplier per code category. include it in the dashboard
@@ -194,9 +180,6 @@ what is GR?
 [57] 2026-10-23 13:37 UTC
 can you give me a text file with the complete prompts for this artifact
 
-[58] 2026-10-23 17:46 UTC
-push and commit
-
 ====================================================================================================
 Session 5 – 6 Nov 2026: top suppliers by PO value, amount differences (cleared vs PO value)
 ====================================================================================================
@@ -215,9 +198,6 @@ and sort it by amount of POs in descending order
 
 [63] 2026-11-06
 same list with the highest average PO value?
-
-[64] 2026-11-06
-can you also push and commit
 
 [65] 2026-11-06
 just focus on znb1: Can you give me the the suppliers by total PO-amount? an overview
@@ -248,9 +228,6 @@ no, a box plot with the differences between cleared amounts and PO-amounts
 
 [74] 2026-11-06
 Can i get a list with a separate column for the amount difference for all znb1. .csv is fine
-
-[75] 2026-11-06
-push and commit
 
 [76] 2026-11-06
 into main?
@@ -463,9 +440,6 @@ Read znb1_variants_pareto.png - for this i want an overview for the first three 
 [141] 2026-11-22
 What is the total PO-value for all znb1 (PO-level not invoice level)
 
-[142] 2026-11-22
-push and commit everything
-
 [143] 2026-11-23
 ap_process_mining
 
@@ -644,9 +618,6 @@ remove this one
 [195] 2026-11-25
 no it's fine. now i need an overview of the share of missed discounts if we would have had a cut at PO-value of MNOK 1.5, 1.75, 2 and 2.25 repectively
 
-[196] 2026-11-25
-commit and push everything
-
 [197] 2026-11-25
 Okay. Now something more advance. To estimate the share of each cut which still we be above 10 days i want to look at the zdj1 (normal orders) and use a machine learning alogrythm (gradient bossting regression) to estimate it based on the PO-amount. Do your magic and create a report!
 
@@ -671,12 +642,5 @@ In combination with the defined invoice thresholds i want an overview which give
 [204] 2026-11-25
 instead of PO value i need invoice value
 
-[205] 2026-11-25
-push and commit
-
 [206] 2026-11-25
 Can you create/update the report of the clock assumption and the assumtpion that pos are divided by amount of invoices and that we only used PO amount NOK and not the cleared one. Only for the znb1 with ctrl1 with manual posted. deleted, never posted and such excluded!
-
-[207] 2026-11-25
-push and commit
-
