@@ -80,6 +80,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 INK, MUTED, GRID = "#1f1f1e", "#6b6a64", "#e4e3dc"
 CLERKS = list(clerks.index)                       # clerks with >= 50 postings, by volume

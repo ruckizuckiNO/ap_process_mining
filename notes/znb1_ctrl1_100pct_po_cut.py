@@ -17,6 +17,9 @@ import numpy as np
 import pandas as pd
 
 from common import POSTING_ACTIVITIES, SLA_SOFT_DAYS, load_cases, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 PNG = NOTES / "figures" / "znb1_ctrl1_100pct_po_cut.png"
@@ -92,7 +95,7 @@ for yi, r in zip(y, res.itertuples()):
 ax.set_yticks(y)
 ax.set_yticklabels([f"Cut at {c:.2f}M NOK".replace(".00M", ".0M").replace(".50M", ".5M") for c in res.cut_mnok],
                    fontsize=10, color=INK)
-ax.set_xlim(0, total / 1e6 * 1.13)
+ax.set_xlim(0, total / 1e6 * 1.22)
 ax.set_xlabel("Missed 2% cash discount (M NOK)", color=INK2, fontsize=10)
 ax.grid(axis="x", color=GRID, zorder=0)
 ax.tick_params(axis="both", length=0, colors=INK2)

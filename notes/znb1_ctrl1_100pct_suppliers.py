@@ -28,6 +28,9 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from common import POSTING_ACTIVITIES, SLA_HARD_DAYS, SLA_SOFT_DAYS, load_cases, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 FIGS = NOTES / "figures"
@@ -107,10 +110,10 @@ fig.text(0.01, 0.905,
          f"({tot['amount'] / all_amount:.0%} of posted ZNB1) · missed discount {tot['missed'] / 1e6:.2f}M NOK "
          f"({tot['missed'] / all_missed:.0%} of ZNB1) · > {SLA_HARD_DAYS} days: {tot['n30']} invoice ({tot['n30'] / tot['n']:.2%})",
          ha="left", fontsize=10, color=MUTED)
-fig.text(0.01, 0.015, "Number of invoices in brackets. Sorted by invoice amount. Clock: arrival in AP → first posting. "
+fig.text(0.01, 0.015, "Number of invoices in brackets. Sorted by invoice amount. Clock: arrival in AP → first posting.\n"
          "Invoice amount = PO value split evenly over the PO's posted invoices. Missed discount = 2% of late invoices (> 10 days).",
          ha="left", fontsize=8.5, color=MUTED)
-fig.subplots_adjust(left=0.17, right=0.98, top=0.84, bottom=0.08)
+fig.subplots_adjust(left=0.17, right=0.98, top=0.84, bottom=0.115)
 png = FIGS / "znb1_ctrl1_100pct_suppliers.png"
 fig.savefig(png, dpi=200)
 plt.close(fig)
@@ -138,9 +141,9 @@ fig.text(0.01, 0.905,
          f"{tot['amount'] / 1e6:,.0f}M NOK in total ({tot['amount'] / all_amount:.0%} of posted ZNB1 value)",
          ha="left", fontsize=10, color=MUTED)
 fig.text(0.01, 0.015, "Number of invoices in brackets; % = share of this group's amount. Invoices posted straight from "
-         "the queue. Invoice amount = PO value split evenly over the PO's posted invoices.",
+         "the queue.\nInvoice amount = PO value split evenly over the PO's posted invoices.",
          ha="left", fontsize=8.5, color=MUTED)
-fig.subplots_adjust(left=0.2, right=0.97, top=0.84, bottom=0.12)
+fig.subplots_adjust(left=0.2, right=0.97, top=0.84, bottom=0.15)
 png_amount = FIGS / "znb1_ctrl1_100pct_suppliers_amount.png"
 fig.savefig(png_amount, dpi=200)
 plt.close(fig)

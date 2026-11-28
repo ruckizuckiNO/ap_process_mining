@@ -22,6 +22,7 @@ A single step can be rerun on its own as long as its inputs in `output/` exist (
 ## Architecture
 
 - `common.py` holds all shared paths, constants (bot users, posting activities, SLA limits, PO types, KPIs) and the `load_events/cases/invoices()` loaders. Change constants there, not in the scripts.
+- Chart wording (since 2026-11-28): figures say "invoice proxy/proxies", because `SAP_PO_No` only stands in for the real invoice document. Every plotting script calls `use_invoice_proxy_labels()` from `common.py`, which rewrites all matplotlib text at draw time; SAP names and verbs in `PROXY_KEEP` (e.g. *Invoice document deleted*, "suppliers invoice") stay. New plotting scripts must call it too. `PROXY_CHECK=1` prints texts that run outside the figure. HTML report text is not affected.
 - Data flow (everything goes to `output/`, figures to `output/figures/`):
   - `01_prepare.py`: raw CSV → `events.pkl`, `cases.csv` (one row per PO_ID), `invoices.csv` (one row per PO_ID × SAP_PO_No invoice cycle), `bot_profile.csv`, `summary.json`.
   - `02_process_maps.py`: DFGs/variants per PO type (pm4py + graphviz).

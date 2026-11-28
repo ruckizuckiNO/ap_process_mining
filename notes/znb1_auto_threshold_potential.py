@@ -16,6 +16,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from common import SLA_SOFT_DAYS, load_cases, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 K = ["PO_ID", "SAP_PO_No"]
@@ -117,7 +120,7 @@ fig.text(0.03, 0.915, f"ZNB1 · {len(suppliers)} always-manual suppliers · {tot
 ax.legend(loc="upper left", bbox_to_anchor=(-0.13, 1.1), ncol=2, frameon=False, fontsize=9, labelcolor=INK2,
           handlelength=1.6, borderaxespad=0)
 fig.text(0.03, 0.01, "Assumes automatic handling posts within 10 days, so today's late invoices on those POs earn the 2% "
-         "discount. Scope: ZNB1 POs without never-posted invoices; GR clock; invoice value = PO value / posted invoices.",
+         "discount.\nScope: ZNB1 POs without never-posted invoices; GR clock; invoice value = PO value / posted invoices.",
          fontsize=7.5, color=INK2, ha="left")
 fig.subplots_adjust(left=0.13, right=0.98, top=0.8, bottom=0.11)
 fig.savefig(NOTES / "figures" / "znb1_auto_threshold_potential.png", facecolor=SURFACE)

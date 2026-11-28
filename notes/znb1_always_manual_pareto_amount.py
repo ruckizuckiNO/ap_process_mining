@@ -15,6 +15,9 @@ import pandas as pd
 from matplotlib.ticker import PercentFormatter
 
 from common import load_cases, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 SRC = NOTES / "znb1_always_manual_suppliers.xlsx"

@@ -20,6 +20,9 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 from common import POSTING_ACTIVITIES, SLA_SOFT_DAYS, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 K = ["PO_ID", "SAP_PO_No"]

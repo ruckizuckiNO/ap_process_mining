@@ -20,6 +20,9 @@ import numpy as np
 import pandas as pd
 
 from common import POSTING_ACTIVITIES, SLA_SOFT_DAYS, load_cases, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 PNG = NOTES / "figures" / "znb1_ctrl1_100pct_exposure.png"
@@ -88,7 +91,7 @@ for yi, e, l, n in zip(y, expo, late, ninv):
             va="center", ha="left", fontsize=9, color=INK)
 ax.set_yticks(y)
 ax.set_yticklabels(labels, fontsize=10, color=INK)
-ax.set_xlim(0, xmax * 1.45)
+ax.set_xlim(0, xmax * 1.62)
 ax.set_xlabel("Missed 2% cash discount (M NOK)", color=INK2, fontsize=10)
 ax.grid(axis="x", color=GRID, zorder=0)
 ax.tick_params(axis="both", length=0, colors=INK2)
@@ -103,7 +106,7 @@ fig.text(0.01, 0.905,
          f"exposure = 2% of that · {n_sup_exposed} suppliers with any exposure",
          ha="left", fontsize=9.5, color=INK2)
 fig.text(0.01, 0.015, "Suppliers with 100% of invoices routed to CTRL1 at initial validation. Deleted and never-posted "
-         "invoices left out. Clock: arrival in AP to first posting (pipeline clock). Invoice amount = PO value split evenly over the "
+         "invoices left out.\nClock: arrival in AP to first posting (pipeline clock). Invoice amount = PO value split evenly over the "
          "PO's posted invoices.", ha="left", fontsize=7.5, color=INK2)
 fig.subplots_adjust(left=0.17, right=0.98, top=0.85, bottom=0.12)
 fig.savefig(PNG, facecolor=SURFACE)

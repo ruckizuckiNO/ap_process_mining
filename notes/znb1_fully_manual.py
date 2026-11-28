@@ -69,6 +69,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 INK, MUTED, GRID = "#1f1f1e", "#6b6a64", "#e4e3dc"
 C1341, COTHER, CGREY = "#2a78d6", "#eb6834", "#8a8980"

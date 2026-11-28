@@ -27,7 +27,7 @@
   Session 6   19–20 Nov 2026     ZNB1 deep dive: suppliers missing 10/30 days,
                                  clerks (User1341, User1177), manual queue,
                                  assumptions, process-path .pptx
-  Session 7   22–27 Nov 2026     Pareto charts, auto-triage
+  Session 7   22–28 Nov 2026     Pareto charts, auto-triage
                                  potential, variant analysis, ZNB1 report,
                                  invoice clock, CTRL1 queue, PO-value cuts with
                                  gradient boosting, FIFO check, assumptions
@@ -471,7 +471,7 @@
 
 
 ================================================================================
-  SESSION 7 – 22 to 27 Nov 2026
+  SESSION 7 – 22 to 28 Nov 2026
   ZNB1 quick wins, Pareto charts, auto-triage potential, User1341 daily load,
   variant analysis, ZNB1 report, invoice clock, CTRL1 queue, PO-value cuts
   with gradient boosting, FIFO check, assumptions
@@ -838,3 +838,38 @@
 
 [200] 2026-11-27
     Yes, please change wording!
+
+  --- 28 Nov 2026 -------------------------------------------------------------
+
+[201] 2026-11-28
+    can you compare zjd1 and znb1 based on the defined clock and on invoice
+    level how many above 10 days and above 30 days (include all paths). What's
+    the missed potential or exposure?
+
+[202] 2026-11-28
+    Is total cost equal with total PO-value?
+
+[203] 2026-11-28
+    total cost for znb1 is 15.9 + 0.5 but you write 16.3
+
+[204] 2026-11-28
+    Can you adjust all the .pngs so that invoice or invoices are replaced with
+    invoice proxy or invoice proxies?
+
+[205] 2026-11-28
+    where is the explanation that we only look at 100 % manual suppliers and how
+    did we test?
+
+[206] 2026-11-28
+    we identified that there are 35 always manual suppliers and thats the reason
+    for why we focus on them!
+
+[207] 2026-11-28
+    give it to me in writing for the report!
+
+[208] 2026-11-28
+    i need a grpah which shows something about the ctrl1 lateness. histogram or
+    something with over 10 days and one over 30 days late
+
+[209] 2026-11-28
+    and give me the analysis for fifo!

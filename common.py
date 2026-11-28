@@ -71,3 +71,71 @@ def load_invoices() -> pd.DataFrame:
 
 def load_cases() -> pd.DataFrame:
     return pd.read_csv(CASES_CSV, parse_dates=["start", "end", "start_week", "first_post", "clock_start"])
+
+
+# --- Chart wording: an "invoice" in this log is SAP_PO_No, a proxy for the real invoice document --------------------
+# Figures call use_invoice_proxy_labels() once; every matplotlib text (titles, axes, ticks, legends, annotations) then
+# shows "invoice proxy"/"invoice proxies" instead of "invoice"/"invoices". SAP names stay as they are: the activity
+# "Invoice document deleted" and field names such as Case_Invoice_Value_NOK (the underscore keeps them from matching).
+PROXY_KEEP = ["Invoice document deleted", "suppliers invoice", "Suppliers invoice", "to invoice"]  # names and verbs
+
+
+def invoice_proxy_text(s):
+    import re
+    if not isinstance(s, str) or "nvoice" not in s.lower():
+        return s
+    keep = {}
+    for i, k in enumerate(PROXY_KEEP):
+        token = f"\x00{i}\x00"
+        s, keep[token] = s.replace(k, token), k
+
+    def rep(m):
+        word, hyphen = m.group(1), m.group(2)
+        out = ("invoice proxies" if word.lower().endswith("s") else "invoice proxy")
+        if hyphen:
+            out = out.replace(" ", "-")
+        if word.isupper():
+            out = out.upper()
+        elif word[0].isupper():
+            out = out[0].upper() + out[1:]
+        return out + hyphen
+
+    s = re.sub(r"(?<![A-Za-z_])(invoices?)(?![A-Za-z_])(?!\s*prox)(-?)", rep, s, flags=re.I)
+    for token, k in keep.items():
+        s = s.replace(token, k)
+    return s
+
+
+def use_invoice_proxy_labels():
+    import matplotlib.text as mtext
+    if getattr(mtext.Text, "_invoice_proxy", False):
+        return
+    orig = mtext.Text.set_text
+
+    def set_text(self, s):
+        return orig(self, invoice_proxy_text(s) if isinstance(s, str) else s)
+
+    mtext.Text.set_text = set_text
+    mtext.Text._invoice_proxy = True
+    if os.environ.get("PROXY_CHECK"):
+        _report_clipped_text()
+
+
+def _report_clipped_text():
+    """Debug aid (PROXY_CHECK=1): print texts that end outside the figure when it is saved."""
+    import matplotlib.figure as mfig
+    orig = mfig.Figure.savefig
+
+    def savefig(self, fname, *a, **k):
+        r = self.canvas.get_renderer()
+        self.draw(r)
+        fb = self.bbox
+        for txt in self.findobj(lambda o: hasattr(o, "get_window_extent") and hasattr(o, "get_text")):
+            if not txt.get_visible() or not txt.get_text().strip():
+                continue
+            bb = txt.get_window_extent(r)
+            if bb.x1 > fb.x1 + 1 or bb.x0 < fb.x0 - 1:
+                print(f"CLIPPED {fname}: {txt.get_text()[:90]!r} x0={bb.x0:.0f} x1={bb.x1:.0f} fig={fb.x1:.0f}")
+        return orig(self, fname, *a, **k)
+
+    mfig.Figure.savefig = savefig

@@ -16,6 +16,9 @@ import numpy as np
 import pandas as pd
 
 from common import POSTING_ACTIVITIES, SLA_SOFT_DAYS, load_cases, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 PNG = NOTES / "figures" / "znb1_ctrl1_threshold_percentiles.png"

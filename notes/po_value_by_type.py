@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 NOTES = Path(__file__).resolve().parent
 sys.path.insert(0, str(NOTES.parent))
 from common import PO_TYPES, load_cases  # noqa: E402
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 PNG = NOTES / "figures" / "po_value_by_type.png"
 CSV = NOTES / "po_value_by_type.csv"

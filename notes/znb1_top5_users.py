@@ -13,6 +13,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = Path(os.environ.get("AP_EVENT_LOG", ROOT.parent / "log.csv"))

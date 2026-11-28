@@ -27,6 +27,9 @@ from openpyxl.utils import get_column_letter
 from common import POSTING_ACTIVITIES, SLA_HARD_DAYS, SLA_SOFT_DAYS, load_cases, load_events, load_invoices
 
 import argparse
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 _ap = argparse.ArgumentParser()

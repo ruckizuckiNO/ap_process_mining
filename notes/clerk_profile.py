@@ -17,6 +17,9 @@ import numpy as np
 import pandas as pd
 
 from common import SLA_SOFT_DAYS, SLA_HARD_DAYS, load_cases, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 USER = sys.argv[1] if len(sys.argv) > 1 else "User1177"
 PO_TYPE = sys.argv[2] if len(sys.argv) > 2 else "ZNB1"

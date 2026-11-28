@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 from common import POSTING_ACTIVITIES, load_events
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 K = ["PO_ID", "SAP_PO_No"]

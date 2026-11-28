@@ -18,6 +18,9 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from common import BOT_USERS, POSTING_ACTIVITIES, load_events
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 K = ["PO_ID", "SAP_PO_No"]
@@ -110,7 +113,7 @@ a1.set_yticklabels(labels)
 
 u0 = top.iloc[0]
 fig.text(0.02, 0.94, f"ZNB1: who posts the invoices of the {n_sup} suppliers that always go to the manual queue (CTRL1)",
-         fontsize=17, fontweight="bold", color=INK)
+         fontsize=15, fontweight="bold", color=INK)
 fig.text(0.02, 0.92, va="top", s=f"{top.index[0]} posts {u0.share:.0%} of them, and they make up {u0.share_35_of_own:.0%} of all {top.index[0]}'s postings "
          f"across all orders (typical workday: {u0.these_median:.0f} of {u0.all_median:.0f}).\nFor the other clerks they are a small side task.",
          fontsize=12, color=MUTED, linespacing=1.4)

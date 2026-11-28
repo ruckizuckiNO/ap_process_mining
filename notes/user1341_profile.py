@@ -14,6 +14,9 @@ import numpy as np
 import pandas as pd
 
 from common import SLA_SOFT_DAYS, load_cases, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 K = ["PO_ID", "SAP_PO_No"]

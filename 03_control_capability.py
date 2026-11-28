@@ -36,6 +36,9 @@ from scipy.stats import norm
 
 from common import (OUT, FIG, PO_TYPES, CHART_KPIS, GR_CLOCK_PO_TYPES, SLA_HARD_DAYS, SLA_SOFT_DAYS,
                     load_cases, load_events, load_invoices)
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 MIN_CASES_PER_WEEK = 5      # mean units/week needed for an X̄–S chart
 MIN_SUBGROUP = 2            # weeks with fewer units are left out of X̄–S charts

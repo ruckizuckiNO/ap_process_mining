@@ -109,6 +109,9 @@ axB.text(wk.index[0], SLA_SOFT_DAYS + 0.3, "10-day limit", color=MUTED, fontsize
 axB.set_ylim(0, 16)
 axB.set_ylabel("median days", color=MUTED)
 import matplotlib.dates as mdates
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 axB.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
 axB.set_title("Median age by week of posting (grey = absent 2+ working days)", loc="left", fontsize=12, fontweight="bold",
               color=INK, pad=8)

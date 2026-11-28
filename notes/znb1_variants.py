@@ -19,6 +19,9 @@ import numpy as np
 import pandas as pd
 
 from common import POSTING_ACTIVITIES, SLA_HARD_DAYS, SLA_SOFT_DAYS, load_cases, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 FIG = NOTES / "figures"
@@ -218,7 +221,7 @@ fig.text(0.02, 0.905, f"ZNB1 variants grouped into families · {headline / 1e6:.
          f"direct manual: {dm.always_manual_supplier_pct:.0f}% of invoices from the 25 always-manual suppliers, "
          f"{dm.posted_by_user1341_pct:.0f}% posted by User1341", fontsize=9.5, color=INK2, ha="left", va="top")
 fig.text(0.02, 0.01, "Late and discount: ZNB1 POs without never-posted invoices, GR clock, invoice value = PO value / "
-         "posted invoices (13.8M NOK total; the 15.9M headline also keeps POs with never-posted invoices). Deleted and not-posted invoices have no discount.", fontsize=7.5,
+         "posted invoices (13.8M NOK total; the 15.9M headline also keeps POs with never-posted invoices).\nDeleted and not-posted invoices have no discount.", fontsize=7.5,
          color=INK2, ha="left")
 fig.subplots_adjust(left=0.2, right=0.98, top=0.8, bottom=0.08)
 fig.savefig(FIG / "znb1_variants_cost.png", facecolor=SURFACE)

@@ -16,6 +16,9 @@ import pandas as pd
 from scipy.stats import spearmanr
 
 from common import BOT_USERS, POSTING_ACTIVITIES, load_cases, load_events
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 K = ["PO_ID", "SAP_PO_No"]

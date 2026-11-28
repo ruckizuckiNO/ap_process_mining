@@ -14,6 +14,9 @@ import numpy as np
 import pandas as pd
 
 from common import POSTING_ACTIVITIES, SLA_HARD_DAYS, SLA_SOFT_DAYS, load_events, load_invoices
+from common import use_invoice_proxy_labels
+
+use_invoice_proxy_labels()  # chart text: invoice -> invoice proxy
 
 NOTES = Path(__file__).resolve().parent
 PNG = NOTES / "figures" / "znb1_ctrl1_user1341_lateness.png"
@@ -111,8 +114,8 @@ fig.text(0.01, 0.905,
          ha="left", fontsize=10, color=INK2)
 fig.text(0.01, 0.012, f"Posted ZNB1 invoices routed to CTRL1 at their first initial validation and posted manually "
          f"(all suppliers). Clerk = user of the posting. Days = pipeline clock (arrival in AP to first posting). "
-         f"Clerks with ≥ {MIN_POSTINGS} invoices shown on their own row.", ha="left", fontsize=7.5, color=INK2)
-fig.subplots_adjust(left=0.15, right=0.79, top=0.8, bottom=0.07)
+         f"\nClerks with ≥ {MIN_POSTINGS} invoices shown on their own row.", ha="left", fontsize=7.5, color=INK2)
+fig.subplots_adjust(left=0.15, right=0.75, top=0.8, bottom=0.08)
 fig.savefig(PNG, facecolor=SURFACE)
 pd.set_option("display.width", 200)
 print(tab.round(3).to_string())
