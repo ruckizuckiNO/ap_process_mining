@@ -911,5 +911,3 @@
 
     instead of the average take the .75 quantile
 
-[215] 2026-11-28
-    formulate the set goals!
