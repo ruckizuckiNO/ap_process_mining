@@ -873,3 +873,43 @@
 
 [209] 2026-11-28
     and give me the analysis for fifo!
+
+[210] 2026-11-28
+    report_po_cut_gbr.html
+
+    Based on that can you make graph or an overview which shows the
+    distribution of the remaining invoice-proxies still manual above a threshold
+    of 1.75 mnok PO-value
+
+[211] 2026-11-28
+    New report/analysis based on the following goals:
+    - PO's with a value up to MNOK 1.75 are automized. The assumptions from
+    earlier apply where around 5% is still missed and not recovered.
+    - for all the POs above the threshhold:
+    a) PO's <= 5 MNOK everything is paid within 10 days
+    b) 100 % is paid within 30 days
+    c ) for the POs greater 5 MNOK 5 % of invoices above 10 days are still
+    missed
+
+[212] 2026-11-28
+    but how did you calculate the 5% still late? what was your basis?
+
+[213] 2026-11-28
+    This assumes the late ones are a random 5% by amount. If the largest invoice
+    proxies were the late ones, the loss would be higher.
+
+    I thought we could take the 5% based on the invoice proxies which today are
+    above the 10 days but given that the underlying PO is greater mnok 5
+
+[214] 2026-11-28
+    Target c) is based on the invoice proxies on POs above 5M that are posted
+    after 10 days today: 5% of them stay late. Which ones stay late matters,
+    because the amounts differ a lot: the main result uses their average amount,
+    the range takes the 5% smallest or largest. The last row shows the other
+    possible reading (5% of all invoice proxies above 5M late) for comparison.
+
+
+    instead of the average take the .75 quantile
+
+[215] 2026-11-28
+    formulate the set goals!
